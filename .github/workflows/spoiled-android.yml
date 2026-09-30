@@ -1,0 +1,102 @@
+name: Spoiled Store Android build
+on:
+  workflow_dispatch:
+    inputs:
+      app_id: { required: true, type: string }
+      app_name: { required: true, type: string }
+      bundle_id: { required: true, type: string }
+      version: { required: true, type: string }
+      icon_url: { required: false, type: string, default: "" }
+      live_url: { required: false, type: string, default: "" }
+      upload_url: { required: true, type: string }
+      callback_url: { required: true, type: string }
+      token: { required: true, type: string }
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      APP_NAME: ${{ inputs.app_name }}
+      BUNDLE_ID: ${{ inputs.bundle_id }}
+      APP_VERSION: ${{ inputs.version }}
+      ICON_URL: ${{ inputs.icon_url }}
+      LIVE_URL: ${{ inputs.live_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - uses: android-actions/setup-android@v3
+
+      - name: Build the web app
+        run: |
+          if [ -f package.json ]; then
+            if [ -f pnpm-lock.yaml ]; then npm i -g pnpm && pnpm install --no-frozen-lockfile
+            elif [ -f yarn.lock ]; then yarn install
+            elif [ -f bun.lockb ] || [ -f bun.lock ]; then npm i -g bun && bun install
+            else npm install --no-audit --no-fund; fi
+            if node -e "process.exit(require('./package.json').scripts?.build?0:1)"; then npm run build; fi
+          fi
+          WEB=""
+          for d in dist/client dist build out www public .; do
+            if [ -f "$d/index.html" ]; then WEB="$d"; break; fi
+          done
+          if [ -z "$WEB" ]; then
+            # Server-rendered app with no static index: ship a native shell that loads the live site.
+            mkdir -p spoiled-www
+            echo "<!doctype html><meta http-equiv=refresh content=\"0;url=$LIVE_URL\">" > spoiled-www/index.html
+            WEB="spoiled-www"
+            echo "REMOTE=1" >> $GITHUB_ENV
+          fi
+          echo "WEB_DIR=$WEB" >> $GITHUB_ENV
+
+      - name: Add Capacitor (native Android project)
+        run: |
+          npm install --no-audit --no-fund --no-save @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6 \
+            @capacitor/app@6 @capacitor/splash-screen@6 @capacitor/status-bar@6 @capacitor/haptics@6 \
+            @capacitor/share@6 @capacitor/preferences@6 @capacitor/push-notifications@6
+          if ! ls capacitor.config.* >/dev/null 2>&1; then
+            if [ "$REMOTE" = "1" ]; then
+              node -e "require('fs').writeFileSync('capacitor.config.json', JSON.stringify({appId:process.env.BUNDLE_ID,appName:process.env.APP_NAME,webDir:process.env.WEB_DIR,server:{url:process.env.LIVE_URL,cleartext:false}},null,2))"
+            else
+              node -e "require('fs').writeFileSync('capacitor.config.json', JSON.stringify({appId:process.env.BUNDLE_ID,appName:process.env.APP_NAME,webDir:process.env.WEB_DIR},null,2))"
+            fi
+          fi
+          [ -d android ] || npx cap add android
+          npx cap sync android
+
+      - name: App icon
+        continue-on-error: true
+        run: |
+          if [ -n "$ICON_URL" ]; then
+            mkdir -p assets && curl -fsSL "$ICON_URL" -o assets/icon.png
+            npx --yes @capacitor/assets@3 generate --android --iconBackgroundColor '#0b0b0d' --splashBackgroundColor '#0b0b0d'
+          fi
+
+      - name: Compile & sign APK
+        run: |
+          cd android
+          sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/; s/versionName \"[^\"]*\"/versionName \"$APP_VERSION\"/" app/build.gradle
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+          BT=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)
+          keytool -genkeypair -keystore ../spoiled.jks -alias spoiled -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass spoiledstore -keypass spoiledstore -dname "CN=$APP_NAME, O=Spoiled Store"
+          IN=$(ls app/build/outputs/apk/release/*.apk | head -1)
+          $BT/zipalign -f -p 4 "$IN" ../aligned.apk
+          $BT/apksigner sign --ks ../spoiled.jks --ks-pass pass:spoiledstore --key-pass pass:spoiledstore --out ../app.apk ../aligned.apk
+
+      - name: Upload to Spoiled Store
+        run: |
+          curl -fsS -X PUT -H "Content-Type: application/vnd.android.package-archive" -H "x-upsert: true" \
+            --data-binary @app.apk "${{ inputs.upload_url }}"
+          curl -fsS -X POST -H "Content-Type: application/json" "${{ inputs.callback_url }}" \
+            -d "{\"appId\":\"${{ inputs.app_id }}\",\"token\":\"${{ inputs.token }}\",\"status\":\"ready\"}"
+
+      - name: Report failure
+        if: failure()
+        run: |
+          curl -sS -X POST -H "Content-Type: application/json" "${{ inputs.callback_url }}" \
+            -d "{\"appId\":\"${{ inputs.app_id }}\",\"token\":\"${{ inputs.token }}\",\"status\":\"failed\"}"
