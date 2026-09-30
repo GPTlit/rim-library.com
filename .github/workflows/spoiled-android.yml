@@ -29,6 +29,11 @@ jobs:
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: 17 }
       - uses: android-actions/setup-android@v3
+        with:
+          packages: |
+            platform-tools
+            platforms;android-35
+            build-tools;35.0.0
 
       - name: Build the web app
         run: |
@@ -59,7 +64,7 @@ jobs:
             @capacitor/share@6 @capacitor/preferences@6 @capacitor/push-notifications@6
           if ! ls capacitor.config.* >/dev/null 2>&1; then
             if [ "$REMOTE" = "1" ]; then
-              node -e "require('fs').writeFileSync('capacitor.config.json', JSON.stringify({appId:process.env.BUNDLE_ID,appName:process.env.APP_NAME,webDir:process.env.WEB_DIR,server:{url:process.env.LIVE_URL,cleartext:false}},null,2))"
+              node -e "require('fs').writeFileSync('capacitor.config.json', JSON.stringify({appId:process.env.BUNDLE_ID,appName:process.env.APP_NAME,webDir:process.env.WEB_DIR,server:{url:process.env.LIVE_URL}},null,2))"
             else
               node -e "require('fs').writeFileSync('capacitor.config.json', JSON.stringify({appId:process.env.BUNDLE_ID,appName:process.env.APP_NAME,webDir:process.env.WEB_DIR},null,2))"
             fi
@@ -81,12 +86,12 @@ jobs:
           sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/; s/versionName \"[^\"]*\"/versionName \"$APP_VERSION\"/" app/build.gradle
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
-          BT=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)
+          BT="$ANDROID_HOME/build-tools/35.0.0"
           keytool -genkeypair -keystore ../spoiled.jks -alias spoiled -keyalg RSA -keysize 2048 -validity 10000 \
             -storepass spoiledstore -keypass spoiledstore -dname "CN=$APP_NAME, O=Spoiled Store"
           IN=$(ls app/build/outputs/apk/release/*.apk | head -1)
-          $BT/zipalign -f -p 4 "$IN" ../aligned.apk
-          $BT/apksigner sign --ks ../spoiled.jks --ks-pass pass:spoiledstore --key-pass pass:spoiledstore --out ../app.apk ../aligned.apk
+          "$BT/zipalign" -f -p 4 "$IN" ../aligned.apk
+          "$BT/apksigner" sign --ks ../spoiled.jks --ks-pass pass:spoiledstore --key-pass pass:spoiledstore --out ../app.apk ../aligned.apk
 
       - name: Upload to Spoiled Store
         run: |
