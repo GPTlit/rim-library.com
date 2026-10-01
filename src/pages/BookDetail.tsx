@@ -205,7 +205,7 @@ const BookDetail = () => {
       try {
         await navigator.share({
           title: book.title,
-          text: `اقرأ كتاب "${book.title}" على مكتبة موريتانيا`,
+          text: `اقرأ كتاب "${book.title}" على مكتبة القهوة`,
           url: window.location.href,
         });
       } catch (error) {

@@ -20,7 +20,7 @@ export interface LocalNotifOptions {
 export async function sendLocalNotification(
   opts: LocalNotifOptions = {}
 ): Promise<{ ok: boolean; error?: string; via?: 'capacitor' | 'web' }> {
-  const title = opts.title ?? 'مكتبة موريتانيا';
+  const title = opts.title ?? 'مكتبة القهوة';
   const body = opts.body ?? 'You have a new update or saved file';
   const id = opts.id ?? Math.floor(Date.now() % 2147483647);
 
