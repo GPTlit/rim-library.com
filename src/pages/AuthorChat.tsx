@@ -311,7 +311,7 @@ const AuthorChat = () => {
           </div>
         </header>
 
-        <Conversation className="min-h-0" ref={scrollRef}>
+        <Conversation className="min-h-0">
           <ConversationContent className="mx-auto w-full max-w-4xl gap-5 px-4 py-8 sm:px-8">
             {messages.length === 0 ? (
               <ConversationEmptyState className="min-h-[50vh]">
