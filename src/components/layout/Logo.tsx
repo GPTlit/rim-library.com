@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import libraryLogo from '@/assets/library-logo.jpg';
 
 export const Logo = () => {
   const { t } = useLanguage();
@@ -11,14 +10,9 @@ export const Logo = () => {
         {/* Main logo container */}
         <div className="relative flex h-12 w-12 items-center justify-center rounded-full overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 border-2 border-primary/30">
           <img
-            src={libraryLogo}
+            src="/qahwa-library-logo.jpg"
             alt={t('libraryName')}
             className="w-full h-full object-cover"
-            onError={(e) => {
-              // Fallback if image fails to load
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-            }}
           />
         </div>
         

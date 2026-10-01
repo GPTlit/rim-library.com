@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import bookLogo from '@/assets/book-logo.png.asset.json';
 
 export const Footer = () => {
   const { t } = useLanguage();
@@ -11,7 +10,7 @@ export const Footer = () => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <img
-              src={bookLogo.url}
+              src="/qahwa-library-logo.jpg"
               alt={t('libraryName')}
               className="h-9 w-9 rounded-lg object-cover"
             />
