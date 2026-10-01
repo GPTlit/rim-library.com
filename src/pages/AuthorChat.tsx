@@ -1,13 +1,32 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, User, Sparkles, Mic, Volume2, Trash2, Square } from 'lucide-react';
+import { ArrowRight, Loader2, Mic, Volume2, Trash2, Square } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Layout } from '@/components/layout/Layout';
-import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { AiMessageContent } from '@/components/chat/AiMessageContent';
+import Prism from '@/components/Prism';
+import {
+  Conversation,
+  ConversationContent,
+  ConversationEmptyState,
+  ConversationScrollButton,
+} from '@/components/ai-elements/conversation';
+import {
+  Message as ChatMessage,
+  MessageAction,
+  MessageActions,
+  MessageContent,
+  MessageResponse,
+} from '@/components/ai-elements/message';
+import {
+  PromptInput,
+  PromptInputButton,
+  PromptInputFooter,
+  PromptInputSubmit,
+  PromptInputTextarea,
+  PromptInputTools,
+} from '@/components/ai-elements/prompt-input';
+import { Shimmer } from '@/components/ai-elements/shimmer';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -17,6 +36,7 @@ interface Message {
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/author-chat`;
 
 const AuthorChat = () => {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -273,209 +293,104 @@ const AuthorChat = () => {
   };
 
   return (
-    <Layout>
-      <div className="container mx-auto py-8 px-4 max-w-4xl" dir="rtl">
-        <div className="bg-card rounded-2xl border shadow-xl overflow-hidden">
-          {/* Header */}
-          <div className="gold-gradient p-6">
-            <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-foreground/20">
-                <Sparkles className="h-8 w-8 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-primary-foreground">المؤلف أحمد سالم</h1>
-                <p className="text-primary-foreground/80">أديب ومثقف موريتاني - اسألني أي شيء عن الكتب والأدب</p>
-              </div>
-            </div>
-          </div>
+    <div className="relative flex h-screen min-h-[36rem] overflow-hidden bg-background" dir="rtl">
+      <div className="absolute inset-0 opacity-55 pointer-events-none" aria-hidden="true">
+        <Prism animationType="rotate" timeScale={0.5} height={3.5} baseWidth={5.5} scale={3.6} hueShift={0} colorFrequency={1} noise={0} glow={1} suspendWhenOffscreen />
+      </div>
+      <div className="absolute inset-0 bg-background/72 backdrop-blur-sm pointer-events-none" />
 
-          {/* Messages */}
-          <ScrollArea className="h-[500px] p-6" ref={scrollRef}>
+      <main className="relative z-10 mx-auto flex h-full w-full max-w-6xl flex-col border-x border-border/70 bg-background/78 shadow-2xl backdrop-blur-xl">
+        <header className="flex h-16 shrink-0 items-center gap-3 border-b border-border/70 px-3 sm:px-6">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/')} aria-label="العودة إلى المكتبة">
+            <ArrowRight className="h-5 w-5" />
+          </Button>
+          <img src="/qahwa-library-logo.jpg" alt="QAHWA LIBRARY" className="h-10 w-10 rounded-md object-cover" />
+          <div className="min-w-0">
+            <h1 className="truncate font-bold text-foreground">المؤلف أحمد سالم</h1>
+            <p className="truncate text-xs text-muted-foreground">أديب ومثقف موريتاني · متصل بالمكتبة</p>
+          </div>
+        </header>
+
+        <Conversation className="min-h-0" ref={scrollRef}>
+          <ConversationContent className="mx-auto w-full max-w-4xl gap-5 px-4 py-8 sm:px-8">
             {messages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-center p-8">
-                <div className="w-24 h-24 rounded-full gold-gradient flex items-center justify-center mb-6">
-                  <Sparkles className="h-12 w-12 text-primary-foreground" />
-                </div>
-                <h2 className="text-xl font-semibold text-foreground mb-3">مرحباً بك في محادثتي!</h2>
-                <p className="text-muted-foreground mb-6 max-w-md">
-                  أنا المؤلف أحمد سالم، يسعدني أن أساعدك في رحلتك مع الكتب والأدب العربي. يمكنك الكتابة أو استخدام الميكروفون للتحدث معي.
-                </p>
-                <div className="flex flex-wrap gap-3 justify-center">
+              <ConversationEmptyState className="min-h-[50vh]">
+                <img src="/qahwa-library-logo.jpg" alt="QAHWA LIBRARY" className="h-24 w-24 rounded-lg object-cover shadow-xl" />
+                <h2 className="mt-3 text-2xl font-bold text-foreground">مرحباً بك في محادثتي</h2>
+                <p className="max-w-xl text-muted-foreground">أنا المؤلف أحمد سالم. اسألني عن الكتب والأدب أو اطلب مني اقتراح كتاب من مكتبة القهوة.</p>
+                <div className="mt-4 flex flex-wrap justify-center gap-2">
                   {['ما هي أفضل الكتب للمبتدئين؟', 'أوصني بكتاب في الأدب العربي', 'حدثني عن الأدب الموريتاني'].map((q) => (
-                    <button
-                      key={q}
-                      onClick={() => setInput(q)}
-                      className="text-sm px-4 py-2 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
-                    >
-                      {q}
-                    </button>
+                    <Button key={q} variant="secondary" size="sm" onClick={() => setInput(q)}>{q}</Button>
                   ))}
                 </div>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {messages.map((msg, i) => (
-                  <div
-                    key={i}
-                    className={cn(
-                      "flex gap-3",
-                      msg.role === 'user' ? 'flex-row' : 'flex-row-reverse'
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
-                        msg.role === 'user' ? 'bg-primary' : 'gold-gradient'
-                      )}
-                    >
-                      {msg.role === 'user' ? (
-                        <User className="h-5 w-5 text-primary-foreground" />
-                      ) : (
-                        <Sparkles className="h-5 w-5 text-primary-foreground" />
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-1 max-w-[80%]">
-                      <div
-                        className={cn(
-                          "rounded-2xl px-4 py-3",
-                          msg.role === 'user'
-                            ? 'bg-primary text-primary-foreground rounded-tr-none'
-                            : 'bg-muted rounded-tl-none'
-                        )}
-                      >
-                        {msg.role === 'assistant' ? (
-                          <AiMessageContent content={msg.content} />
-                        ) : (
-                          <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-                        )}
-                      </div>
-                      {msg.role === 'assistant' && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="self-start"
-                          onClick={() => speakText(msg.content)}
-                          disabled={isSpeaking}
-                        >
-                          <Volume2 className="h-4 w-4 ml-1" />
-                          استمع
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-                {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
-                  <div className="flex gap-3 flex-row-reverse">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full gold-gradient">
-                      <Sparkles className="h-5 w-5 text-primary-foreground" />
-                    </div>
-                    <div className="bg-muted rounded-2xl rounded-tl-none px-4 py-3">
-                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                    </div>
-                  </div>
+              </ConversationEmptyState>
+            ) : messages.map((msg, i) => (
+              <ChatMessage key={`${msg.role}-${i}`} from={msg.role}>
+                <MessageContent className={msg.role === 'user' ? 'bg-primary text-primary-foreground' : ''}>
+                  {msg.role === 'assistant' ? <MessageResponse>{msg.content}</MessageResponse> : <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>}
+                </MessageContent>
+                {msg.role === 'assistant' && (
+                  <MessageActions>
+                    <MessageAction tooltip="استمع" onClick={() => speakText(msg.content)} disabled={isSpeaking}>
+                      <Volume2 className="h-4 w-4" />
+                    </MessageAction>
+                  </MessageActions>
                 )}
-              </div>
+              </ChatMessage>
+            ))}
+            {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
+              <ChatMessage from="assistant"><MessageContent><Shimmer>يفكر أحمد سالم...</Shimmer></MessageContent></ChatMessage>
             )}
-          </ScrollArea>
+          </ConversationContent>
+          <ConversationScrollButton />
+        </Conversation>
 
-          {/* Input */}
-          <div className="border-t p-6 bg-background/50">
-            {/* Recording UI */}
-            {(isRecording || audioBlob) && (
-              <div className="mb-4 flex items-center gap-3 p-3 bg-destructive/10 rounded-xl border border-destructive/20">
-                {isRecording ? (
-                  <>
-                    {/* Recording animation */}
-                    <div className="flex items-center gap-2">
-                      <div className="relative">
-                        <div className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
-                        <div 
-                          className="absolute inset-0 bg-destructive rounded-full animate-ping opacity-75"
-                          style={{ transform: `scale(${1 + audioLevel * 2})` }}
-                        />
-                      </div>
-                      {/* Audio wave animation */}
-                      <div className="flex items-center gap-0.5 h-8">
-                        {[...Array(12)].map((_, i) => (
-                          <div
-                            key={i}
-                            className="w-1 bg-destructive rounded-full transition-all duration-100"
-                            style={{ 
-                              height: `${Math.max(4, (Math.sin(Date.now() / 100 + i) * 0.5 + 0.5) * audioLevel * 32)}px`,
-                              opacity: 0.5 + audioLevel * 0.5
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <span className="text-destructive font-mono text-sm min-w-[50px]">
-                      {formatDuration(recordingDuration)}
-                    </span>
-                    <span className="text-destructive/70 text-sm flex-1">جاري التسجيل...</span>
-                    <Button variant="ghost" size="icon" onClick={cancelRecording} className="text-destructive hover:bg-destructive/10">
-                      <Trash2 className="h-5 w-5" />
-                    </Button>
-                    <Button size="icon" onClick={stopRecording} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">
-                      <Square className="h-4 w-4" />
-                    </Button>
-                  </>
-                ) : audioBlob && (
-                  <>
-                    <Mic className="h-5 w-5 text-primary" />
-                    <span className="font-mono text-sm">{formatDuration(recordingDuration)}</span>
-                    <audio src={URL.createObjectURL(audioBlob)} controls className="flex-1 h-8" />
-                    <Button variant="ghost" size="icon" onClick={cancelRecording} className="text-destructive hover:bg-destructive/10">
-                      <Trash2 className="h-5 w-5" />
-                    </Button>
-                    <Button 
-                      size="icon" 
-                      onClick={sendVoiceMessage} 
-                      disabled={isTranscribing}
-                      className="gold-gradient"
-                    >
-                      {isTranscribing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-                    </Button>
-                  </>
-                )}
-              </div>
-            )}
-
-            <div className="flex gap-3">
-              {!audioBlob && (
-                <Button
-                  variant={isRecording ? "destructive" : "outline"}
-                  size="icon"
-                  onClick={isRecording ? stopRecording : startRecording}
-                  className="shrink-0"
-                >
-                  {isRecording ? <Square className="h-4 w-4" /> : <Mic className="h-5 w-5" />}
-                </Button>
+        <div className="shrink-0 border-t border-border/70 bg-background/88 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-xl sm:px-6">
+          {(isRecording || audioBlob) && (
+            <div className="mx-auto mb-2 flex max-w-4xl items-center gap-3 rounded-md border border-destructive/30 bg-destructive/10 p-2">
+              <Mic className="h-4 w-4 text-destructive" />
+              <span className="font-mono text-sm">{formatDuration(recordingDuration)}</span>
+              <span className="min-w-0 flex-1 text-sm text-muted-foreground">{isRecording ? 'جاري التسجيل...' : 'التسجيل جاهز للإرسال'}</span>
+              <Button variant="ghost" size="icon" onClick={cancelRecording} aria-label="حذف التسجيل"><Trash2 className="h-4 w-4" /></Button>
+              {isRecording ? (
+                <Button variant="destructive" size="icon" onClick={stopRecording} aria-label="إيقاف التسجيل"><Square className="h-4 w-4" /></Button>
+              ) : (
+                <Button size="sm" onClick={sendVoiceMessage} disabled={isTranscribing}>{isTranscribing ? <Loader2 className="animate-spin" /> : 'إرسال الصوت'}</Button>
               )}
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-                placeholder="اكتب رسالتك هنا..."
-                disabled={isLoading || isRecording || !!audioBlob}
-                className="flex-1 text-base"
-              />
-              <Button
-                onClick={() => sendMessage()}
-                disabled={isLoading || !input.trim() || isRecording || !!audioBlob}
-                size="icon"
-                className="gold-gradient hover:opacity-90 shrink-0"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  <Send className="h-5 w-5" />
-                )}
-              </Button>
             </div>
-          </div>
+          )}
+          <PromptInput
+            className="mx-auto max-w-4xl"
+            onSubmit={({ text }) => sendMessage(text)}
+          >
+            <PromptInputTextarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="اكتب رسالتك هنا..."
+              disabled={isLoading || isRecording || !!audioBlob}
+              className="min-h-16 text-base"
+            />
+            <PromptInputFooter>
+              <PromptInputTools>
+                {!audioBlob && (
+                  <PromptInputButton
+                    tooltip={isRecording ? 'إيقاف التسجيل' : 'تسجيل صوتي'}
+                    onClick={isRecording ? stopRecording : startRecording}
+                    disabled={isLoading}
+                  >
+                    {isRecording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                  </PromptInputButton>
+                )}
+              </PromptInputTools>
+              <PromptInputSubmit
+                status={isLoading ? 'streaming' : 'ready'}
+                disabled={!input.trim() || isRecording || !!audioBlob}
+              />
+            </PromptInputFooter>
+          </PromptInput>
         </div>
-      </div>
-    </Layout>
+      </main>
+    </div>
   );
 };
 
