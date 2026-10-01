@@ -22,18 +22,32 @@ jobs:
       APP_VERSION: ${{ inputs.version }}
       ICON_URL: ${{ inputs.icon_url }}
       LIVE_URL: ${{ inputs.live_url }}
+      # ubuntu-latest runners ship the Android SDK pre-installed; reuse it
+      # instead of letting android-actions/setup-android re-download packages
+      # (its sdkmanager intermittently fails to find platform-tools).
+      ANDROID_HOME: /usr/local/lib/android/sdk
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: 17 }
-      - uses: android-actions/setup-android@v3
-        with:
-          packages: |
-            platform-tools
-            platforms;android-35
-            build-tools;35.0.0
+
+      - name: Verify pre-installed Android SDK & accept licenses
+        run: |
+          SDK="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          echo "ANDROID_HOME=$SDK" >> $GITHUB_ENV
+          ls "$SDK" >/dev/null
+          # Ensure the exact versions the build needs exist on the runner image.
+          test -d "$SDK/build-tools/35.0.0" || (yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" "build-tools;35.0.0" >/dev/null)
+          test -d "$SDK/platforms/android-35" || (yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" >/dev/null)
+          test -d "$SDK/platform-tools" || (yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" "platform-tools" >/dev/null)
+          # Accept licenses so Gradle never blocks on a prompt.
+          mkdir -p "$SDK/licenses"
+          echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > "$SDK/licenses/android-sdk-license"
+          echo "84831b9409646a918e30573bab4c9c91346d8abd" > "$SDK/licenses/android-sdk-preview-license"
+          yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$SDK/platform-tools/adb" version || true
 
       - name: Build the web app
         run: |
