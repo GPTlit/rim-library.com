@@ -18,7 +18,7 @@ interface Props {
 
 export const DeviceFeaturesPanel = ({
   filename = 'note.txt',
-  content = 'Hello from Mauritania Library',
+  content = 'Hello from QAHWA LIBRARY',
   storageKey = 'last-note',
   data,
 }: Props) => {

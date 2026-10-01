@@ -11,7 +11,7 @@ interface Props {
 }
 
 export const SendNotificationButton = ({
-  title = 'مكتبة موريتانيا',
+  title = 'مكتبة القهوة',
   body = 'You have a new update or saved file',
   label = 'Send Notification',
 }: Props) => {

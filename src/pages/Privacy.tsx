@@ -24,8 +24,8 @@ const Privacy = () => {
   const content = {
     ar: {
       title: 'سياسة الخصوصية',
-      subtitle: 'مكتبة موريتانيا',
-      welcome: 'مرحباً بك في مكتبة موريتانيا. خصوصيتك مهمة بالنسبة لنا. توضح هذه السياسة كيف نجمع ونستخدم ونحمي معلوماتك الشخصية.',
+      subtitle: 'مكتبة القهوة',
+      welcome: 'مرحباً بك في مكتبة القهوة. خصوصيتك مهمة بالنسبة لنا. توضح هذه السياسة كيف نجمع ونستخدم ونحمي معلوماتك الشخصية.',
       tldr: 'ملخص سريع',
       tldrPoints: [
         'نجمع فقط المعلومات الأساسية لتقديم تجربة قراءة سلسة.',
@@ -72,8 +72,8 @@ const Privacy = () => {
     },
     en: {
       title: 'Privacy Policy',
-      subtitle: 'Mauritania Library',
-      welcome: 'Welcome to مكتبة موريتانيا. Your privacy is important to us. This policy explains how we collect, use, and protect your personal information.',
+      subtitle: 'QAHWA LIBRARY',
+      welcome: 'Welcome to مكتبة القهوة. Your privacy is important to us. This policy explains how we collect, use, and protect your personal information.',
       tldr: 'Quick Summary',
       tldrPoints: [
         'We collect only essential information to provide a seamless reading experience.',
@@ -120,8 +120,8 @@ const Privacy = () => {
     },
     fr: {
       title: 'Politique de Confidentialité',
-      subtitle: 'Bibliothèque Mauritanie',
-      welcome: 'Bienvenue dans مكتبة موريتانيا. Votre vie privée est importante pour nous. Cette politique explique comment nous collectons, utilisons et protégeons vos informations personnelles.',
+      subtitle: 'QAHWA LIBRARY',
+      welcome: 'Bienvenue dans مكتبة القهوة. Votre vie privée est importante pour nous. Cette politique explique comment nous collectons, utilisons et protégeons vos informations personnelles.',
       tldr: 'Résumé Rapide',
       tldrPoints: [
         'Nous collectons uniquement les informations essentielles pour offrir une expérience de lecture fluide.',

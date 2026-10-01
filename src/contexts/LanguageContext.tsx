@@ -30,7 +30,7 @@ const translations: Translations = {
   lightMode: { ar: 'الوضع الفاتح', en: 'Light Mode', fr: 'Mode clair' },
   
   // Hero Section
-  libraryTitle: { ar: 'مكتبة موريتانيا', en: 'Mauritania Library', fr: 'Bibliothèque Mauritanie' },
+  libraryTitle: { ar: 'مكتبة القهوة', en: 'QAHWA LIBRARY', fr: 'QAHWA LIBRARY' },
   freeDigitalLibrary: { ar: 'مكتبة رقمية مجانية للجميع', en: 'Free digital library for everyone', fr: 'Bibliothèque numérique gratuite pour tous' },
   discoverBooks: { ar: 'اكتشف آلاف الكتب مجاناً واقرأها في أي وقت.', en: 'Discover thousands of books for free, anytime.', fr: 'Découvrez des milliers de livres gratuitement, à tout moment.' },
   searchPlaceholder: { ar: 'ابحث عن كتاب، مؤلف، أو تصنيف...', en: 'Search for a book, author, or category...', fr: 'Rechercher un livre, un auteur ou une catégorie...' },
@@ -205,8 +205,8 @@ const translations: Translations = {
   unknown: { ar: 'مجهول', en: 'Unknown', fr: 'Inconnu' },
   
   // Library name
-  libraryName: { ar: 'مكتبة موريتانيا', en: 'Mauritania Library', fr: 'Bibliothèque Mauritanie' },
-  librarySubtitle: { ar: 'MAURITANIA LIBRARY', en: 'MAURITANIA LIBRARY', fr: 'BIBLIOTHÈQUE MAURITANIE' },
+  libraryName: { ar: 'مكتبة القهوة', en: 'QAHWA LIBRARY', fr: 'QAHWA LIBRARY' },
+  librarySubtitle: { ar: 'QAHWA LIBRARY', en: 'مكتبة القهوة', fr: 'مكتبة القهوة' },
   
   // Upload page
   uploadTitle: { ar: 'أرسل كتاباً', en: 'Upload a Book', fr: 'Envoyer un livre' },
@@ -307,10 +307,10 @@ const translations: Translations = {
   noProductsYet: { ar: 'لم تتم إضافة منتجات بعد', en: 'No products added yet', fr: 'Aucun produit ajouté pour le moment' },
 
   // About page
-  aboutLibrary: { ar: 'عن مكتبة موريتانيا', en: 'About Mauritania Library', fr: 'À propos de la Bibliothèque Mauritanie' },
+  aboutLibrary: { ar: 'عن مكتبة القهوة', en: 'About QAHWA LIBRARY', fr: 'À propos de QAHWA LIBRARY' },
   freeDigitalLibraryDesc: { ar: 'مكتبة رقمية مجانية للجميع', en: 'Free digital library for everyone', fr: 'Bibliothèque numérique gratuite pour tous' },
   ourMission: { ar: 'رسالتنا', en: 'Our Mission', fr: 'Notre Mission' },
-  ourMissionDesc: { ar: 'نسعى لنشر المعرفة والثقافة العربية من خلال توفير مكتبة رقمية شاملة ومجانية للجميع. نؤمن بأن المعرفة حق للجميع، ونعمل على جعل الكتب في متناول كل قارئ عربي في موريتانيا والعالم.', en: 'We strive to spread Arabic knowledge and culture by providing a comprehensive and free digital library for everyone. We believe knowledge is a right for all, and we work to make books accessible to every Arabic reader in Mauritania and the world.', fr: 'Nous nous efforçons de diffuser les connaissances et la culture arabes en fournissant une bibliothèque numérique complète et gratuite pour tous.' },
+  ourMissionDesc: { ar: 'نسعى لنشر المعرفة والثقافة العربية من خلال توفير مكتبة رقمية شاملة ومجانية للجميع. نؤمن بأن المعرفة حق للجميع، ونعمل على جعل الكتب في متناول كل قارئ عربي في موريتانيا والعالم.', en: 'QAHWA LIBRARY spreads Arabic knowledge and culture through a comprehensive, free digital library. We believe knowledge belongs to everyone.', fr: 'QAHWA LIBRARY diffuse les connaissances et la culture arabes grâce à une bibliothèque numérique complète et gratuite.' },
   ourValues: { ar: 'قيمنا', en: 'Our Values', fr: 'Nos Valeurs' },
   value1: { ar: 'المعرفة للجميع بدون قيود', en: 'Knowledge for all without restrictions', fr: 'La connaissance pour tous sans restrictions' },
   value2: { ar: 'الحفاظ على التراث العربي والإسلامي', en: 'Preserving Arab and Islamic heritage', fr: 'Préserver le patrimoine arabe et islamique' },

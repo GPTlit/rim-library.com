@@ -15,6 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useBooks } from '@/hooks/useBooks';
+import Prism from '@/components/Prism';
 
 interface Group {
   id: string;
@@ -989,9 +990,13 @@ const Eterke = () => {
   };
 
   return (
-    <Layout>
-      <div className="container mx-auto py-2 sm:py-4 px-2 sm:px-4" dir="rtl">
-        <div className="bg-card rounded-xl sm:rounded-2xl border shadow-lg overflow-hidden h-[calc(100vh-140px)] sm:h-[calc(100vh-200px)] flex flex-col md:flex-row">
+    <div className="relative h-screen overflow-hidden bg-background" dir="rtl">
+      <div className="absolute inset-0 opacity-45 pointer-events-none" aria-hidden="true">
+        <Prism animationType="rotate" timeScale={0.5} height={3.5} baseWidth={5.5} scale={3.6} hueShift={0} colorFrequency={1} noise={0} glow={1} suspendWhenOffscreen />
+      </div>
+      <div className="absolute inset-0 bg-background/75 backdrop-blur-sm pointer-events-none" />
+      <div className="relative z-10 h-full w-full p-0 sm:p-3">
+        <div className="bg-card/90 border-border overflow-hidden h-full flex flex-col border shadow-2xl backdrop-blur-xl md:flex-row">
           {/* Sidebar - Hidden on mobile when chat is selected */}
           <div className={cn(
             "border-l flex flex-col transition-all duration-300",
@@ -1534,7 +1539,7 @@ const Eterke = () => {
           )}
         </div>
       </div>
-    </Layout>
+    </div>
   );
 };
 

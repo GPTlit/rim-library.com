@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useBooks } from '@/hooks/useBooks';
 import { allCategories } from '@/hooks/useCategories';
+import GradientWaves from '@/components/GradientWaves';
 
 export const HeroSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -24,18 +25,38 @@ export const HeroSection = () => {
   const categoryCount = allCategories.length;
 
   return (
-    <section className="relative hero-gradient overflow-hidden">
-      {/* Decorative elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-10 w-64 h-64 bg-gold/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 left-20 w-48 h-48 bg-amber/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gold-light/5 rounded-full blur-3xl" />
+    <section className="relative overflow-hidden bg-background">
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <GradientWaves
+          horizonColor="#1c0b5e"
+          waveColor="#353335"
+          crestColor="#FFFFFF"
+          speed={0.4}
+          amplitude={2.5}
+          waveScale={0.6}
+          waveRatio={0.9}
+          swell={35}
+          turbulence={20}
+          tilt={1.11}
+          zoom={1}
+          height={5.5}
+          fogDepth={15}
+          detail="medium"
+          brightness={1}
+          opacity={1}
+          mouseInteraction
+          parallaxStrength={0.5}
+          grain
+          grainIntensity={0.05}
+          className="motion-reduce:hidden"
+        />
+        <div className="absolute inset-0 bg-background/60 backdrop-blur-[1px]" />
       </div>
 
       <div className="container-library relative">
         <div className="flex flex-col items-center text-center py-12 sm:py-16 md:py-24 lg:py-32 px-4">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border/50 shadow-sm mb-6 animate-fade-in">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/90 border border-border shadow-sm mb-6 animate-fade-in backdrop-blur-md">
             <Sparkles className="h-4 w-4 text-gold" />
             <span className="text-sm font-medium text-muted-foreground">
               {t('freeDigitalLibrary')}
@@ -44,11 +65,11 @@ export const HeroSection = () => {
 
           {/* Title */}
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold mb-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-            <span className="text-gradient">{t('libraryTitle')}</span>
+            <span className="text-foreground drop-shadow-sm">{t('libraryTitle')}</span>
           </h1>
 
           {/* Subtitle */}
-          <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mb-8 animate-fade-in-up px-4" style={{ animationDelay: '0.2s' }}>
+          <p className="text-base sm:text-lg md:text-xl text-foreground/80 max-w-2xl mb-8 animate-fade-in-up px-4" style={{ animationDelay: '0.2s' }}>
             {t('discoverBooks')}
           </p>
 

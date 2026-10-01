@@ -67,7 +67,7 @@ export const DevicePermissionPrompt = () => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-right">أذونات مكتبة موريتانيا</DialogTitle>
+          <DialogTitle className="text-right">أذونات مكتبة القهوة</DialogTitle>
           <DialogDescription className="text-right">
             فعّل الأذونات حتى تعمل القراءة الصوتية، التسجيل، الوسائط، والتنبيهات خارج التطبيق.
           </DialogDescription>

@@ -517,3 +517,7 @@ input, textarea, [contenteditable="true"], .allow-select {
   -webkit-user-select: text;
   user-select: text;
 }
+
+.reader-page-inverted canvas {
+  filter: invert(1) hue-rotate(180deg);
+}

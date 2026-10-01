@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Book, Mail, Lock, LogIn, UserPlus } from 'lucide-react';
+import { Mail, Lock, LogIn, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -114,11 +114,9 @@ const Auth = () => {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl gold-gradient shadow-lg mb-4">
-            <Book className="h-8 w-8 text-primary-foreground" />
-          </div>
+          <img src="/qahwa-library-logo.jpg" alt="QAHWA LIBRARY" className="mx-auto h-20 w-20 rounded-lg object-cover shadow-lg mb-4" />
           <h1 className="text-3xl font-bold text-gradient mb-2">
-            مكتبة موريتانيا
+            مكتبة القهوة
           </h1>
           <p className="text-muted-foreground">
             {isLogin ? 'سجل دخولك للوصول للمكتبة' : 'أنشئ حساباً جديداً'}

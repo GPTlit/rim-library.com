@@ -7,7 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 const content = {
   ar: {
-    welcome: 'مرحباً بك في مكتبة موريتانيا! 📚',
+    welcome: 'مرحباً بك في مكتبة القهوة! 📚',
     message: 'قبل أن تبدأ بالاستكشاف، يرجى مراجعة سياسة الخصوصية الخاصة بنا. بتحديد "أوافق"، فإنك توافق على سياسة الخصوصية وشروط الاستخدام.',
     agree: '✅ أوافق وأتابع',
     readPrivacy: '📄 قراءة سياسة الخصوصية',
@@ -15,7 +15,7 @@ const content = {
     checkboxLabel: 'لقد قرأت وأوافق على سياسة الخصوصية',
     closePrivacy: 'إغلاق',
     privacyTitle: 'سياسة الخصوصية',
-    privacyContent: `مرحباً بك في مكتبة موريتانيا. خصوصيتك مهمة بالنسبة لنا. توضح هذه السياسة كيف نجمع ونستخدم ونحمي معلوماتك الشخصية.
+    privacyContent: `مرحباً بك في مكتبة القهوة. خصوصيتك مهمة بالنسبة لنا. توضح هذه السياسة كيف نجمع ونستخدم ونحمي معلوماتك الشخصية.
 
 المعلومات التي نجمعها:
 • معلومات شخصية: الاسم، البريد الإلكتروني، وتفاصيل الحساب عند التسجيل.
@@ -40,7 +40,7 @@ const content = {
 Snapchat: myself15_10`,
   },
   en: {
-    welcome: 'Welcome to مكتبة موريتانيا! 📚',
+    welcome: 'Welcome to مكتبة القهوة! 📚',
     message: 'Before you start exploring, please review our Privacy Policy. By checking "I Agree," you consent to our Privacy Policy and Terms of Use.',
     agree: '✅ I Agree & Continue',
     readPrivacy: '📄 Read Privacy Policy',
@@ -48,7 +48,7 @@ Snapchat: myself15_10`,
     checkboxLabel: 'I have read and agree to the Privacy Policy',
     closePrivacy: 'Close',
     privacyTitle: 'Privacy Policy',
-    privacyContent: `Welcome to مكتبة موريتانيا. Your privacy is important to us. This policy explains how we collect, use, and protect your personal information.
+    privacyContent: `Welcome to مكتبة القهوة. Your privacy is important to us. This policy explains how we collect, use, and protect your personal information.
 
 Information We Collect:
 • Personal information: Name, email, and account details when you sign up.
@@ -73,7 +73,7 @@ Contact Us:
 Snapchat: myself15_10`,
   },
   fr: {
-    welcome: 'Bienvenue dans مكتبة موريتانيا ! 📚',
+    welcome: 'Bienvenue dans مكتبة القهوة ! 📚',
     message: 'Avant de commencer à explorer, veuillez consulter notre Politique de Confidentialité. En cochant "J\'accepte", vous consentez à notre Politique de Confidentialité et Conditions d\'Utilisation.',
     agree: '✅ J\'accepte et je continue',
     readPrivacy: '📄 Lire la Politique de Confidentialité',
@@ -81,7 +81,7 @@ Snapchat: myself15_10`,
     checkboxLabel: 'J\'ai lu et j\'accepte la Politique de Confidentialité',
     closePrivacy: 'Fermer',
     privacyTitle: 'Politique de Confidentialité',
-    privacyContent: `Bienvenue dans مكتبة موريتانيا. Votre vie privée est importante pour nous. Cette politique explique comment nous collectons, utilisons et protégeons vos informations personnelles.
+    privacyContent: `Bienvenue dans مكتبة القهوة. Votre vie privée est importante pour nous. Cette politique explique comment nous collectons, utilisons et protégeons vos informations personnelles.
 
 Informations Collectées :
 • Informations personnelles : nom, email et détails du compte lors de l'inscription.
