@@ -49,6 +49,7 @@ jobs:
             if [ -f "$d/index.html" ]; then WEB="$d"; break; fi
           done
           if [ -z "$WEB" ]; then
+            # Server-rendered app with no static index: ship a native shell that loads the live site.
             mkdir -p spoiled-www
             echo "<!doctype html><meta http-equiv=refresh content=\"0;url=$LIVE_URL\">" > spoiled-www/index.html
             WEB="spoiled-www"
