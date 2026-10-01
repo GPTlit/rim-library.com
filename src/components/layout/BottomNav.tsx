@@ -25,7 +25,7 @@ export const BottomNav = () => {
               className={({ isActive }) =>
                 cn(
                   'flex flex-col items-center justify-center gap-0.5 py-2 text-[11px] transition-colors min-h-[56px]',
-                  isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                  isActive ? 'text-foreground font-bold' : 'text-muted-foreground hover:text-foreground'
                 )
               }
               aria-label={label}

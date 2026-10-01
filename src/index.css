@@ -16,8 +16,8 @@
     --popover: 40 25% 98%;
     --popover-foreground: 25 40% 15%;
 
-    --primary: 32 60% 40%;
-    --primary-foreground: 40 30% 96%;
+    --primary: 25 40% 18%;
+    --primary-foreground: 42 40% 94%;
 
     --secondary: 40 20% 90%;
     --secondary-foreground: 25 40% 20%;
@@ -25,7 +25,7 @@
     --muted: 40 15% 92%;
     --muted-foreground: 25 20% 45%;
 
-    --accent: 45 70% 55%;
+    --accent: 42 40% 94%;
     --accent-foreground: 25 40% 15%;
 
     --destructive: 0 65% 50%;
@@ -33,29 +33,29 @@
 
     --border: 35 20% 85%;
     --input: 35 20% 88%;
-    --ring: 32 60% 40%;
+    --ring: 25 40% 18%;
 
     --radius: 0.75rem;
 
     /* Custom Theme Colors */
-    --gold: 45 70% 55%;
-    --gold-light: 45 60% 75%;
+    --gold: 42 40% 94%;
+    --gold-light: 42 40% 96%;
     --cream: 40 30% 96%;
     --cream-dark: 40 25% 90%;
     --brown: 25 40% 25%;
     --brown-light: 25 30% 35%;
-    --amber: 32 60% 40%;
-    --amber-light: 32 50% 60%;
+    --amber: 42 40% 94%;
+    --amber-light: 42 40% 96%;
 
     /* Sidebar */
     --sidebar-background: 40 25% 95%;
     --sidebar-foreground: 25 40% 15%;
-    --sidebar-primary: 32 60% 40%;
-    --sidebar-primary-foreground: 40 30% 96%;
+    --sidebar-primary: 25 40% 18%;
+    --sidebar-primary-foreground: 42 40% 94%;
     --sidebar-accent: 40 20% 90%;
     --sidebar-accent-foreground: 25 40% 20%;
     --sidebar-border: 35 20% 85%;
-    --sidebar-ring: 32 60% 40%;
+    --sidebar-ring: 25 40% 18%;
 
     /* Overlay */
     --overlay: 0 0% 0%;
@@ -72,8 +72,8 @@
     --popover: 240 8% 9%;
     --popover-foreground: 45 10% 90%;
 
-    --primary: 42 80% 52%;
-    --primary-foreground: 240 10% 4%;
+    --primary: 42 40% 94%;
+    --primary-foreground: 0 0% 7%;
 
     --secondary: 240 6% 14%;
     --secondary-foreground: 45 8% 80%;
@@ -81,35 +81,35 @@
     --muted: 240 5% 12%;
     --muted-foreground: 45 5% 50%;
 
-    --accent: 42 70% 48%;
-    --accent-foreground: 240 10% 4%;
+    --accent: 42 40% 94%;
+    --accent-foreground: 0 0% 7%;
 
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 240 6% 16%;
     --input: 240 6% 13%;
-    --ring: 42 80% 52%;
+    --ring: 42 40% 94%;
 
     /* Custom Theme Colors - Dark Mode */
-    --gold: 42 80% 52%;
-    --gold-light: 42 55% 62%;
+    --gold: 42 40% 94%;
+    --gold-light: 42 40% 96%;
     --cream: 240 8% 9%;
     --cream-dark: 240 6% 14%;
     --brown: 45 10% 82%;
     --brown-light: 45 8% 65%;
-    --amber: 42 70% 48%;
-    --amber-light: 42 50% 58%;
+    --amber: 42 40% 94%;
+    --amber-light: 42 40% 96%;
 
     /* Sidebar - Dark Mode */
     --sidebar-background: 240 10% 7%;
     --sidebar-foreground: 45 10% 90%;
-    --sidebar-primary: 42 80% 52%;
-    --sidebar-primary-foreground: 240 10% 4%;
+    --sidebar-primary: 42 40% 94%;
+    --sidebar-primary-foreground: 0 0% 7%;
     --sidebar-accent: 240 6% 14%;
     --sidebar-accent-foreground: 45 8% 80%;
     --sidebar-border: 240 6% 16%;
-    --sidebar-ring: 42 80% 52%;
+    --sidebar-ring: 42 40% 94%;
 
     /* Overlay */
     --overlay: 0 0% 0%;
@@ -198,7 +198,7 @@
     --input: 205 35% 16%;
     --ring: 190 85% 55%;
   }
-  /* Sunset — vibrant orange/magenta gradient feel */
+  /* Sunset — vibrant theme preset */
   [data-theme-preset="sunset"] {
     --background: 20 45% 10%;
     --foreground: 35 60% 94%;
@@ -206,8 +206,8 @@
     --card-foreground: 35 60% 94%;
     --popover: 20 40% 14%;
     --popover-foreground: 35 60% 94%;
-    --primary: 18 90% 58%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 42 40% 94%;
+    --primary-foreground: 0 0% 7%;
     --secondary: 20 30% 18%;
     --secondary-foreground: 35 50% 90%;
     --muted: 20 25% 16%;
@@ -216,7 +216,7 @@
     --accent-foreground: 0 0% 100%;
     --border: 20 30% 22%;
     --input: 20 30% 18%;
-    --ring: 18 90% 58%;
+    --ring: 42 40% 94%;
   }
 
   /* ===== Light-mode variants for each preset ===== */
@@ -304,8 +304,8 @@
     --card-foreground: 20 45% 14%;
     --popover: 35 70% 99%;
     --popover-foreground: 20 45% 14%;
-    --primary: 18 85% 48%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 42 40% 94%;
+    --primary-foreground: 0 0% 7%;
     --secondary: 35 55% 92%;
     --secondary-foreground: 20 45% 16%;
     --muted: 35 45% 94%;
@@ -314,7 +314,7 @@
     --accent-foreground: 0 0% 100%;
     --border: 35 45% 86%;
     --input: 35 45% 92%;
-    --ring: 18 85% 48%;
+    --ring: 42 40% 94%;
   }
 }
 
@@ -329,6 +329,17 @@
 
   body {
     @apply bg-background text-foreground font-tajawal antialiased;
+  }
+
+  /* Buttons with #F5F1E8 background have #121212 black text and icons */
+  .bg-\[\#F5F1E8\],
+  .gold-gradient {
+    color: #121212 !important;
+  }
+
+  .bg-\[\#F5F1E8\] svg,
+  .gold-gradient svg {
+    color: #121212 !important;
   }
 }
 
@@ -357,7 +368,9 @@
   }
 
   .gold-gradient {
-    background: linear-gradient(135deg, hsl(var(--gold)) 0%, hsl(var(--amber)) 100%);
+    background-color: #F5F1E8 !important;
+    background: linear-gradient(135deg, #F5F1E8 0%, #EDE7DC 100%) !important;
+    color: #121212 !important;
   }
 
   .warm-gradient {
@@ -365,11 +378,11 @@
   }
 
   .hero-gradient {
-    background: linear-gradient(135deg, hsl(var(--secondary)) 0%, hsl(var(--background)) 50%, hsl(var(--gold) / 0.15) 100%);
+    background: linear-gradient(135deg, hsl(var(--secondary)) 0%, hsl(var(--background)) 50%, #F5F1E8 100%);
   }
 
   .text-gradient {
-    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--gold)) 100%);
+    background: linear-gradient(135deg, #F5F1E8 0%, #D8D2C5 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

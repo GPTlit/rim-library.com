@@ -1,0 +1,8 @@
+{
+  "name": "QAHWA LIBRARY | مكتبة القهوة",
+  "description": "QAHWA LIBRARY - مكتبة القهوة، مكتبة رقمية للكتب العربية والقراءة عبر الإنترنت.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

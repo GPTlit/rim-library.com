@@ -2,7 +2,6 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import fs from "fs";
-import { componentTagger } from "lovable-tagger";
 
 // Backend connection values. These are publishable (safe in the browser) and are
 // used as fallbacks so a build on GitHub/Netlify still works if the environment
@@ -24,14 +23,12 @@ const spaFallback = () => ({
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  // Relative asset paths so the app also works when served from a sub-folder
-  // (for example a GitHub Pages project site).
-  base: "./",
+  base: "/",
   server: {
-    host: "::",
-    port: 8080,
+    host: "0.0.0.0",
+    port: 3000,
   },
-  plugins: [react(), mode === "development" && componentTagger(), spaFallback()].filter(Boolean),
+  plugins: [react(), spaFallback()].filter(Boolean),
   define: {
     "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(
       process.env.VITE_SUPABASE_URL || FALLBACK_SUPABASE_URL

@@ -16,12 +16,51 @@ export const getReadingHistory = (): ReadingHistoryItem[] => {
 export const addToReadingHistory = (item: ReadingHistoryItem): void => {
   try {
     const history = getReadingHistory();
+    const existing = history.find((h) => h.bookId === item.bookId);
+    const existingSeconds = existing?.totalSecondsRead || 0;
+    const incomingSeconds = item.totalSecondsRead || 0;
+    const finalSeconds = Math.max(existingSeconds, incomingSeconds);
+
     const filtered = history.filter((h) => h.bookId !== item.bookId);
-    const updated = [{ ...item, lastRead: new Date().toISOString() }, ...filtered].slice(0, 50);
+    const updated = [
+      {
+        ...item,
+        totalSecondsRead: finalSeconds,
+        lastRead: new Date().toISOString(),
+      },
+      ...filtered,
+    ].slice(0, 50);
     localStorage.setItem(READING_HISTORY_KEY, JSON.stringify(updated));
   } catch (error) {
     console.error('Error saving reading history:', error);
   }
+};
+
+export const updateBookReadingTime = (bookId: string, additionalSeconds: number): number => {
+  try {
+    const history = getReadingHistory();
+    const existing = history.find((h) => h.bookId === bookId);
+    if (existing) {
+      existing.totalSecondsRead = (existing.totalSecondsRead || 0) + additionalSeconds;
+      existing.lastRead = new Date().toISOString();
+      localStorage.setItem(READING_HISTORY_KEY, JSON.stringify(history));
+      return existing.totalSecondsRead;
+    }
+  } catch (error) {
+    console.error('Error updating book reading time:', error);
+  }
+  return 0;
+};
+
+export const getBookReadingTime = (bookId: string): number => {
+  const history = getReadingHistory();
+  const existing = history.find((h) => h.bookId === bookId);
+  return existing?.totalSecondsRead || 0;
+};
+
+export const getTotalStoredReadingSeconds = (): number => {
+  const history = getReadingHistory();
+  return history.reduce((sum, item) => sum + (item.totalSecondsRead || 0), 0);
 };
 
 export const clearReadingHistory = (): void => {

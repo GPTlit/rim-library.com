@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { ArrowRight, Download, ZoomIn, ZoomOut, Loader2, WifiOff, BookmarkPlus, Bookmark as BookmarkIcon, List, Moon, Sun, RotateCw, Smartphone } from 'lucide-react';
+import { ArrowRight, Download, ZoomIn, ZoomOut, Loader2, WifiOff, BookmarkPlus, Bookmark as BookmarkIcon, List, Moon, Sun, RotateCw, RotateCcw, Smartphone, Check, Menu } from 'lucide-react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
@@ -18,7 +18,17 @@ import { useReadingTime } from '@/hooks/useReadingTime';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sparkles } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useBookSessionTimer } from '@/hooks/useBookSessionTimer';
+import { ReaderSessionTimer } from '@/components/books/ReaderSessionTimer';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -29,6 +39,13 @@ const BookReader = () => {
   const { user } = useAuth();
   useReadingTime(true);
   useReadingPresence(id);
+  const sessionTimer = useBookSessionTimer({
+    bookId: id || '',
+    title: book?.title,
+    author: book?.author,
+    coverUrl: book?.cover_url,
+    active: true,
+  });
   const [numPages, setNumPages] = useState<number>(0);
   const [scale, setScale] = useState(1.0);
   const [isOfflineMode, setIsOfflineMode] = useState(false);
@@ -42,11 +59,38 @@ const BookReader = () => {
   const [invertPages, setInvertPages] = useState(() => localStorage.getItem('reader-invert') === 'true');
   const [pageRotation, setPageRotation] = useState(() => Number(localStorage.getItem('reader-rotation') || 0));
   const [orientation, setOrientation] = useState<'auto' | 'portrait' | 'landscape'>(() => (localStorage.getItem('reader-orientation') as 'auto' | 'portrait' | 'landscape') || 'auto');
+  const [scrollProgress, setScrollProgress] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const pageElementsRef = useRef<Map<number, HTMLDivElement>>(new Map());
   const shouldRestoreRef = useRef(true);
   const pinchRef = useRef<{ startDist: number; startScale: number } | null>(null);
+
+  // Track visual reading scroll progress
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const totalScroll = scrollHeight - clientHeight;
+      if (totalScroll > 10) {
+        const percent = Math.min(100, Math.max(0, (scrollTop / totalScroll) * 100));
+        setScrollProgress(percent);
+      } else if (numPages > 0) {
+        setScrollProgress(Math.min(100, Math.max(0, (currentPage / numPages) * 100)));
+      }
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [numPages, currentPage]);
 
   // Load bookmarks
   useEffect(() => {
@@ -255,73 +299,192 @@ const BookReader = () => {
     <div className="min-h-screen bg-muted flex flex-col">
       {/* Toolbar */}
       <div className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
+        {/* Visual Reading Progress Bar at the Top */}
+        <div
+          className="h-1.5 w-full bg-secondary/50 overflow-hidden relative"
+          title={`تقدم القراءة: ${Math.round(scrollProgress)}%`}
+          role="progressbar"
+          aria-valuenow={Math.round(scrollProgress)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
+          <div
+            className="h-full bg-primary transition-[width] duration-150 ease-out shadow-sm"
+            style={{ width: `${scrollProgress}%` }}
+          />
+        </div>
+
         <div className="container-library">
-          <div className="flex items-center justify-between h-14">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <Link to={`/book/${book.id}`}>
-                <Button variant="ghost" size="icon"><ArrowRight className="h-5 w-5" /></Button>
+          <div className="flex items-center justify-between h-14 gap-2 overflow-hidden">
+            {/* Left section: Back button + Title & Author + Session Timer */}
+            <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 shrink">
+              <Link to={`/book/${book.id}`} className="shrink-0">
+                <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0"><ArrowRight className="h-5 w-5" /></Button>
               </Link>
-              <div className="hidden sm:block">
-                <h1 className="font-bold text-foreground line-clamp-1">{book.title}</h1>
-                <p className="text-xs text-muted-foreground">{book.author}</p>
+              <div className="min-w-0 shrink">
+                <h1 className="font-bold text-foreground text-sm sm:text-base truncate max-w-[110px] sm:max-w-[200px] md:max-w-xs">{book.title}</h1>
+                <p className="text-[11px] text-muted-foreground truncate hidden sm:block">{book.author}</p>
               </div>
               {isOfflineMode && (
-                <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 text-accent text-xs">
+                <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-accent/10 text-accent text-[11px] shrink-0">
                   <WifiOff className="h-3 w-3" />
                 </div>
               )}
+              {/* Reading Session Timer */}
+              <ReaderSessionTimer
+                formattedSession={sessionTimer.formattedSession}
+                sessionSeconds={sessionTimer.sessionSeconds}
+                formattedTotalBook={sessionTimer.formattedTotalBook}
+                totalBookSeconds={sessionTimer.totalBookSeconds}
+                bookTitle={book.title}
+                medalsProgress={sessionTimer.medalsProgress}
+                className="shrink-0"
+              />
             </div>
 
-            <div className="flex items-center gap-1 sm:gap-2">
-              {/* Bookmark controls */}
+            {/* Center section: Page counter & progress */}
+            <div className="flex items-center gap-1.5 shrink-0 px-2.5 py-1 rounded-full bg-secondary/50 border border-border/60">
+              <span className="text-xs font-mono font-medium text-foreground whitespace-nowrap">{currentPage}/{numPages}</span>
+              <span className="text-[10px] font-bold text-primary px-1.5 py-0.2 rounded bg-primary/10 hidden sm:inline-block">
+                {Math.round(scrollProgress)}%
+              </span>
+            </div>
+
+            {/* Right section: Scaling buttons (visible on page) + Quick Bookmark + Three-Lines Menu Button (☰) */}
+            <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+              {/* Scaling / Zoom Controls directly visible on the page */}
+              <div className="flex items-center gap-0.5 sm:gap-1 bg-secondary/60 rounded-full px-1 sm:px-1.5 py-0.5 border border-border/60">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 rounded-full"
+                  onClick={handleZoomOut}
+                  title="تصغير (-)"
+                  aria-label="تصغير"
+                >
+                  <ZoomOut className="h-3.5 w-3.5" />
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => setScale(1.0)}
+                  className="text-[11px] font-mono font-semibold px-1 min-w-[2.2rem] text-center select-none hover:text-primary transition-colors"
+                  title="إعادة تعيين الحجم 100%"
+                >
+                  {Math.round(scale * 100)}%
+                </button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 rounded-full"
+                  onClick={handleZoomIn}
+                  title="تكبير (+)"
+                  aria-label="تكبير"
+                >
+                  <ZoomIn className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+
+              {/* Bookmark Button */}
+              <Button
+                variant={currentPageBookmarked ? 'default' : 'ghost'}
+                size="icon"
+                className="h-8 w-8 sm:h-9 sm:w-9 shrink-0"
+                onClick={handleAddBookmark}
+                title={`إضافة علامة - صفحة ${currentPage}`}
+              >
+                {currentPageBookmarked ? <BookmarkIcon className="h-4 w-4 text-primary" /> : <BookmarkPlus className="h-4 w-4" />}
+              </Button>
+
+              {/* Bookmarks List Panel Button */}
               <Button
                 variant="ghost"
                 size="icon"
+                className="h-8 w-8 sm:h-9 sm:w-9 shrink-0 relative"
                 onClick={() => setPanelOpen(!panelOpen)}
-                className="relative"
                 title="العلامات المرجعية"
               >
                 <List className="h-4 w-4" />
                 {bookmarks.length > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[9px] rounded-full w-4 h-4 flex items-center justify-center">
+                  <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[9px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
                     {bookmarks.length}
                   </span>
                 )}
               </Button>
-              <Button
-                variant={currentPageBookmarked ? 'default' : 'ghost'}
-                size="icon"
-                onClick={handleAddBookmark}
-                title={`إضافة علامة - صفحة ${currentPage}`}
-              >
-                {currentPageBookmarked ? <BookmarkIcon className="h-4 w-4" /> : <BookmarkPlus className="h-4 w-4" />}
-              </Button>
 
-              <div className="h-6 w-px bg-border mx-1" />
-              <span className="text-xs text-muted-foreground">{currentPage}/{numPages}</span>
-              <div className="h-6 w-px bg-border mx-1" />
-              <Button variant="ghost" size="icon" onClick={handleZoomOut}><ZoomOut className="h-4 w-4" /></Button>
-              <span className="text-xs text-muted-foreground min-w-[2.5rem] text-center hidden sm:block">{Math.round(scale * 100)}%</span>
-              <Button variant="ghost" size="icon" onClick={handleZoomIn}><ZoomIn className="h-4 w-4" /></Button>
-              <div className="h-6 w-px bg-border mx-1" />
-              <Button variant="ghost" size="icon" onClick={togglePageTheme} title={invertPages ? 'صفحات فاتحة' : 'صفحات داكنة'}>
-                {invertPages ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </Button>
-              <Button variant="ghost" size="icon" onClick={rotatePage} title="تدوير الصفحة"><RotateCw className="h-4 w-4" /></Button>
-              <Select value={orientation} onValueChange={(value) => setReaderOrientation(value as 'auto' | 'portrait' | 'landscape')}>
-                <SelectTrigger className="h-9 w-24" aria-label="قفل اتجاه الشاشة"><Smartphone className="h-4 w-4" /><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="auto">تلقائي</SelectItem>
-                  <SelectItem value="portrait">عمودي</SelectItem>
-                  <SelectItem value="landscape">أفقي</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="h-6 w-px bg-border mx-1" />
-              <a href={book.file_url} download target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Download className="h-4 w-4" /><span className="hidden sm:inline">تحميل</span>
-                </Button>
-              </a>
+              {/* Three-Lines Menu Button (☰ يحتوي فقط على: الوضع الفاتح/الداكن، التدوير، والتحميل) */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 sm:h-9 sm:w-9 shrink-0 text-foreground hover:bg-secondary"
+                    title="خيارات القارئ (3 خطوط)"
+                    aria-label="قائمة الخيارات"
+                  >
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 p-2 text-right font-tajawal space-y-1">
+                  {/* 1. Light Mode / Dark Mode button */}
+                  <DropdownMenuItem onClick={togglePageTheme} className="flex items-center justify-between cursor-pointer py-2">
+                    <span className="flex items-center gap-2.5">
+                      {invertPages ? <Sun className="h-4 w-4 text-amber-500" /> : <Moon className="h-4 w-4 text-primary" />}
+                      {invertPages ? 'الوضع الفاتح للصفحات' : 'الوضع الداكن للصفحات'}
+                    </span>
+                    <span className="text-[11px] text-muted-foreground">{invertPages ? 'مفعل' : 'عادي'}</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  {/* 2. Rotation buttons */}
+                  <DropdownMenuItem onClick={rotatePage} className="flex items-center justify-between cursor-pointer py-2">
+                    <span className="flex items-center gap-2.5">
+                      <RotateCw className="h-4 w-4 text-primary" />
+                      تدوير الصفحة 90°
+                    </span>
+                    <span className="text-xs font-semibold text-muted-foreground">{pageRotation}°</span>
+                  </DropdownMenuItem>
+
+                  {pageRotation !== 0 && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setPageRotation(0);
+                        localStorage.setItem('reader-rotation', '0');
+                      }}
+                      className="flex items-center gap-2.5 text-destructive cursor-pointer py-2"
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                      إعادة ضبط التدوير (0°)
+                    </DropdownMenuItem>
+                  )}
+
+                  <DropdownMenuItem
+                    onClick={() => setReaderOrientation(orientation === 'landscape' ? 'portrait' : 'landscape')}
+                    className="flex items-center justify-between cursor-pointer py-2"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <Smartphone className="h-4 w-4 text-primary" />
+                      اتجاه الشاشة
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {orientation === 'landscape' ? 'أفقي' : orientation === 'portrait' ? 'عمودي' : 'تلقائي'}
+                    </span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  {/* 3. Download button */}
+                  <DropdownMenuItem asChild className="cursor-pointer py-2">
+                    <a href={book.file_url} download target="_blank" rel="noopener noreferrer" className="flex items-center justify-between w-full">
+                      <span className="flex items-center gap-2.5">
+                        <Download className="h-4 w-4 text-primary" />
+                        تحميل الكتاب
+                      </span>
+                      <span className="text-[11px] text-muted-foreground">PDF</span>
+                    </a>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>

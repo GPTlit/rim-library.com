@@ -45,7 +45,7 @@ export const AskTheBook = ({ bookTitle, author, passage, onClose }: Props) => {
         </div>
         <div className="p-4 overflow-y-auto space-y-3">
           {passage && (
-            <div className="text-xs bg-amber-50 dark:bg-amber-950/20 border-r-2 border-amber-400 p-2 rounded text-foreground/80">
+            <div className="text-xs bg-[#F5F1E8]/20 border-r-2 border-[#F5F1E8] p-2 rounded text-foreground/80">
               "{passage.slice(0, 200)}{passage.length > 200 ? '…' : ''}"
             </div>
           )}

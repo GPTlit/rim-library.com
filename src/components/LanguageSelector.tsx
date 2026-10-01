@@ -22,8 +22,9 @@ export const LanguageSelector = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Globe className="h-5 w-5" />        </Button>
+        <Button variant="ghost" size="icon" className="relative text-foreground">
+          <Globe className="h-5 w-5" />
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {languages.map((lang) => (

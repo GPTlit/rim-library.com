@@ -67,7 +67,7 @@ export const GhostReaders = ({ bookId }: Props) => {
       )}
       {recentHighlight && (
         <div className="flex items-start gap-2 text-muted-foreground">
-          <Highlighter className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
+          <Highlighter className="h-4 w-4 text-[#F5F1E8] mt-0.5 shrink-0" />
           <span>قام أحد القراء بتمييز سطر قبل {recentHighlight.minutesAgo} دقيقة</span>
         </div>
       )}

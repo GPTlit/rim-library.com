@@ -32,6 +32,7 @@ export interface ReadingHistoryItem {
   author: string;
   coverUrl: string;
   lastRead: string;
+  totalSecondsRead?: number;
 }
 
 export interface DownloadedBook {

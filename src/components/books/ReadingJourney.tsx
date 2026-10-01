@@ -72,7 +72,7 @@ export const ReadingJourney = ({ bookId }: Props) => {
       </div>
 
       {user && (
-        <div className="rounded-2xl border border-border bg-gradient-to-br from-amber-50/50 to-rose-50/30 dark:from-amber-950/10 dark:to-rose-950/10 p-5 shadow-inner" style={{ fontFamily: 'cursive' }}>
+        <div className="rounded-2xl border border-border bg-gradient-to-br from-[#F5F1E8]/60 to-background dark:from-[#F5F1E8]/10 dark:to-background p-5 shadow-inner" style={{ fontFamily: 'cursive' }}>
           <div className="grid sm:grid-cols-2 gap-3 mb-3">
             <label className="text-sm">
               <span className="block text-muted-foreground mb-1">بدأت في</span>

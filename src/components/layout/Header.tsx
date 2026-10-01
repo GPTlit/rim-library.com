@@ -70,7 +70,7 @@ export const Header = () => {
                     size="sm"
                     className={cn(
                       'gap-2',
-                      isActive && 'bg-secondary text-primary'
+                      isActive && 'bg-secondary text-foreground font-semibold'
                     )}
                   >
                     <Icon className="h-4 w-4" />
@@ -87,6 +87,7 @@ export const Header = () => {
             <Button
               variant="ghost"
               size="icon"
+              className="text-foreground"
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             >
               {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
@@ -95,8 +96,9 @@ export const Header = () => {
             {/* Language Selector */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                  <Globe className="h-5 w-5" />                </Button>
+                <Button variant="ghost" size="icon" className="relative text-foreground">
+                  <Globe className="h-5 w-5" />
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {languages.map((lang) => (
@@ -133,6 +135,7 @@ export const Header = () => {
             <Button
               variant="ghost"
               size="icon"
+              className="text-foreground"
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             >
               {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
@@ -141,8 +144,9 @@ export const Header = () => {
             {/* Language Selector */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                  <Globe className="h-5 w-5" />                </Button>
+                <Button variant="ghost" size="icon" className="relative text-foreground">
+                  <Globe className="h-5 w-5" />
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {languages.map((lang) => (
@@ -160,9 +164,10 @@ export const Header = () => {
             <Button
               variant="ghost"
               size="icon"
+              className="text-foreground"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
           </div>
         </div>

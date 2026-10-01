@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import { User, Heart, Lock, Mail, LogOut, BookOpen, StickyNote, Plus, Pencil, Trash2, MoreVertical, Camera, Save, X, Loader2, BookText } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { User, Heart, Lock, Mail, LogOut, BookOpen, StickyNote, Plus, Pencil, Trash2, MoreVertical, Camera, Save, X, Loader2, BookText, Award, Clock, History as HistoryIcon, Sparkles } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,10 @@ import { useUserProfile, useUpdateProfile, useUploadAvatar } from '@/hooks/useUs
 import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { useMyStories } from '@/hooks/useStories';
 import { Badge } from '@/components/ui/badge';
+import { getReadingHistory, getTotalStoredReadingSeconds } from '@/lib/storage';
+import { MedalsShowcase } from '@/components/medals/MedalsShowcase';
+import { formatReadingDurationArabic, MEDALS } from '@/lib/medals';
+import { ReadingHistoryItem } from '@/lib/types';
 
 // Names longer than 10 characters are cut to 7 characters followed by "..."
 const shortenName = (name?: string | null) => {
@@ -54,6 +58,14 @@ const Profile = () => {
   const [noteTitle, setNoteTitle] = useState('');
   const [noteContent, setNoteContent] = useState('');
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'history';
+  const [readingHistory, setReadingHistory] = useState<ReadingHistoryItem[]>(() => getReadingHistory());
+
+  useEffect(() => {
+    setReadingHistory(getReadingHistory());
+  }, []);
+
   const { data: profile } = useUserProfile();
   const updateProfile = useUpdateProfile();
   const uploadAvatar = useUploadAvatar();
@@ -62,6 +74,11 @@ const Profile = () => {
   const addNote = useAddNote();
   const updateNote = useUpdateNote();
   const deleteNote = useDeleteNote();
+
+  const totalReadingSeconds = Math.max(
+    profile?.reading_seconds || 0,
+    getTotalStoredReadingSeconds()
+  );
 
   // Fetch user's favorite books
   const { data: favorites = [], isLoading: favoritesLoading } = useQuery({
@@ -329,25 +346,172 @@ const Profile = () => {
             </DialogContent>
           </Dialog>
 
-          <Tabs defaultValue="favorites" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="stories" className="gap-2">
+          <Tabs value={activeTab} onValueChange={(val) => setSearchParams({ tab: val })} className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 gap-1 h-auto p-1.5">
+              <TabsTrigger value="history" className="gap-2 py-2">
+                <Award className="h-4 w-4" />
+                السجل والأوسمة
+              </TabsTrigger>
+              <TabsTrigger value="stories" className="gap-2 py-2">
                 <BookText className="h-4 w-4" />
                 قصصي
               </TabsTrigger>
-              <TabsTrigger value="favorites" className="gap-2">
+              <TabsTrigger value="favorites" className="gap-2 py-2">
                 <Heart className="h-4 w-4" />
                 {t('favorites')}
               </TabsTrigger>
-              <TabsTrigger value="notes" className="gap-2">
+              <TabsTrigger value="notes" className="gap-2 py-2">
                 <StickyNote className="h-4 w-4" />
                 {t('notes')}
               </TabsTrigger>
-              <TabsTrigger value="security" className="gap-2">
+              <TabsTrigger value="security" className="gap-2 py-2">
                 <Lock className="h-4 w-4" />
                 {t('security')}
               </TabsTrigger>
             </TabsList>
+
+            {/* Reading History & Medals Tab */}
+            <TabsContent value="history" className="space-y-6">
+              {/* Reading Stats Overview Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <Card className="bg-gradient-to-br from-primary/10 via-card to-card border-border">
+                  <CardContent className="p-5 flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-2xl bg-primary/15 text-primary flex items-center justify-center shrink-0">
+                      <Clock className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <span className="text-xs text-muted-foreground block">إجمالي وقت القراءة</span>
+                      <h4 className="text-lg font-bold text-foreground mt-0.5">
+                        {formatReadingDurationArabic(totalReadingSeconds)}
+                      </h4>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-amber-500/10 via-card to-card border-border">
+                  <CardContent className="p-5 flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                      <Award className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <span className="text-xs text-muted-foreground block">الأوسمة المجمعة</span>
+                      <h4 className="text-lg font-bold text-foreground mt-0.5">
+                        {MEDALS.filter((m) => totalReadingSeconds >= m.requiredSeconds).length} من {MEDALS.length} أوسمة
+                      </h4>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-sky-500/10 via-card to-card border-border">
+                  <CardContent className="p-5 flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-2xl bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
+                      <BookOpen className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <span className="text-xs text-muted-foreground block">الكتب في سجلك</span>
+                      <h4 className="text-lg font-bold text-foreground mt-0.5">
+                        {readingHistory.length} كتاب
+                      </h4>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Medals Showcase Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Award className="h-5 w-5 text-primary" />
+                    أوسمة القراءة ومجموعتك الشرفية
+                  </CardTitle>
+                  <CardDescription>
+                    كلما قرأت أكثر تقترب من فتح وسام جديد وتوسيع مجموعتك الشرفية
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <MedalsShowcase totalReadingSeconds={totalReadingSeconds} />
+                </CardContent>
+              </Card>
+
+              {/* Book Reading History with exact duration tracked per book */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <HistoryIcon className="h-5 w-5 text-primary" />
+                      سجل قراءة الكتب ووقت الجلسات
+                    </CardTitle>
+                    <CardDescription>
+                      تفاصيل كل كتاب قرأته والوقت الفعلي المسجل لقراءته
+                    </CardDescription>
+                  </div>
+                  {readingHistory.length > 0 && (
+                    <Button asChild variant="outline" size="sm">
+                      <Link to="/history">عرض السجل الكامل</Link>
+                    </Button>
+                  )}
+                </CardHeader>
+                <CardContent>
+                  {readingHistory.length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <BookOpen className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                      <p className="font-medium text-foreground">لا يوجد سجل قراءة بعد</p>
+                      <p className="text-xs text-muted-foreground mt-1 mb-4">
+                        اختر أي كتاب من المكتبة وابدأ القراءة لتسجيل وقتك وجمع الأوسمة
+                      </p>
+                      <Button asChild variant="outline" size="sm">
+                        <Link to="/">تصفح المكتبة</Link>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {readingHistory.map((item) => (
+                        <div
+                          key={item.bookId}
+                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-border bg-card hover:bg-muted/40 transition-colors"
+                        >
+                          <div className="flex items-center gap-3.5 min-w-0">
+                            <div className="h-16 w-12 rounded-lg overflow-hidden bg-muted shrink-0 border border-border">
+                              <img
+                                src={item.coverUrl || '/placeholder.svg'}
+                                alt={item.title}
+                                className="h-full w-full object-cover"
+                              />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <Link to={`/book/${item.bookId}`} className="font-bold text-foreground hover:text-primary transition-colors truncate block">
+                                {item.title}
+                              </Link>
+                              <p className="text-xs text-muted-foreground truncate">{item.author}</p>
+                              <span className="text-[11px] text-muted-foreground block mt-1">
+                                آخر قراءة: {new Date(item.lastRead).toLocaleDateString('ar-MR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-border">
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20 text-xs font-bold">
+                              <Clock className="h-3.5 w-3.5 shrink-0" />
+                              <span>
+                                {item.totalSecondsRead && item.totalSecondsRead > 0
+                                  ? formatReadingDurationArabic(item.totalSecondsRead)
+                                  : 'أقل من دقيقة'}
+                              </span>
+                            </div>
+                            <Button asChild size="sm" variant="outline" className="gap-1.5">
+                              <Link to={`/book/${item.bookId}/read`}>
+                                <BookOpen className="h-3.5 w-3.5" />
+                                متابعة القراءة
+                              </Link>
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
 
             <TabsContent value="stories" className="space-y-4">
               <Card>

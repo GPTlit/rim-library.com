@@ -6,12 +6,12 @@ import { Check, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const PRESETS = [
-  { id: null,        name: 'الافتراضي (داكن/فاتح)', swatch: ['#1a1a1a', '#f5e9d5', '#c89b3c'] },
+  { id: null,        name: 'الافتراضي (داكن/فاتح)', swatch: ['#1a1a1a', '#f5e9d5', '#F5F1E8'] },
   { id: 'royal',     name: 'الذهب الملكي',          swatch: ['#0f1330', '#1a2050', '#f5c842'] },
   { id: 'ramadan',   name: 'رمضان',                  swatch: ['#143228', '#2a8a5f', '#ecc14d'] },
   { id: 'sakura',    name: 'ساكورا',                 swatch: ['#fde7ef', '#e83e8c', '#b56cd8'] },
   { id: 'ocean',     name: 'المحيط',                 swatch: ['#0b2236', '#1eb6d4', '#2bd4c0'] },
-  { id: 'sunset',    name: 'الغروب',                 swatch: ['#2a1410', '#ef6a2a', '#e84a8e'] },
+  { id: 'sunset',    name: 'الغروب',                 swatch: ['#2a1410', '#F5F1E8', '#e84a8e'] },
 ] as const;
 
 export const ThemePresetPicker = () => {

@@ -9,15 +9,15 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm hover:shadow-md",
+        default: "bg-[#F5F1E8] text-[#121212] [&_svg]:text-[#121212] border border-[#121212]/15 hover:bg-[#F5F1E8]/90 shadow-sm hover:shadow-md",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        outline: "border border-border bg-background text-foreground hover:bg-[#F5F1E8] hover:text-[#121212] hover:[&_svg]:text-[#121212]",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
-        gold: "gold-gradient text-primary-foreground shadow-md hover:shadow-lg hover:opacity-95",
-        warm: "bg-amber text-primary-foreground hover:bg-amber/90 shadow-sm",
-        cozy: "bg-card border border-input text-foreground hover:bg-secondary hover:border-primary/20 shadow-sm",
+        ghost: "text-foreground hover:bg-secondary hover:text-foreground",
+        link: "text-foreground underline-offset-4 hover:underline",
+        gold: "bg-[#F5F1E8] text-[#121212] [&_svg]:text-[#121212] border border-[#121212]/15 shadow-md hover:shadow-lg hover:bg-[#F5F1E8]/90",
+        warm: "bg-[#F5F1E8] text-[#121212] [&_svg]:text-[#121212] border border-[#121212]/15 hover:bg-[#F5F1E8]/90 shadow-sm",
+        cozy: "bg-card border border-input text-foreground hover:bg-[#F5F1E8] hover:text-[#121212] hover:[&_svg]:text-[#121212] shadow-sm",
       },
       size: {
         default: "h-10 px-4 py-2",

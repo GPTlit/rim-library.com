@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, BookOpen, Sparkles, FolderOpen, Download } from 'lucide-react';
+import { Search, BookOpen, FolderOpen, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -55,14 +55,6 @@ export const HeroSection = () => {
 
       <div className="container-library relative">
         <div className="flex flex-col items-center text-center py-12 sm:py-16 md:py-24 lg:py-32 px-4">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/90 border border-border shadow-sm mb-6 animate-fade-in backdrop-blur-md">
-            <Sparkles className="h-4 w-4 text-gold" />
-            <span className="text-sm font-medium text-muted-foreground">
-              {t('freeDigitalLibrary')}
-            </span>
-          </div>
-
           {/* Title */}
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold mb-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
             <span className="text-foreground drop-shadow-sm">{t('libraryTitle')}</span>

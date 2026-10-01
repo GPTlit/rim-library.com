@@ -11,6 +11,7 @@ export const ThemeToggle = () => {
     <Button
       variant="ghost"
       size="icon"
+      className="text-foreground"
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
       title={theme === 'dark' ? t('lightMode') : t('darkMode')}
     >

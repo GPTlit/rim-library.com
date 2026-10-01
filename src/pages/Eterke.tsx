@@ -715,7 +715,9 @@ const Eterke = () => {
                     const json = JSON.parse(line.slice(6));
                     const content = json.choices?.[0]?.delta?.content;
                     if (content) aiResponse += content;
-                  } catch {}
+                  } catch {
+                    // Ignore SSE parse errors on partial chunks
+                  }
                 }
               }
             }
@@ -1287,7 +1289,7 @@ const Eterke = () => {
                                     <p className="text-xs text-muted-foreground">@{member.username}</p>
                                   </div>
                                   {member.role === 'admin' && (
-                                    <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded">
+                                    <span className="text-xs bg-[#F5F1E8] text-[#121212] px-2 py-0.5 rounded font-medium">
                                       مشرف
                                     </span>
                                   )}
@@ -1346,7 +1348,7 @@ const Eterke = () => {
                           <div
                             className={cn(
                               "rounded-2xl px-4 py-2",
-                              isAI ? "bg-amber-100 dark:bg-amber-900/30" :
+                              isAI ? "bg-[#F5F1E8] text-[#121212]" :
                               isMe ? "bg-primary text-primary-foreground rounded-tr-none" : 
                               "bg-muted rounded-tl-none"
                             )}
