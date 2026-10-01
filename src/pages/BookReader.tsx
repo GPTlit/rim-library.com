@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { ArrowRight, Download, ZoomIn, ZoomOut, Loader2, WifiOff, BookmarkPlus, Bookmark as BookmarkIcon, List } from 'lucide-react';
+import { ArrowRight, Download, ZoomIn, ZoomOut, Loader2, WifiOff, BookmarkPlus, Bookmark as BookmarkIcon, List, Moon, Sun, RotateCw, Smartphone } from 'lucide-react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
@@ -18,6 +18,7 @@ import { useReadingTime } from '@/hooks/useReadingTime';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sparkles } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -38,6 +39,9 @@ const BookReader = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selection, setSelection] = useState('');
   const [askOpen, setAskOpen] = useState(false);
+  const [invertPages, setInvertPages] = useState(() => localStorage.getItem('reader-invert') === 'true');
+  const [pageRotation, setPageRotation] = useState(() => Number(localStorage.getItem('reader-rotation') || 0));
+  const [orientation, setOrientation] = useState<'auto' | 'portrait' | 'landscape'>(() => (localStorage.getItem('reader-orientation') as 'auto' | 'portrait' | 'landscape') || 'auto');
   const containerRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const pageElementsRef = useRef<Map<number, HTMLDivElement>>(new Map());
@@ -182,6 +186,32 @@ const BookReader = () => {
 
   const currentPageBookmarked = bookmarks.some((b) => b.page === currentPage);
 
+  const togglePageTheme = () => setInvertPages((current) => {
+    localStorage.setItem('reader-invert', String(!current));
+    return !current;
+  });
+
+  const rotatePage = () => setPageRotation((current) => {
+    const next = (current + 90) % 360;
+    localStorage.setItem('reader-rotation', String(next));
+    return next;
+  });
+
+  const setReaderOrientation = async (value: 'auto' | 'portrait' | 'landscape') => {
+    setOrientation(value);
+    localStorage.setItem('reader-orientation', value);
+    const orientationApi = screen.orientation as ScreenOrientation & { lock?: (mode: string) => Promise<void> };
+    try {
+      if (value === 'auto') orientationApi.unlock();
+      else if (orientationApi.lock) await orientationApi.lock(value);
+      else throw new Error('unsupported');
+    } catch {
+      toast.info('تم حفظ اتجاه الصفحات، لكن المتصفح لم يسمح بقفل اتجاه الهاتف.');
+    }
+  };
+
+  useEffect(() => () => screen.orientation?.unlock?.(), []);
+
   // Track text selection for "Ask the book" + highlight save
   useEffect(() => {
     const onUp = () => {
@@ -274,6 +304,19 @@ const BookReader = () => {
               <span className="text-xs text-muted-foreground min-w-[2.5rem] text-center hidden sm:block">{Math.round(scale * 100)}%</span>
               <Button variant="ghost" size="icon" onClick={handleZoomIn}><ZoomIn className="h-4 w-4" /></Button>
               <div className="h-6 w-px bg-border mx-1" />
+              <Button variant="ghost" size="icon" onClick={togglePageTheme} title={invertPages ? 'صفحات فاتحة' : 'صفحات داكنة'}>
+                {invertPages ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </Button>
+              <Button variant="ghost" size="icon" onClick={rotatePage} title="تدوير الصفحة"><RotateCw className="h-4 w-4" /></Button>
+              <Select value={orientation} onValueChange={(value) => setReaderOrientation(value as 'auto' | 'portrait' | 'landscape')}>
+                <SelectTrigger className="h-9 w-24" aria-label="قفل اتجاه الشاشة"><Smartphone className="h-4 w-4" /><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="auto">تلقائي</SelectItem>
+                  <SelectItem value="portrait">عمودي</SelectItem>
+                  <SelectItem value="landscape">أفقي</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="h-6 w-px bg-border mx-1" />
               <a href={book.file_url} download target="_blank" rel="noopener noreferrer">
                 <Button variant="outline" size="sm" className="gap-2">
                   <Download className="h-4 w-4" /><span className="hidden sm:inline">تحميل</span>
@@ -352,7 +395,8 @@ const BookReader = () => {
                       <Page
                         pageNumber={pageNum}
                         scale={scale}
-                        className="shadow-xl rounded-lg overflow-hidden"
+                        rotate={pageRotation}
+                        className={`shadow-xl rounded-lg overflow-hidden ${invertPages ? 'reader-page-inverted' : ''}`}
                         renderTextLayer={false}
                         renderAnnotationLayer={false}
                       />
