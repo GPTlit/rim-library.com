@@ -1,9 +1,0 @@
-# Obsolete workflow disabled. Delete this file in GitHub if desired.
-name: Android CI (Disabled)
-on:
-  workflow_dispatch:
-jobs:
-  disabled:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Workflow disabled"
