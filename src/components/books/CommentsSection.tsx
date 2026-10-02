@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { useComments, useAddComment, useDeleteComment, useToggleCommentLike, Comment } from '@/hooks/useComments';
 import { useFeature } from '@/hooks/useAppConfig';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { MessageSquare, Heart, Loader2, Send, Reply, X, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { MessageSquare, Heart, Loader2, Send, Reply, X, MoreVertical, Pencil, Trash2, LogIn } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar, enUS, fr } from 'date-fns/locale';
 import {
@@ -368,9 +369,17 @@ export const CommentsSection = ({ bookId }: CommentsSectionProps) => {
           </Button>
         </div>
       ) : (
-        <p className="text-muted-foreground text-center py-4 bg-muted/50 rounded-lg">
-          {t('loginToComment')}
-        </p>
+        <div className="flex items-center justify-between gap-3 p-4 bg-muted/40 border border-border/80 rounded-xl">
+          <p className="text-sm text-muted-foreground">
+            {t('loginToComment')}
+          </p>
+          <Button asChild size="sm" variant="gold" className="shrink-0 gap-1.5 text-xs h-8">
+            <Link to="/auth">
+              <LogIn className="h-3.5 w-3.5" />
+              {t('login')}
+            </Link>
+          </Button>
+        </div>
       )}
 
       {/* Comments list */}

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { BrandingProvider } from "@/contexts/BrandingContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ConsentDialog } from "@/components/ConsentDialog";
 import { DevicePermissionPrompt } from "@/components/DevicePermissionPrompt";
@@ -56,13 +57,14 @@ const App = () => (
     <AuthProvider>
       <LanguageProvider>
         <ThemeProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <ConsentDialog />
-              <DevicePermissionPrompt />
-              <Routes>
+          <BrandingProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <ConsentDialog />
+                <DevicePermissionPrompt />
+                <Routes>
                 <Route path="/auth" element={<Auth />} />
                 {/* Public routes - viewable without login */}
                 <Route path="/" element={<Index />} />
@@ -97,8 +99,9 @@ const App = () => (
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
-        </ThemeProvider>
-      </LanguageProvider>
+        </BrandingProvider>
+      </ThemeProvider>
+    </LanguageProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

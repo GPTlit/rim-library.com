@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { getPublicReaderClient, initialRealBooks } from '@/integrations/supabase/guestClient';
 import { Category } from '@/lib/types';
 
 // Extended categories list
@@ -53,39 +54,51 @@ export const allCategories: Category[] = [
   { id: '40', name: 'sports', nameAr: 'رياضة', icon: '⚽', bookCount: 0 },
 ];
 
+function computeCategoryCounts(books: { category?: string | null; categories?: string[] | null }[]) {
+  const counts: Record<string, number> = {};
+  books.forEach((book) => {
+    if (book.categories && Array.isArray(book.categories)) {
+      book.categories.forEach((cat: string) => {
+        const catLower = cat?.toLowerCase() || '';
+        counts[catLower] = (counts[catLower] || 0) + 1;
+      });
+    } else if (book.category) {
+      const cat = book.category.toLowerCase();
+      counts[cat] = (counts[cat] || 0) + 1;
+    }
+  });
+
+  return allCategories.map((cat) => ({
+    ...cat,
+    bookCount: counts[cat.name.toLowerCase()] || 0,
+  }));
+}
+
+const initialCategories = computeCategoryCounts(initialRealBooks);
+
 export const useCategories = () => {
   return useQuery({
     queryKey: ['categories-with-counts'],
+    initialData: initialCategories,
     queryFn: async () => {
-      // Fetch book counts from both category and categories fields
-      const { data, error } = await supabase
-        .from('books')
-        .select('category, categories');
-      
-      if (error) throw error;
-      
-      // Count books per category (supporting both legacy single category and new array)
-      const counts: Record<string, number> = {};
-      data?.forEach(book => {
-        // Count from categories array if present
-        if (book.categories && Array.isArray(book.categories)) {
-          book.categories.forEach((cat: string) => {
-            const catLower = cat?.toLowerCase() || '';
-            counts[catLower] = (counts[catLower] || 0) + 1;
-          });
-        } else if (book.category) {
-          // Fallback to legacy single category
-          const cat = book.category.toLowerCase();
-          counts[cat] = (counts[cat] || 0) + 1;
+      try {
+        const { data: userSession } = await supabase.auth.getSession();
+        const client = userSession?.session ? supabase : await getPublicReaderClient();
+
+        const { data, error } = await client
+          .from('books')
+          .select('category, categories');
+
+        if (!error && data && data.length > 0) {
+          return computeCategoryCounts(data);
         }
-      });
-      
-      // Merge counts with categories
-      return allCategories.map(cat => ({
-        ...cat,
-        bookCount: counts[cat.name.toLowerCase()] || 0
-      }));
+      } catch (err) {
+        console.warn('Live category counts fetch failed, using real library catalog counts:', err);
+      }
+
+      return initialCategories;
     },
+    staleTime: 1000 * 60 * 5,
   });
 };
 

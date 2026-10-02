@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { getPublicReaderClient, initialRealBooks } from '@/integrations/supabase/guestClient';
+import { searchBooksFuzzy, FuzzySearchResult } from '@/lib/fuzzySearch';
 
 export interface Book {
   id: string;
@@ -13,89 +15,131 @@ export interface Book {
   cover_tall_url?: string | null;
   file_url: string;
   file_type: string | null;
+  page_count?: number | null;
   created_at: string;
   updated_at: string;
+  is_premium?: boolean | null;
+  premium_price?: number | null;
 }
+
+// Fallback to real library books (170 books in storage/database)
+export const fallbackBooks: Book[] = initialRealBooks;
 
 export const useBooks = () => {
   return useQuery({
     queryKey: ['books'],
+    initialData: initialRealBooks,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('books')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data as Book[];
+      try {
+        // Try user session first
+        const { data: userSession } = await supabase.auth.getSession();
+        const client = userSession?.session ? supabase : await getPublicReaderClient();
+
+        const { data, error } = await client
+          .from('books')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          return data as Book[];
+        }
+      } catch (err) {
+        console.warn('Live fetch error, falling back to real library catalog:', err);
+      }
+      return initialRealBooks;
     },
+    staleTime: 1000 * 60 * 5,
   });
 };
 
 export const useBook = (id: string) => {
+  const initialBook = initialRealBooks.find((b) => b.id === id);
+
   return useQuery({
     queryKey: ['book', id],
+    initialData: initialBook || undefined,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('books')
-        .select('*')
-        .eq('id', id)
-        .maybeSingle();
-      
-      if (error) throw error;
-      return data as Book | null;
+      try {
+        const { data: userSession } = await supabase.auth.getSession();
+        const client = userSession?.session ? supabase : await getPublicReaderClient();
+
+        const { data, error } = await client
+          .from('books')
+          .select('*')
+          .eq('id', id)
+          .maybeSingle();
+
+        if (!error && data) {
+          return data as Book;
+        }
+      } catch (err) {
+        console.warn('Error fetching book by id:', err);
+      }
+      return initialRealBooks.find((b) => b.id === id) || null;
     },
     enabled: !!id,
+    staleTime: 1000 * 60 * 5,
   });
 };
 
 export const useBooksByCategory = (category: string) => {
+  const initialCategoryBooks = initialRealBooks.filter(
+    (b) => b.category === category || b.categories?.includes(category)
+  );
+
   return useQuery({
     queryKey: ['books', 'category', category],
+    initialData: initialCategoryBooks,
     queryFn: async () => {
-      // Query books where the category is in the categories array OR matches the legacy category field
-      const { data, error } = await supabase
-        .from('books')
-        .select('*')
-        .or(`categories.cs.{"${category}"},category.eq.${category}`)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data as Book[];
+      try {
+        const { data: userSession } = await supabase.auth.getSession();
+        const client = userSession?.session ? supabase : await getPublicReaderClient();
+
+        const { data, error } = await client
+          .from('books')
+          .select('*')
+          .or(`categories.cs.{"${category}"},category.eq.${category}`)
+          .order('created_at', { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          return data as Book[];
+        }
+      } catch (err) {
+        console.warn('Error fetching books by category:', err);
+      }
+      return initialRealBooks.filter(
+        (b) => b.category === category || b.categories?.includes(category)
+      );
     },
     enabled: !!category,
+    staleTime: 1000 * 60 * 5,
   });
 };
 
 export const useSearchBooks = (query: string) => {
-  return useQuery({
+  return useQuery<FuzzySearchResult>({
     queryKey: ['books', 'search', query],
     queryFn: async () => {
-      // Search in title, author, description, category, and categories array
-      const searchTerm = `%${query}%`;
-      const { data, error } = await supabase
-        .from('books')
-        .select('*')
-        .or(`title.ilike.${searchTerm},author.ilike.${searchTerm},description.ilike.${searchTerm},category.ilike.${searchTerm}`)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      
-      // Also filter by categories array (Supabase doesn't support ilike on arrays easily)
-      // So we do a secondary filter on the client side for categories
-      const filtered = (data as Book[]).filter(book => {
-        // Already matched by SQL query
-        if (book.title.toLowerCase().includes(query.toLowerCase())) return true;
-        if (book.author.toLowerCase().includes(query.toLowerCase())) return true;
-        if (book.description?.toLowerCase().includes(query.toLowerCase())) return true;
-        if (book.category.toLowerCase().includes(query.toLowerCase())) return true;
-        // Check categories array
-        if (book.categories?.some(cat => cat.toLowerCase().includes(query.toLowerCase()))) return true;
-        return false;
-      });
-      
-      return filtered;
+      let pool: Book[] = initialRealBooks;
+      try {
+        const { data: userSession } = await supabase.auth.getSession();
+        const client = userSession?.session ? supabase : await getPublicReaderClient();
+
+        const { data, error } = await client
+          .from('books')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          pool = data as Book[];
+        }
+      } catch (err) {
+        console.warn('Error fetching live books pool for search:', err);
+      }
+
+      return searchBooksFuzzy(pool, query);
     },
-    enabled: query.length > 0,
+    enabled: query.trim().length > 0,
+    staleTime: 1000 * 60 * 5,
   });
 };

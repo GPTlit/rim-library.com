@@ -11,8 +11,10 @@ interface LayoutProps {
 export const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen flex flex-col">
-      <SignInBanner />
-      <Header />
+      <div className="sticky top-0 z-50 w-full">
+        <SignInBanner />
+        <Header />
+      </div>
       <main className="flex-1 pb-20">{children}</main>
       <Footer />
       <BottomNav />

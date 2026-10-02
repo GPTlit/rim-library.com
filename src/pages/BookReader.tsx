@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Download, ZoomIn, ZoomOut, Loader2, WifiOff, BookmarkPlus, Bookmark as BookmarkIcon, List, Moon, Sun, RotateCw, RotateCcw, Smartphone, Check, Menu } from 'lucide-react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
@@ -34,9 +34,22 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/b
 
 const BookReader = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { data: book, isLoading } = useBook(id || '');
   const { getOfflineBookUrl } = useOfflineBooks();
   const { user } = useAuth();
+
+  // Authentication gating: signed-out visitors cannot open the reader
+  useEffect(() => {
+    if (!user) {
+      toast.error('تسجيل الدخول مطلوب للقراءة', {
+        description: 'يرجى تسجيل الدخول للاستمتاع بقراءة الكتاب وتتبع وقتك وأوسمتك.',
+        duration: 5000,
+      });
+      navigate(id ? `/book/${id}` : '/', { replace: true });
+    }
+  }, [user, id, navigate]);
+
   useReadingTime(true);
   useReadingPresence(id);
   const sessionTimer = useBookSessionTimer({
@@ -559,7 +572,7 @@ const BookReader = () => {
                         pageNumber={pageNum}
                         scale={scale}
                         rotate={pageRotation}
-                        className={`shadow-xl rounded-lg overflow-hidden ${invertPages && pageNum !== 1 ? 'reader-page-inverted' : ''}`}
+                        className={`shadow-xl rounded-lg overflow-hidden ${invertPages && pageNum > 1 ? 'reader-page-inverted' : ''}`}
                         renderTextLayer={false}
                         renderAnnotationLayer={false}
                       />

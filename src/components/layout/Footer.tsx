@@ -1,10 +1,11 @@
-import { useBranding } from '@/hooks/useBranding';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useBranding } from '@/contexts/BrandingContext';
 
 export const Footer = () => {
-  const { t } = useLanguage();
-  const brand = useBranding();
+  const { t, language } = useLanguage();
+  const { branding, getLibraryName } = useBranding();
+  const libraryName = getLibraryName(language);
   
   return (
     <footer className="border-t border-border bg-card mt-auto">
@@ -12,11 +13,11 @@ export const Footer = () => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <img
-              src={brand.logoUrl}
-              alt={brand.name}
+              src={branding.logoUrl || '/qahwa-library-logo.jpg'}
+              alt={libraryName}
               className="h-9 w-9 rounded-lg object-cover"
             />
-            <span className="font-bold text-gradient">{brand.name}</span>
+            <span className="font-bold text-gradient">{libraryName}</span>
           </div>
 
           <nav className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
@@ -73,7 +74,7 @@ export const Footer = () => {
         </div>
 
         <div className="mt-4 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} {brand.name}. {t('allRightsReserved')}</p>
+          <p>© {new Date().getFullYear()} {t('libraryName')}. {t('allRightsReserved')}</p>
         </div>
       </div>
     </footer>

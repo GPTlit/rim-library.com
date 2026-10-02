@@ -28,6 +28,7 @@ import { PromoBlocksManager } from '@/components/admin/PromoBlocksManager';
 import { VerifiedBadgeManager } from '@/components/admin/VerifiedBadgeManager';
 import { AIBulkUpload } from '@/components/admin/AIBulkUpload';
 import { ThemePresetPicker } from '@/components/admin/ThemePresetPicker';
+import { BrandingManager } from '@/components/admin/BrandingManager';
 import { useFeaturedBookIds, useSetFeaturedBookIds } from '@/hooks/useFeaturedBooks';
 import { Bot, Send, Loader2, Settings, Palette, ToggleLeft, Sparkles, Upload, FileText, Image, Image as ImageIcon, Save, Trash2, Pencil, X, ShoppingBag, Bell, Star, Plus, ArrowUp, ArrowDown } from 'lucide-react';
 
@@ -528,7 +529,16 @@ const AdminPanel = () => {
               <ImageIcon className="h-4 w-4" />
               اللافتات
             </TabsTrigger>
+            <TabsTrigger value="branding" className="flex items-center gap-2 px-4 py-2">
+              <Sparkles className="h-4 w-4" />
+              الاسم والشعار
+            </TabsTrigger>
           </TabsList>
+
+          {/* Branding Management Tab */}
+          <TabsContent value="branding">
+            <BrandingManager />
+          </TabsContent>
 
           {/* Store Management Tab */}
           <TabsContent value="store">

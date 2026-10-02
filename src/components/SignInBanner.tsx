@@ -27,12 +27,12 @@ export const SignInBanner = () => {
   const t = text[language] ?? text.ar;
 
   return (
-    <div className="sticky top-0 z-40 w-full bg-primary text-primary-foreground shadow-md">
-      <div className="container mx-auto flex items-center gap-3 px-4 py-2.5 text-sm">
-        <p className="flex-1 leading-snug">{t.msg}</p>
-        <Button asChild size="sm" variant="secondary" className="shrink-0">
+    <div className="w-full bg-primary text-primary-foreground border-b border-primary-foreground/15 shadow-xs">
+      <div className="container-library flex items-center justify-between gap-3 py-2 text-xs sm:text-sm">
+        <p className="flex-1 font-medium leading-snug">{t.msg}</p>
+        <Button asChild size="sm" variant="secondary" className="shrink-0 font-bold text-xs h-8">
           <Link to="/auth">
-            <LogIn className="h-4 w-4" />
+            <LogIn className="h-3.5 w-3.5" />
             {t.cta}
           </Link>
         </Button>

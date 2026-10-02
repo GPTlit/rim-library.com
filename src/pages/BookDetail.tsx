@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, BookOpen, Download, Share2, WifiOff, Check, Loader2, FileText } from 'lucide-react';
+import { ArrowRight, BookOpen, Download, Share2, WifiOff, Check, Loader2, FileText, LogIn } from 'lucide-react';
 import { CategoryIcon } from '@/components/CategoryIcon';
 
 import { Layout } from '@/components/layout/Layout';
@@ -10,6 +10,14 @@ import { addToReadingHistory } from '@/lib/storage';
 import { useToast } from '@/hooks/use-toast';
 import { useBook } from '@/hooks/useBooks';
 import { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { CommentsSection } from '@/components/books/CommentsSection';
 import { LikeButton } from '@/components/books/LikeButton';
 import { BookRatingSection } from '@/components/books/BookRatingSection';
@@ -34,6 +42,7 @@ const BookDetail = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [isOffline, setIsOffline] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
   
   const category = book ? categories.find((c) => c.name === book.category) : null;
 
@@ -58,6 +67,7 @@ const BookDetail = () => {
   // Helper function to require authentication
   const requireAuth = (callback: () => void, actionDescription: string) => {
     if (!user) {
+      setShowAuthDialog(true);
       toast({
         title: t('loginRequired'),
         description: actionDescription,
@@ -409,6 +419,33 @@ const BookDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Guest Sign-in Prompt Dialog */}
+      <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
+        <DialogContent className="sm:max-w-md text-right font-tajawal">
+          <DialogHeader className="text-right sm:text-right">
+            <DialogTitle className="text-lg font-bold flex items-center gap-2">
+              <LogIn className="h-5 w-5 text-primary" />
+              {t('loginRequired')}
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground pt-2">
+              {t('loginToRead')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-2 text-sm text-foreground/90 leading-relaxed">
+            سجّل دخولك الآن لقراءة الكتاب إلكترونياً، حفظ مكان توقفك، تدوين الملاحظات، وإضافة الكتب إلى مفضلتك.
+          </div>
+          <DialogFooter className="flex flex-row-reverse sm:justify-start gap-2 pt-2">
+            <Button variant="gold" onClick={() => navigate('/auth')} className="gap-2">
+              <LogIn className="h-4 w-4" />
+              {t('login')}
+            </Button>
+            <Button variant="outline" onClick={() => setShowAuthDialog(false)}>
+              {t('cancel')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };
