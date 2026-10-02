@@ -1,33 +1,19 @@
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useBranding } from '@/hooks/useBranding';
 
 export const Logo = () => {
   const { t } = useLanguage();
-  
+  const { name, logoUrl } = useBranding();
+
   return (
-    <Link to="/" className="flex items-center gap-3 group">
-      <div className="relative flex h-12 w-12 items-center justify-center">
-        {/* Main logo container */}
-        <div className="relative flex h-12 w-12 items-center justify-center rounded-full overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 border-2 border-primary/30">
-          <img
-            src="/qahwa-library-logo.jpg"
-            alt={t('libraryName')}
-            className="w-full h-full object-cover"
-          />
-        </div>
-        
-        {/* Floating sparkle decoration */}
-        <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-accent/60 animate-pulse" />
+    <Link to="/" className="flex shrink-0 items-center gap-3 group">
+      <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 border-2 border-primary/30">
+        <img src={logoUrl} alt={name} className="w-full h-full object-cover" />
       </div>
-      
-      {/* Logo text */}
-      <div className="hidden sm:flex flex-col">
-        <span className="text-xl font-bold text-gradient leading-tight">
-          {t('libraryName')}
-        </span>
-        <span className="text-[10px] text-muted-foreground/70 tracking-wider">
-          {t('librarySubtitle')}
-        </span>
+      <div className="hidden sm:flex flex-col shrink-0">
+        <span className="text-xl font-bold text-gradient leading-tight whitespace-nowrap">{name}</span>
+        <span className="text-[10px] text-muted-foreground/70 tracking-wider whitespace-nowrap">{t('librarySubtitle')}</span>
       </div>
     </Link>
   );

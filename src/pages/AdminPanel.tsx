@@ -1,3 +1,4 @@
+import { BrandingManager } from '@/components/admin/BrandingManager';
 import { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
@@ -518,6 +519,10 @@ const AdminPanel = () => {
             <TabsTrigger value="notifications" className="flex items-center gap-2 px-4 py-2">
               <Bell className="h-4 w-4" />
               الإشعارات
+            </TabsTrigger>
+            <TabsTrigger value="branding" className="flex items-center gap-2 px-4 py-2">
+              <Settings className="h-4 w-4" />
+              الاسم والشعار
             </TabsTrigger>
             <TabsTrigger value="banners" className="flex items-center gap-2 px-4 py-2">
               <ImageIcon className="h-4 w-4" />
@@ -1137,6 +1142,10 @@ const AdminPanel = () => {
           </TabsContent>
 
           {/* Hero Banners Tab */}
+          <TabsContent value="branding">
+            <BrandingManager />
+          </TabsContent>
+
           <TabsContent value="banners">
             <Card>
               <CardContent className="p-6 space-y-6">
