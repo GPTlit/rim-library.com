@@ -59,7 +59,7 @@ export const Header = () => {
           <Logo />
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden xl:flex items-center gap-1 min-w-0">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive = location.pathname === link.href;
@@ -127,7 +127,7 @@ export const Header = () => {
           </nav>
 
           {/* Mobile Menu Button */}
-          <div className="flex lg:hidden items-center gap-2">
+          <div className="flex xl:hidden items-center gap-2">
             {/* Notifications */}
             <NotificationBell />
             
@@ -174,7 +174,7 @@ export const Header = () => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <nav className="lg:hidden py-4 border-t border-border/50 animate-fade-in max-h-[70vh] overflow-y-auto">
+          <nav className="xl:hidden py-4 border-t border-border/50 animate-fade-in max-h-[70vh] overflow-y-auto">
             <div className="flex flex-col gap-1">
               {navLinks.map((link) => {
                 const Icon = link.icon;

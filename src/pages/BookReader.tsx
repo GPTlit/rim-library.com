@@ -559,7 +559,7 @@ const BookReader = () => {
                         pageNumber={pageNum}
                         scale={scale}
                         rotate={pageRotation}
-                        className={`shadow-xl rounded-lg overflow-hidden ${invertPages ? 'reader-page-inverted' : ''}`}
+                        className={`shadow-xl rounded-lg overflow-hidden ${invertPages && pageNum !== 1 ? 'reader-page-inverted' : ''}`}
                         renderTextLayer={false}
                         renderAnnotationLayer={false}
                       />
