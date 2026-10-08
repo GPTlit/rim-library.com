@@ -22,6 +22,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- Deep links used by home-screen widgets: qahwa://book/<id>, qahwa://quote/<id>, qahwa://downloads -->
+            <intent-filter android:label="@string/app_name">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="qahwa" />
+            </intent-filter>
+
         </activity>
 
         <provider
@@ -33,9 +41,85 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!-- Qahwa home-screen widgets -->
+        <receiver
+            android:name=".widgets.DailyBookWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_daily_book_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_daily_book_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widgets.ContinueReadingWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_continue_reading_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_continue_reading_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widgets.DiscoverWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_discover_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_discover_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widgets.CollectionWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_collection_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_collection_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widgets.MinimalWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_minimal_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_minimal_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widgets.QuoteWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_quote_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_quote_info" />
+        </receiver>
     </application>
 
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
 </manifest>

@@ -9,4 +9,4 @@
     android:initialLayout="@layout/widget_minimal"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
-    android:description="@string/app_name" />
+    android:description="@string/widget_minimal_description" />

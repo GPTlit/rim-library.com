@@ -4,4 +4,17 @@
     <string name="title_activity_main">QAHWA LIBRARY</string>
     <string name="package_name">app.lovable.p27bac873470c472ba5395b7471b73a0e</string>
     <string name="custom_url_scheme">app.lovable.p27bac873470c472ba5395b7471b73a0e</string>
+
+    <string name="widget_daily_book_label">كتاب اليوم - قهوة</string>
+    <string name="widget_daily_book_description">يعرض كتاب اليوم المختار مع غلافه ورسالة قصيرة.</string>
+    <string name="widget_continue_reading_label">متابعة القراءة - قهوة</string>
+    <string name="widget_continue_reading_description">يتابع آخر كتاب تقرأه ويعيدك إلى نفس الصفحة.</string>
+    <string name="widget_discover_label">اكتشف - قهوة</string>
+    <string name="widget_discover_description">اقتراح كتاب جديد يتغيّر يوميًا.</string>
+    <string name="widget_collection_label">مكتبتي - قهوة</string>
+    <string name="widget_collection_description">شبكة مصغّرة من أحدث كتبك أو كتبك المحمّلة.</string>
+    <string name="widget_minimal_label">قهوة مصغّر</string>
+    <string name="widget_minimal_description">واجهة مصغّرة لفتح آخر كتاب بسرعة.</string>
+    <string name="widget_quote_label">اقتباس - قهوة</string>
+    <string name="widget_quote_description">اقتباس مُلهم من كتبك مع رابط لمصدره.</string>
 </resources>
