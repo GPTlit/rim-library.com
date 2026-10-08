@@ -60,19 +60,49 @@ export interface DeviceDownloadEntry {
   coverUrl: string;
   fileName: string;
   uri: string;
+  filePath: string;
   size: number;
+  fileSize: number;
   type: string; // mime type, e.g. 'application/pdf'
   downloadedAt: string;
+  downloadDate: string;
   platform: string;
 }
 
 export const loadDeviceDownloads = (): DeviceDownloadEntry[] => {
   try {
     const raw = localStorage.getItem(DEVICE_DOWNLOADS_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((item: any) => ({
+      bookId: item.bookId || item.id,
+      title: item.title || '',
+      author: item.author || '',
+      coverUrl: item.coverUrl || '',
+      fileName: item.fileName || `${item.title || 'book'}.pdf`,
+      uri: item.uri || item.filePath || '',
+      filePath: item.filePath || item.uri || '',
+      size: item.size || item.fileSize || 0,
+      fileSize: item.fileSize || item.size || 0,
+      type: item.type || 'application/pdf',
+      downloadedAt: item.downloadedAt || item.downloadDate || new Date().toISOString(),
+      downloadDate: item.downloadDate || item.downloadedAt || new Date().toISOString(),
+      platform: item.platform || 'web',
+    }));
   } catch {
     return [];
   }
+};
+
+export const isBookDownloadedOnDevice = (bookId: string): boolean => {
+  const downloads = loadDeviceDownloads();
+  if (downloads.some((d) => d.bookId === bookId)) return true;
+  try {
+    const raw = localStorage.getItem(OFFLINE_BOOKS_KEY);
+    const books: OfflineBook[] = raw ? JSON.parse(raw) : [];
+    if (books.some((b) => b.id === bookId)) return true;
+  } catch {}
+  return false;
 };
 
 const saveDeviceDownloads = (entries: DeviceDownloadEntry[]) => {
@@ -262,16 +292,36 @@ export const useOfflineBooks = () => {
       // user's Downloads folder (in addition to the offline-cache copy below).
       if (!isNative()) {
         try {
-          const safeTitle = (book.title || book.id).replace(/[\\/:*?"<>|]+/g, '_').slice(0, 80);
-          const ext = (book.fileType || 'pdf').toLowerCase().replace(/[^a-z0-9]/g, '') || 'pdf';
+          const downloadName = buildQahwaDownloadFileName(book.title, book.id);
           const dlUrl = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = dlUrl;
-          a.download = `${safeTitle}.${ext}`;
+          a.download = downloadName;
           document.body.appendChild(a);
           a.click();
           a.remove();
           setTimeout(() => URL.revokeObjectURL(dlUrl), 5000);
+
+          // Register in device downloads registry
+          const nowStr = new Date().toISOString();
+          const webDlEntry: DeviceDownloadEntry = {
+            bookId: book.id,
+            title: book.title,
+            author: book.author,
+            coverUrl: book.coverUrl,
+            fileName: downloadName,
+            uri: 'web-offline://' + book.id,
+            filePath: 'web-offline://' + book.id,
+            size: fileSize,
+            fileSize,
+            type: mimeType,
+            downloadedAt: nowStr,
+            downloadDate: nowStr,
+            platform: 'web',
+          };
+          const nextDownloads = [webDlEntry, ...loadDeviceDownloads().filter((e) => e.bookId !== book.id)];
+          saveDeviceDownloads(nextDownloads);
+          setDeviceDownloads(nextDownloads);
         } catch (e) {
           console.warn('Browser download trigger failed', e);
         }
@@ -535,6 +585,7 @@ export const useOfflineBooks = () => {
       const result = await QahwaNative.savePdfToDownloads({ base64, fileName });
       onProgress?.(90);
 
+      const nowStr = new Date().toISOString();
       const entry: DeviceDownloadEntry = {
         bookId: book.id,
         title: book.title,
@@ -542,9 +593,12 @@ export const useOfflineBooks = () => {
         coverUrl: book.coverUrl,
         fileName: result.fileName || fileName,
         uri: result.uri,
+        filePath: result.uri,
         size: result.size ?? blob.size,
+        fileSize: result.size ?? blob.size,
         type: mimeType,
-        downloadedAt: new Date().toISOString(),
+        downloadedAt: nowStr,
+        downloadDate: nowStr,
         platform: 'android',
       };
 

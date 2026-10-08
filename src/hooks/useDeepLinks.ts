@@ -20,14 +20,17 @@ export function useDeepLinks() {
         const segments = pathPart.split('/').filter(Boolean);
         const params = new URLSearchParams(queryPart || '');
 
-        if (segments[0] === 'book' && segments[1]) {
+        if (segments[0] === 'read' && segments[1]) {
+          const page = params.get('page');
+          navigate(`/book/${segments[1]}/read${page ? `?page=${page}` : ''}`);
+        } else if (segments[0] === 'book' && segments[1]) {
           const page = params.get('page');
           if (page) {
             navigate(`/book/${segments[1]}/read?page=${page}`);
           } else {
             navigate(`/book/${segments[1]}`);
           }
-        } else if (segments[0] === 'quote' && segments[1]) {
+        } else if ((segments[0] === 'quote' || segments[0] === 'quotes') && segments[1]) {
           navigate(`/quotes/${segments[1]}`);
         } else if (segments[0] === 'downloads') {
           navigate('/downloads');

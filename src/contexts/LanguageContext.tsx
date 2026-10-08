@@ -11,6 +11,76 @@ interface Translations {
 }
 
 const translations: Translations = {
+  // Bottom Navigation
+  navHome: { ar: 'الرئيسية', en: 'Home', fr: 'Accueil' },
+  navFeed: { ar: 'المتابَعون', en: 'Following', fr: 'Abonnements' },
+  navExplore: { ar: 'استكشف', en: 'Discover', fr: 'Découvrir' },
+  navWrite: { ar: 'اكتب', en: 'Write', fr: 'Écrire' },
+  navProfile: { ar: 'حسابي', en: 'Profile', fr: 'Profil' },
+
+  // Feed & Followers
+  feedTitle: { ar: 'المتابَعون', en: 'Following Feed', fr: 'Fil d\'actualité' },
+  feedSubtitle: { ar: 'آخر القصص والمنشورات من الكتّاب الذين تتابعهم', en: 'Latest stories from authors you follow', fr: 'Dernières histoires des auteurs que vous suivez' },
+  feedLoginPrompt: { ar: 'سجّل دخولك لمتابعة كتّابك المفضلين ورؤية قصصهم هنا.', en: 'Log in to follow your favorite authors and see their stories here.', fr: 'Connectez-vous pour suivre vos auteurs favoris et voir leurs histoires ici.' },
+  feedEmptyTitle: { ar: 'لم تتابع أي كاتب بعد', en: 'Not following any authors yet', fr: 'Vous ne suivez aucun auteur pour le moment' },
+  feedEmptyDesc: { ar: 'استكشف القصص وتابع كاتباً لتظهر قصصه هنا.', en: 'Explore stories and follow an author to see their stories here.', fr: 'Explorez les histoires et suivez un auteur pour voir ses publications ici.' },
+  exploreStoriesAction: { ar: 'استكشف القصص', en: 'Explore Stories', fr: 'Explorer les histoires' },
+  noNewStoriesFromFollowed: { ar: 'لا توجد قصص جديدة من الذين تتابعهم.', en: 'No new stories from authors you follow.', fr: 'Aucune nouvelle histoire de vos auteurs suivis.' },
+  followersCount: { ar: 'متابع', en: 'followers', fr: 'abonnés' },
+  followingCount: { ar: 'يتابع', en: 'following', fr: 'abonnements' },
+  storiesCount: { ar: 'قصة', en: 'stories', fr: 'histoires' },
+  follow: { ar: 'متابعة', en: 'Follow', fr: 'Suivre' },
+  following: { ar: 'متابَع', en: 'Following', fr: 'Abonné' },
+  unfollow: { ar: 'إلغاء المتابعة', en: 'Unfollow', fr: 'Ne plus suivre' },
+
+  // Explore & Stories
+  exploreTitle: { ar: 'استكشف القصص والروايات', en: 'Discover Stories & Novels', fr: 'Découvrir des Histoires' },
+  searchStoriesPlaceholder: { ar: 'ابحث عن قصة، رواية، أو كاتب...', en: 'Search for a story, novel, or author...', fr: 'Rechercher une histoire, un roman ou un auteur...' },
+  noStoriesFound: { ar: 'لا توجد قصص مطابقة حتى الآن.', en: 'No matching stories found yet.', fr: 'Aucune histoire correspondante trouvée.' },
+  allStories: { ar: 'جميع القصص', en: 'All Stories', fr: 'Toutes les histoires' },
+
+  // Write & Creator
+  writeTitle: { ar: 'قصصي ومسوداتي', en: 'My Stories & Drafts', fr: 'Mes Histoires & Brouillons' },
+  writeSubtitle: { ar: 'اكتب وأدر قصصك وفصولك بكل حرية', en: 'Write and publish your chapters freely', fr: 'Rédigez et publiez vos chapitres librement' },
+  newStory: { ar: 'قصة جديدة', en: 'New Story', fr: 'Nouvelle histoire' },
+  writeLoginPrompt: { ar: 'سجّل دخولك لتبدأ في كتابة قصصك.', en: 'Log in to start writing your stories.', fr: 'Connectez-vous pour commencer à écrire vos histoires.' },
+  noStoriesWritten: { ar: 'لم تكتب أي قصة بعد. ابدأ قصتك الأولى الآن.', en: 'You haven\'t written any stories yet. Start your first story now.', fr: 'Vous n\'avez pas encore écrit d\'histoire. Commencez maintenant.' },
+  storyStatusPublished: { ar: 'منشورة', en: 'Published', fr: 'Publiée' },
+  storyStatusDraft: { ar: 'مسودة', en: 'Draft', fr: 'Brouillon' },
+  noDescription: { ar: 'بدون وصف', en: 'No description', fr: 'Sans description' },
+
+  // Reading Goals & Notch Achievements
+  goalUnlockedNotch: { ar: '🎉 إنجاز جديد مفتوح!', en: '🎉 Goal Achieved!', fr: '🎉 Objectif Débloqué !' },
+  congratsGoal: { ar: 'مبروك! واصل القراءة لفتح أوسمة أصعب', en: 'Congratulations! Keep reading to unlock higher tiers', fr: 'Félicitations ! Continuez à lire pour débloquer de nouveaux paliers' },
+  dismissNotch: { ar: 'إغلاق', en: 'Dismiss', fr: 'Fermer' },
+  readingGoals: { ar: 'أهداف القراءة والأوسمة', en: 'Reading Goals & Badges', fr: 'Objectifs de lecture & Badges' },
+  readingGoalsDesc: { ar: 'كلما أطلت القراءة تفتح مستويات وألقاب شرفية أعلى', en: 'The more you read, the harder the goals and prestige titles you unlock', fr: 'Plus vous lisez, plus les objectifs et titres prestigieux deviennent ardus' },
+  totalReadingTime: { ar: 'إجمالي وقت القراءة', en: 'Total Reading Time', fr: 'Temps total de lecture' },
+  collectedMedalsCount: { ar: 'الأوسمة المجمعة', en: 'Collected Medals', fr: 'Médailles collectées' },
+  booksInHistoryCount: { ar: 'الكتب في سجلك', en: 'Books in History', fr: 'Livres dans l\'historique' },
+  outOfMedals: { ar: 'من {total} أوسمة', en: 'of {total} medals', fr: 'sur {total} médailles' },
+  booksCountLabel: { ar: 'كتاب', en: 'books', fr: 'livres' },
+  historyAndMedalsTab: { ar: 'السجل والأوسمة', en: 'History & Badges', fr: 'Historique & Badges' },
+  myStoriesTab: { ar: 'قصصي', en: 'My Stories', fr: 'Mes Histoires' },
+  readingHistoryTitle: { ar: 'سجل قراءة الكتب ووقت الجلسات', en: 'Reading History & Session Durations', fr: 'Historique de lecture & Sessions' },
+  readingHistorySubtitle: { ar: 'تفاصيل كل كتاب قرأته والوقت الفعلي المسجل لقراءته', en: 'Exact time spent reading each book', fr: 'Temps exact passé sur chaque livre' },
+  noReadingHistoryYet: { ar: 'لا يوجد سجل قراءة بعد', en: 'No reading history yet', fr: 'Aucun historique pour le moment' },
+  noReadingHistoryDesc: { ar: 'اختر أي كتاب من المكتبة وابدأ القراءة لتسجيل وقتك وجمع الأوسمة', en: 'Pick any book from the library and start reading to track your time and earn badges', fr: 'Choisissez un livre et commencez à lire pour accumuler du temps et des badges' },
+  lastReadAt: { ar: 'آخر قراءة', en: 'Last read', fr: 'Dernière lecture' },
+  lessThanMinute: { ar: 'أقل من دقيقة', en: 'Less than a minute', fr: 'Moins d\'une minute' },
+  hoursToVerifiedBadge: { ar: '{hours}/10 ساعات للحصول على شارة القارئ الموثّق', en: '{hours}/10 hours to earn the Verified Reader badge', fr: '{hours}/10 heures pour obtenir le badge de lecteur vérifié' },
+
+  // Home Screen Sections
+  continueReadingTitle: { ar: 'متابعة القراءة', en: 'Continue Reading', fr: 'Continuer la lecture' },
+  continueReadingSubtitle: { ar: 'أكمل قراءة آخر الكتب التي تصفحتها من حيث توقفت', en: 'Pick up right where you left off', fr: 'Reprenez exactement là où vous vous êtes arrêté' },
+  fullHistoryLink: { ar: 'السجل الكامل', en: 'Full History', fr: 'Historique complet' },
+  featuredPicks: { ar: 'الكتب المختارة', en: 'Featured Books', fr: 'Livres en vedette' },
+  trendingSection: { ar: 'الأكثر رواجاً', en: 'Trending Now', fr: 'Tendances du moment' },
+  topRatedSection: { ar: 'الأعلى تقييماً', en: 'Top Rated', fr: 'Les mieux notés' },
+  recentlyAddedSection: { ar: 'أُضيف حديثاً', en: 'Recently Added', fr: 'Récemment ajoutés' },
+  readingTimeProgress: { ar: 'تقدم القراءة', en: 'Reading Progress', fr: 'Progression' },
+  deleteFromDevice: { ar: 'حذف من الجهاز', en: 'Delete from device', fr: 'Supprimer de l\'appareil' },
+
   // Navigation
   home: { ar: 'الرئيسية', en: 'Home', fr: 'Accueil' },
   categories: { ar: 'التصنيفات', en: 'Categories', fr: 'Catégories' },
@@ -98,6 +168,8 @@ const translations: Translations = {
   featuredBooks: { ar: 'كتب مختارة', en: 'Featured Books', fr: 'Livres en vedette' },
   recentBooks: { ar: 'آخر الإضافات', en: 'Recent Additions', fr: 'Ajouts récents' },
   recentlyViewed: { ar: 'شوهدت مؤخراً', en: 'Recently Viewed', fr: 'Vus récemment' },
+  continueReading: { ar: 'متابعة القراءة', en: 'Continue Reading', fr: 'Continuer la lecture' },
+  resume: { ar: 'استئناف', en: 'Resume', fr: 'Reprendre' },
   trendingBooks: { ar: 'الأكثر رواجاً', en: 'Trending Books', fr: 'Livres tendance' },
   topRatedBooks: { ar: 'الأعلى تقييماً', en: 'Highest Rated', fr: 'Mieux notés' },
   viewAll: { ar: 'عرض الكل', en: 'View All', fr: 'Voir tout' },
@@ -442,7 +514,7 @@ export const useLanguage = () => {
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguageState] = useState<Language>(() => {
     const saved = localStorage.getItem('app-language');
-    return (saved as Language) || 'ar';
+    return (saved as Language) || 'en';
   });
 
   const setLanguage = (lang: Language) => {

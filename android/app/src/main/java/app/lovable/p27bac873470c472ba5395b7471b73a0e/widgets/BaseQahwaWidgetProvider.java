@@ -56,7 +56,7 @@ abstract class BaseQahwaWidgetProvider extends AppWidgetProvider {
     }
 
     static String bookDeepLinkWithPage(String bookId, int page) {
-        return "qahwa://book/" + bookId + "?page=" + page;
+        return "qahwa://read/" + bookId + "?page=" + page;
     }
 
     static String quoteDeepLink(String quoteId) {

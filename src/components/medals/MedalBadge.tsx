@@ -1,6 +1,7 @@
 import React from 'react';
-import { Medal, formatReadingDurationArabic } from '@/lib/medals';
-import { Sparkles, BookOpen, Compass, Shield, Scroll, Sun, Lock, CheckCircle2 } from 'lucide-react';
+import { Medal, formatReadingDuration, getLocalizedMedal } from '@/lib/medals';
+import { Sparkles, BookOpen, Compass, Shield, Scroll, Sun, Lock, CheckCircle2, Crown, Gem, Star, Award } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import {
   Dialog,
@@ -36,20 +37,28 @@ export const MedalIcon: React.FC<{ iconName: Medal['iconName']; className?: stri
       return <Scroll className={className} />;
     case 'sun':
       return <Sun className={className} />;
+    case 'crown':
+      return <Crown className={className} />;
+    case 'gem':
+      return <Gem className={className} />;
+    case 'star':
+      return <Star className={className} />;
     default:
-      return <Sparkles className={className} />;
+      return <Award className={className} />;
   }
 };
 
 export const MedalBadge: React.FC<MedalBadgeProps> = ({
-  medal,
+  medal: rawMedal,
   unlocked,
   totalReadingSeconds,
   className,
   size = 'md',
   showDetailsModal = true,
 }) => {
+  const { language, dir } = useLanguage();
   const [open, setOpen] = React.useState(false);
+  const medal = React.useMemo(() => getLocalizedMedal(rawMedal, language), [rawMedal, language]);
 
   const prevIndex = React.useMemo(() => {
     // calculate progress for locked medal
@@ -60,6 +69,9 @@ export const MedalBadge: React.FC<MedalBadgeProps> = ({
       { id: 'chinguetti-guardian', req: 14400 },
       { id: 'mahdhara-sage', req: 28800 },
       { id: 'desert-sun', req: 54000 },
+      { id: 'scholar-ascendant', req: 90000 },
+      { id: 'master-of-codices', req: 180000 },
+      { id: 'eternal-library-legend', req: 360000 },
     ];
     const idx = medalsList.findIndex((m) => m.id === medal.id);
     const prevReq = idx > 0 ? medalsList[idx - 1].req : 0;
@@ -93,6 +105,15 @@ export const MedalBadge: React.FC<MedalBadgeProps> = ({
     md: 'h-7 w-7',
     lg: 'h-10 w-10',
   };
+
+  const collectedLabel = language === 'en' ? 'Unlocked ✓' : language === 'fr' ? 'Débloqué ✓' : 'تم الجمع ✓';
+  const tierPrefix = language === 'en' ? `${medal.tierName} Medal` : language === 'fr' ? `Médaille ${medal.tierName}` : `وسام ${medal.tierName}`;
+  const reqTimeLabel = language === 'en' ? 'Required Time:' : language === 'fr' ? 'Temps requis :' : 'الوقت المطلوب:';
+  const statusLabel = language === 'en' ? 'Status:' : language === 'fr' ? 'Statut :' : 'حالة الجمع:';
+  const unlockedStatus = language === 'en' ? 'Unlocked (In Collection)' : language === 'fr' ? 'Débloqué (Dans votre collection)' : 'مكتمل (في مجموعتك)';
+  const inProgressStatus = language === 'en' ? `In Progress (${progressPercent}%)` : language === 'fr' ? `En cours (${progressPercent}%)` : `قيد التحصيل (${progressPercent}%)`;
+  const remainingPrefix = language === 'en' ? 'Remaining ' : language === 'fr' ? 'Il reste ' : 'متبقي ';
+  const remainingSuffix = language === 'en' ? ' of reading to unlock this badge' : language === 'fr' ? ' de lecture pour débloquer ce badge' : ' من القراءة للحصول على هذا الوسام';
 
   return (
     <>
@@ -154,7 +175,7 @@ export const MedalBadge: React.FC<MedalBadgeProps> = ({
         {/* Progress or status */}
         {unlocked ? (
           <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">
-            تم الجمع ✓
+            {collectedLabel}
           </span>
         ) : (
           <div className="w-full mt-1.5 space-y-1">
@@ -174,8 +195,8 @@ export const MedalBadge: React.FC<MedalBadgeProps> = ({
       {/* Details Dialog */}
       {showDetailsModal && (
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="sm:max-w-md text-right font-tajawal">
-            <DialogHeader className="text-right">
+          <DialogContent className={cn("sm:max-w-md", dir === 'rtl' ? 'text-right' : 'text-left')}>
+            <DialogHeader className={dir === 'rtl' ? 'text-right' : 'text-left'}>
               <div className="flex items-center justify-center mb-4">
                 <div
                   className={cn(
@@ -205,7 +226,7 @@ export const MedalBadge: React.FC<MedalBadgeProps> = ({
                     unlocked ? medal.colors.badgeBg : 'bg-muted text-muted-foreground border-border'
                   )}
                 >
-                  وسام {medal.tierName}
+                  {tierPrefix}
                 </span>
                 <DialogTitle className="text-xl font-bold text-foreground">
                   {medal.title}
@@ -232,21 +253,21 @@ export const MedalBadge: React.FC<MedalBadgeProps> = ({
               {/* Progress Tracker */}
               <div className="space-y-2 pt-1 border-t border-border">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">الوقت المطلوب:</span>
+                  <span className="text-muted-foreground">{reqTimeLabel}</span>
                   <span className="font-semibold text-foreground">
-                    {formatReadingDurationArabic(medal.requiredSeconds)}
+                    {formatReadingDuration(medal.requiredSeconds, language)}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">حالة الجمع:</span>
+                  <span className="text-muted-foreground">{statusLabel}</span>
                   <span
                     className={cn(
                       'font-bold',
                       unlocked ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
                     )}
                   >
-                    {unlocked ? 'مكتمل (في مجموعتك)' : `قيد التحصيل (${progressPercent}%)`}
+                    {unlocked ? unlockedStatus : inProgressStatus}
                   </span>
                 </div>
 
@@ -259,11 +280,11 @@ export const MedalBadge: React.FC<MedalBadgeProps> = ({
                       />
                     </div>
                     <p className="text-[11px] text-muted-foreground text-center">
-                      متبقي{' '}
+                      {remainingPrefix}
                       <strong className="text-foreground">
-                        {formatReadingDurationArabic(secondsRemaining)}
-                      </strong>{' '}
-                      من القراءة للحصول على هذا الوسام
+                        {formatReadingDuration(secondsRemaining, language)}
+                      </strong>
+                      {remainingSuffix}
                     </p>
                   </div>
                 )}

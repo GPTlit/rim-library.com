@@ -18,17 +18,9 @@ public class MinimalWidgetProvider extends BaseQahwaWidgetProvider {
 
     private void update(Context ctx, AppWidgetManager mgr, int appWidgetId) {
         JSONObject payload = readPayload(ctx);
-
-        if (!isSignedIn(payload)) {
-            RemoteViews empty = new RemoteViews(ctx.getPackageName(), R.layout.widget_empty);
-            empty.setOnClickPendingIntent(R.id.empty_text, openAppPendingIntent(ctx, appWidgetId));
-            push(ctx, mgr, appWidgetId, empty);
-            return;
-        }
-
-        JSONObject book = payload.optJSONObject("continueReading");
-        if (book == null) book = payload.optJSONObject("dailyBook");
-        if (book == null) book = payload.optJSONObject("featured");
+        JSONObject book = payload != null ? payload.optJSONObject("continueReading") : null;
+        if (book == null && payload != null) book = payload.optJSONObject("dailyBook");
+        if (book == null && payload != null) book = payload.optJSONObject("featured");
 
         RemoteViews views = new RemoteViews(ctx.getPackageName(), R.layout.widget_minimal);
         if (book == null) {

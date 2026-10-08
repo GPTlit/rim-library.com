@@ -20,7 +20,7 @@ public class DailyBookWidgetProvider extends BaseQahwaWidgetProvider {
         JSONObject payload = readPayload(ctx);
         JSONObject dailyBook = payload != null ? payload.optJSONObject("dailyBook") : null;
 
-        if (!isSignedIn(payload) || dailyBook == null) {
+        if (dailyBook == null) {
             RemoteViews empty = new RemoteViews(ctx.getPackageName(), R.layout.widget_empty);
             empty.setOnClickPendingIntent(R.id.empty_text, openAppPendingIntent(ctx, appWidgetId));
             push(ctx, mgr, appWidgetId, empty);

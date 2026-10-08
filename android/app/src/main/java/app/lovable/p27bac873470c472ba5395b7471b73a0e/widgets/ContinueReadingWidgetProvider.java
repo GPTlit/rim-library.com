@@ -33,7 +33,7 @@ public class ContinueReadingWidgetProvider extends BaseQahwaWidgetProvider {
         JSONObject payload = readPayload(ctx);
         JSONObject book = payload != null ? payload.optJSONObject("continueReading") : null;
 
-        if (!isSignedIn(payload) || book == null) {
+        if (book == null) {
             RemoteViews empty = new RemoteViews(ctx.getPackageName(), R.layout.widget_empty);
             empty.setOnClickPendingIntent(R.id.empty_text, openAppPendingIntent(ctx, appWidgetId));
             push(ctx, mgr, appWidgetId, empty);

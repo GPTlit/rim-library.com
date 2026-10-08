@@ -7,7 +7,7 @@ import 'react-pdf/dist/Page/TextLayer.css';
 import { Button } from '@/components/ui/button';
 import { useBook } from '@/hooks/useBooks';
 import { addToReadingHistory } from '@/lib/storage';
-import { useOfflineBooks } from '@/hooks/useOfflineBooks';
+import { useOfflineBooks, getOfflinePdfSource, loadDeviceDownloads } from '@/hooks/useOfflineBooks';
 import { getBookmarks, addBookmark, removeBookmark, getLastBookmark, Bookmark } from '@/lib/bookmarks';
 import BookmarkPanel from '@/components/books/BookmarkPanel';
 import { toast } from 'sonner';
@@ -20,6 +20,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Sparkles } from 'lucide-react';
 import { useBookSessionTimer } from '@/hooks/useBookSessionTimer';
 import { ReaderSessionTimer } from '@/components/books/ReaderSessionTimer';
+import { ReadingGoalNotch } from '@/components/medals/ReadingGoalNotch';
 import { QuoteEditorDialog } from '@/components/quotes/QuoteEditorDialog';
 import { QuoteOcrCapture } from '@/components/quotes/QuoteOcrCapture';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -120,20 +121,45 @@ const BookReader = () => {
 
   // Setup book file + history
   useEffect(() => {
-    if (id && book) {
-      const offlineUrl = getOfflineBookUrl(id);
-      if (offlineUrl) {
-        setFileUrl(offlineUrl);
+    if (!id) return;
+    let cancelled = false;
+
+    const initBook = async () => {
+      // 1. Try offline source first (works 100% offline without network)
+      const offlineSrc = await getOfflinePdfSource(id);
+      if (cancelled) return;
+
+      if (offlineSrc) {
+        setFileUrl(offlineSrc);
         setIsOfflineMode(true);
-      } else {
+      } else if (book?.file_url) {
         setFileUrl(book.file_url);
         setIsOfflineMode(false);
+      } else {
+        const fallback = getOfflineBookUrl(id);
+        if (fallback) {
+          setFileUrl(fallback);
+          setIsOfflineMode(true);
+        }
       }
+
+      const downloads = loadDeviceDownloads();
+      const entry = downloads.find((d) => d.bookId === id);
+      const title = book?.title || entry?.title || 'كتاب';
+      const author = book?.author || entry?.author || '';
+      const cover = book?.cover_url || entry?.coverUrl || '/placeholder.svg';
+
       addToReadingHistory({
-        bookId: book.id, title: book.title, author: book.author,
-        coverUrl: book.cover_url || '/placeholder.svg', lastRead: new Date().toISOString(),
+        bookId: id,
+        title,
+        author,
+        coverUrl: cover,
+        lastRead: new Date().toISOString(),
       });
-    }
+    };
+
+    initBook();
+    return () => { cancelled = true; };
   }, [book, id, getOfflineBookUrl]);
 
   // Restore last bookmark position after pages render
@@ -297,7 +323,11 @@ const BookReader = () => {
     toast.success('تم تمييز النص');
   };
 
-  if (isLoading) {
+  const localDownloadedEntry = id ? loadDeviceDownloads().find((d) => d.bookId === id) : null;
+  const displayTitle = book?.title || localDownloadedEntry?.title || 'كتاب';
+  const displayAuthor = book?.author || localDownloadedEntry?.author || '';
+
+  if (isLoading && !fileUrl && !localDownloadedEntry) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -305,7 +335,7 @@ const BookReader = () => {
     );
   }
 
-  if (!book) {
+  if (!book && !fileUrl && !localDownloadedEntry) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -317,7 +347,13 @@ const BookReader = () => {
   }
 
   return (
-    <div className="min-h-screen bg-muted flex flex-col">
+    <div className="min-h-screen bg-muted flex flex-col relative">
+      {/* Top Reading Goal Notch Notification (auto moves out after 5s or user dismisses) */}
+      <ReadingGoalNotch
+        medal={sessionTimer.unlockedMedal}
+        onDismiss={sessionTimer.dismissUnlockedMedal}
+      />
+
       {/* Toolbar */}
       <div className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
         {/* Visual Reading Progress Bar at the Top */}
@@ -339,12 +375,12 @@ const BookReader = () => {
           <div className="flex items-center justify-between h-14 gap-2 overflow-hidden">
             {/* Left section: Back button + Title & Author + Session Timer */}
             <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 shrink">
-              <Link to={`/book/${book.id}`} className="shrink-0">
+              <Link to={id ? `/book/${id}` : '/'} className="shrink-0">
                 <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0"><ArrowRight className="h-5 w-5" /></Button>
               </Link>
               <div className="min-w-0 shrink">
-                <h1 className="font-bold text-foreground text-sm sm:text-base truncate max-w-[110px] sm:max-w-[200px] md:max-w-xs">{book.title}</h1>
-                <p className="text-[11px] text-muted-foreground truncate hidden sm:block">{book.author}</p>
+                <h1 className="font-bold text-foreground text-sm sm:text-base truncate max-w-[110px] sm:max-w-[200px] md:max-w-xs">{displayTitle}</h1>
+                <p className="text-[11px] text-muted-foreground truncate hidden sm:block">{displayAuthor}</p>
               </div>
               {isOfflineMode && (
                 <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-accent/10 text-accent text-[11px] shrink-0">
@@ -357,7 +393,7 @@ const BookReader = () => {
                 sessionSeconds={sessionTimer.sessionSeconds}
                 formattedTotalBook={sessionTimer.formattedTotalBook}
                 totalBookSeconds={sessionTimer.totalBookSeconds}
-                bookTitle={book.title}
+                bookTitle={displayTitle}
                 medalsProgress={sessionTimer.medalsProgress}
                 className="shrink-0"
               />
@@ -537,7 +573,7 @@ const BookReader = () => {
 
                   {/* 3. Download button */}
                   <DropdownMenuItem asChild className="cursor-pointer py-2">
-                    <a href={book.file_url} download target="_blank" rel="noopener noreferrer" className="flex items-center justify-between w-full">
+                    <a href={book?.file_url || fileUrl || '#'} download target="_blank" rel="noopener noreferrer" className="flex items-center justify-between w-full">
                       <span className="flex items-center gap-2.5">
                         <Download className="h-4 w-4 text-primary" />
                         تحميل الكتاب
@@ -584,7 +620,7 @@ const BookReader = () => {
               error={
                 <div className="flex flex-col items-center justify-center py-20 text-center">
                   <p className="text-destructive mb-4">فشل في تحميل الملف</p>
-                  <a href={book.file_url} download target="_blank" rel="noopener noreferrer">
+                  <a href={book?.file_url || fileUrl || '#'} download target="_blank" rel="noopener noreferrer">
                     <Button variant="outline" className="gap-2"><Download className="h-4 w-4" />تحميل الملف مباشرة</Button>
                   </a>
                 </div>

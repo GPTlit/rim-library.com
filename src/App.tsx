@@ -37,6 +37,15 @@ import WritePart from "./pages/stories/WritePart";
 import StoryPage from "./pages/stories/StoryPage";
 import ReadPart from "./pages/stories/ReadPart";
 import AuthorProfile from "./pages/stories/AuthorProfile";
+import QuotePage from "./pages/QuotePage";
+import { useDeepLinks } from "@/hooks/useDeepLinks";
+import { useWidgetSync } from "@/hooks/useWidgetSync";
+
+const AppNativeBridge = () => {
+  useDeepLinks();
+  useWidgetSync();
+  return null;
+};
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -62,6 +71,7 @@ const App = () => (
               <Toaster />
               <Sonner />
               <BrowserRouter>
+                <AppNativeBridge />
                 <ConsentDialog />
                 <DevicePermissionPrompt />
                 <Routes>
@@ -75,6 +85,8 @@ const App = () => (
                 <Route path="/about" element={<About />} />
                 <Route path="/copyright" element={<Copyright />} />
                 <Route path="/privacy" element={<Privacy />} />
+                <Route path="/quotes/:id" element={<QuotePage />} />
+                <Route path="/quote/:id" element={<QuotePage />} />
                 {/* Stories — public browsing */}
                 <Route path="/explore" element={<Explore />} />
                 <Route path="/story/:id" element={<StoryPage />} />

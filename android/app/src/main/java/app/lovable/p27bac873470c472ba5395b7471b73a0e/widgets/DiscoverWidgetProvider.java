@@ -22,7 +22,7 @@ public class DiscoverWidgetProvider extends BaseQahwaWidgetProvider {
         JSONObject payload = readPayload(ctx);
         JSONArray discover = payload != null ? payload.optJSONArray("discover") : null;
 
-        if (!isSignedIn(payload) || discover == null || discover.length() == 0) {
+        if (discover == null || discover.length() == 0) {
             RemoteViews empty = new RemoteViews(ctx.getPackageName(), R.layout.widget_empty);
             empty.setOnClickPendingIntent(R.id.empty_text, openAppPendingIntent(ctx, appWidgetId));
             push(ctx, mgr, appWidgetId, empty);

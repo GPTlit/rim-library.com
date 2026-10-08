@@ -26,7 +26,7 @@ const Downloads = () => {
   } = useOfflineBooks();
 
   const isNative = isQahwaNativeAvailable();
-  const [removeTarget, setRemoveTarget] = useState<DeviceDownloadEntry | null>(null);
+  const [removeTarget, setRemoveTarget] = useState<{ bookId: string; title: string } | null>(null);
 
   // On mount: validate device downloads still exist on disk; drop stale entries.
   useEffect(() => {
@@ -34,13 +34,16 @@ const Downloads = () => {
     (async () => {
       const removed = await refreshDeviceDownloads();
       if (removed.length > 0) {
-        toast({ title: t('staleDownloadsRemoved') });
+        toast({
+          title: t('staleDownloadsRemoved'),
+          description: `تم تنظيف ${removed.length} عنصر حُذف من مدير ملفات الجهاز.`,
+        });
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isNative]);
 
-  const list = isNative ? deviceDownloads : offlineBooks;
+  const list = isNative ? deviceDownloads : (deviceDownloads.length > 0 ? deviceDownloads : offlineBooks);
   const totalSize = isNative
     ? deviceDownloads.reduce((sum, d) => sum + (d.size || 0), 0)
     : getTotalStorageUsed();
@@ -48,12 +51,12 @@ const Downloads = () => {
   const handleRemove = (bookId: string, title: string, deleteFile: boolean) => {
     if (isNative) {
       removeDeviceDownload(bookId, deleteFile);
-    } else {
-      removeOfflineBook(bookId);
     }
+    removeOfflineBook(bookId);
+
     toast({
       title: t('deleted'),
-      description: t('deletedFromList').replace('{title}', title),
+      description: deleteFile ? `تم حذف "${title}" والملف بالكامل` : `تم إزالة "${title}" من قائمة المكتبة`,
     });
     setRemoveTarget(null);
   };
@@ -148,14 +151,15 @@ const Downloads = () => {
                         <Link to={`/book/${d.bookId}/read`}>
                           <Button variant="outline" size="sm" className="gap-2">
                             <BookOpen className="h-4 w-4" />
-                            <span className="hidden sm:inline">{t('openAction')}</span>
+                            <span>اقرأ الآن / Read Now</span>
                           </Button>
                         </Link>
                         <Button
                           variant="ghost"
                           size="icon"
                           className="text-muted-foreground hover:text-destructive"
-                          onClick={() => setRemoveTarget(d)}
+                          onClick={() => setRemoveTarget({ bookId: d.bookId, title: d.title })}
+                          title="حذف / Delete"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -196,14 +200,15 @@ const Downloads = () => {
                         <Link to={`/book/${book.id}/read`}>
                           <Button variant="outline" size="sm" className="gap-2">
                             <BookOpen className="h-4 w-4" />
-                            <span className="hidden sm:inline">{t('readAction')}</span>
+                            <span>اقرأ الآن / Read Now</span>
                           </Button>
                         </Link>
                         <Button
                           variant="ghost"
                           size="icon"
                           className="text-muted-foreground hover:text-destructive"
-                          onClick={() => handleRemove(book.id, book.title, false)}
+                          onClick={() => setRemoveTarget({ bookId: book.id, title: book.title })}
+                          title="حذف / Delete"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

@@ -154,10 +154,9 @@ export function sanitizeForFilename(input: string, maxLen = 80): string {
 }
 
 /** Builds the standard filename used for real on-device PDF downloads. */
-export function buildQahwaDownloadFileName(title: string, bookId: string): string {
+export function buildQahwaDownloadFileName(title: string, _bookId?: string): string {
   const safeTitle = sanitizeForFilename(title);
-  const shortId = (bookId || '').slice(0, 8);
-  return `Qahwa - ${safeTitle} - ${shortId}.pdf`;
+  return `Qahwa - ${safeTitle}.pdf`;
 }
 
 export type MobileOS = 'android' | 'ios' | 'other';

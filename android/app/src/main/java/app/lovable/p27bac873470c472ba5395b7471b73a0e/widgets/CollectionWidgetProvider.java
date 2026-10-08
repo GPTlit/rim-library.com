@@ -35,7 +35,7 @@ public class CollectionWidgetProvider extends BaseQahwaWidgetProvider {
         JSONObject payload = readPayload(ctx);
         JSONArray collection = payload != null ? payload.optJSONArray("collection") : null;
 
-        if (!isSignedIn(payload) || collection == null || collection.length() == 0) {
+        if (collection == null || collection.length() == 0) {
             RemoteViews empty = new RemoteViews(ctx.getPackageName(), R.layout.widget_empty);
             empty.setOnClickPendingIntent(R.id.empty_text, openAppPendingIntent(ctx, appWidgetId));
             push(ctx, mgr, appWidgetId, empty);

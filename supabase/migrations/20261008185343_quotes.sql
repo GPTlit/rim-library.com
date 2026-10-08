@@ -1,8 +1,57 @@
 -- =========================================================
 -- Quote Cards (إقتباسات) feature
--- Tables: quotes, quote_likes, quote_saves
+-- Tables: book_quotes, quotes, quote_likes, quote_saves
 -- =========================================================
 
+-- Primary book_quotes table
+CREATE TABLE IF NOT EXISTS public.book_quotes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  book_id uuid NOT NULL REFERENCES public.books(id) ON DELETE CASCADE,
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  quote_text text NOT NULL,
+  comment_text text,
+  page_number integer,
+  theme_config jsonb NOT NULL DEFAULT '{}'::jsonb,
+  likes_count integer NOT NULL DEFAULT 0,
+  image_url text,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_book_quotes_book_id ON public.book_quotes(book_id);
+CREATE INDEX IF NOT EXISTS idx_book_quotes_user_id ON public.book_quotes(user_id);
+CREATE INDEX IF NOT EXISTS idx_book_quotes_created_at ON public.book_quotes(created_at DESC);
+
+ALTER TABLE public.book_quotes ENABLE ROW LEVEL SECURITY;
+
+-- book_quotes RLS: Public read access for all visitors
+DROP POLICY IF EXISTS "Anyone can view book quotes" ON public.book_quotes;
+CREATE POLICY "Anyone can view book quotes"
+ON public.book_quotes FOR SELECT
+USING (true);
+
+-- Authenticated create access where auth.uid() = user_id
+DROP POLICY IF EXISTS "Authenticated can insert own book quotes" ON public.book_quotes;
+CREATE POLICY "Authenticated can insert own book quotes"
+ON public.book_quotes FOR INSERT TO authenticated
+WITH CHECK (auth.uid() = user_id);
+
+-- User update access for their own quotes
+DROP POLICY IF EXISTS "Users can update own book quotes" ON public.book_quotes;
+CREATE POLICY "Users can update own book quotes"
+ON public.book_quotes FOR UPDATE TO authenticated
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+-- User delete access for their own quotes
+DROP POLICY IF EXISTS "Users can delete own book quotes" ON public.book_quotes;
+CREATE POLICY "Users can delete own book quotes"
+ON public.book_quotes FOR DELETE TO authenticated
+USING (auth.uid() = user_id);
+
+GRANT SELECT ON public.book_quotes TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.book_quotes TO authenticated;
+
+-- Legacy / compatibility quotes table
 CREATE TABLE IF NOT EXISTS public.quotes (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   book_id uuid NOT NULL REFERENCES public.books(id) ON DELETE CASCADE,

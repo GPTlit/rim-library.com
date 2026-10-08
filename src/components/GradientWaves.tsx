@@ -134,7 +134,7 @@ const GradientWaves = ({
   horizonColor = '#5227FF',
   waveColor = '#FF9FFC',
   crestColor = '#FFFFFF',
-  speed = 0.4,
+  speed = 0.2,
   amplitude = 2.5,
   waveScale = 0.6,
   waveRatio = 0.9,
@@ -183,7 +183,7 @@ const GradientWaves = ({
       uniforms: {
         iTime: { value: 0 },
         iResolution: { value: new Float32Array([1, 1]) },
-        uSpeed: { value: 0.4 },
+        uSpeed: { value: 0.2 },
         uAmplitude: { value: 2.5 },
         uWaveScale: { value: 0.6 },
         uWaveRatio: { value: 0.9 },

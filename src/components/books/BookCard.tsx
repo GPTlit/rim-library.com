@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { trackRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { useAdminEditMenu } from '@/hooks/useAdminEditMenu';
+import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +31,8 @@ type AnyBook = MockBook | DbBook | {
   author: string;
   coverUrl?: string;
   cover_url?: string | null;
+  pdfUrl?: string;
+  file_url?: string;
   featured?: boolean;
   category?: string;
 };

@@ -295,7 +295,7 @@ const AuthorChat = () => {
   return (
     <div className="relative flex h-screen min-h-[36rem] overflow-hidden bg-background" dir="rtl">
       <div className="absolute inset-0 opacity-55 pointer-events-none" aria-hidden="true">
-        <Prism animationType="rotate" timeScale={0.5} height={3.5} baseWidth={5.5} scale={3.6} hueShift={0} colorFrequency={1} noise={0} glow={1} suspendWhenOffscreen />
+        <Prism animationType="rotate" timeScale={0.25} height={3.5} baseWidth={5.5} scale={3.6} hueShift={0} colorFrequency={1} noise={0} glow={1} suspendWhenOffscreen />
       </div>
       <div className="absolute inset-0 bg-background/72 backdrop-blur-sm pointer-events-none" />
 

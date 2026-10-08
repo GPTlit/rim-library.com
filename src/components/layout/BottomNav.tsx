@@ -1,16 +1,19 @@
 import { NavLink } from 'react-router-dom';
 import { Home, Rss, Compass, PenSquare, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const items = [
-  { to: '/', label: 'الرئيسية', icon: Home, end: true },
-  { to: '/feed', label: 'المتابَعون', icon: Rss },
-  { to: '/explore', label: 'استكشف', icon: Compass },
-  { to: '/write', label: 'اكتب', icon: PenSquare },
-  { to: '/profile', label: 'حسابي', icon: User },
-];
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export const BottomNav = () => {
+  const { t } = useLanguage();
+
+  const items = [
+    { to: '/', label: t('navHome'), icon: Home, end: true },
+    { to: '/feed', label: t('navFeed'), icon: Rss },
+    { to: '/explore', label: t('navExplore'), icon: Compass },
+    { to: '/write', label: t('navWrite'), icon: PenSquare },
+    { to: '/profile', label: t('navProfile'), icon: User },
+  ];
+
   return (
     <nav
       aria-label="Primary"
@@ -31,7 +34,7 @@ export const BottomNav = () => {
               aria-label={label}
             >
               <Icon className="h-5 w-5" />
-              <span>{label}</span>
+              <span className="truncate px-0.5">{label}</span>
             </NavLink>
           </li>
         ))}

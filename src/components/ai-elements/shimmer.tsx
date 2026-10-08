@@ -35,7 +35,7 @@ const ShimmerComponent = ({
   children,
   as: Component = "p",
   className,
-  duration = 2,
+  duration = 4,
   spread = 2,
 }: TextShimmerProps) => {
   const MotionComponent = getMotionComponent(

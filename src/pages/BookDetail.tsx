@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, BookOpen, Download, Share2, WifiOff, Check, Loader2, FileText, LogIn } from 'lucide-react';
+import { ArrowRight, BookOpen, Download, Share2, WifiOff, Check, Loader2, FileText, LogIn, Trash2 } from 'lucide-react';
 import { CategoryIcon } from '@/components/CategoryIcon';
 
 import { Layout } from '@/components/layout/Layout';
@@ -22,7 +22,7 @@ import { CommentsSection } from '@/components/books/CommentsSection';
 import { LikeButton } from '@/components/books/LikeButton';
 import { BookRatingSection } from '@/components/books/BookRatingSection';
 import { BookRecommendations } from '@/components/books/BookRecommendations';
-import { useOfflineBooks } from '@/hooks/useOfflineBooks';
+import { useOfflineBooks, isBookDownloadedOnDevice } from '@/hooks/useOfflineBooks';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { GhostReaders } from '@/components/books/GhostReaders';
@@ -31,6 +31,7 @@ import { ReadingJourney } from '@/components/books/ReadingJourney';
 import { getPdfPageCount } from '@/lib/pdfExtract';
 import { supabase } from '@/integrations/supabase/client';
 import { QuoteFeed } from '@/components/quotes/QuoteFeed';
+import { isQahwaNativeAvailable } from '@/lib/qahwaNative';
 
 const BookDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -39,11 +40,12 @@ const BookDetail = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { data: book, isLoading } = useBook(id || '');
-  const { isBookOffline, saveBookOffline } = useOfflineBooks();
+  const { isBookOffline, saveBookOffline, downloadBookToDevice, removeOfflineBook } = useOfflineBooks();
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [isOffline, setIsOffline] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
   
   const category = book ? categories.find((c) => c.name === book.category) : null;
 
@@ -128,6 +130,77 @@ const BookDetail = () => {
     }, t('loginToRead'));
   };
 
+  const executeDownload = async () => {
+    setIsDownloading(true);
+    setDownloadProgress(10);
+
+    try {
+      const isNative = isQahwaNativeAvailable();
+      if (isNative) {
+        const res = await downloadBookToDevice(
+          {
+            id: book.id,
+            title: book.title,
+            author: book.author,
+            coverUrl: book.cover_url || '/placeholder.svg',
+            fileUrl: book.file_url,
+          },
+          (progress) => setDownloadProgress(progress)
+        );
+
+        if (res.ok) {
+          setIsOffline(true);
+          toast({
+            title: t('success') + ' ✓',
+            description: `تم حفظ الكتاب في مجلد التحميلات باسم "${res.entry?.fileName || book.title}"`,
+          });
+        } else {
+          toast({
+            title: t('error'),
+            description: 'تعذر حفظ الكتاب في مجلد التحميلات على الجهاز',
+            variant: 'destructive',
+          });
+        }
+      } else {
+        // Web: trigger browser download + cache blob for offline reading
+        const success = await saveBookOffline(
+          {
+            id: book.id,
+            title: book.title,
+            author: book.author,
+            coverUrl: book.cover_url || '/placeholder.svg',
+            fileUrl: book.file_url,
+            fileType: book.file_type || 'pdf',
+          },
+          (progress) => setDownloadProgress(progress)
+        );
+
+        if (success) {
+          setIsOffline(true);
+          toast({
+            title: t('success') + ' ✓',
+            description: 'تم تحميل الكتاب وتخزينه للقراءة بدون إنترنت',
+          });
+        } else {
+          toast({
+            title: t('error'),
+            description: 'حدث خطأ أثناء تحميل وتخزين الكتاب',
+            variant: 'destructive',
+          });
+        }
+      }
+    } catch {
+      toast({
+        title: t('error'),
+        description: 'تعذر تحميل الكتاب',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDownloading(false);
+      setDownloadProgress(0);
+    }
+  };
+
   const handleDownload = async () => {
     if (!user) {
       toast({
@@ -142,73 +215,23 @@ const BookDetail = () => {
       return;
     }
 
-    // On the web: let the browser handle it, so the download shows in the
-    // browser's own download bar/tab. Inside the installed app (Capacitor):
-    // store the file locally so it can be read offline.
-    const isNativeApp = (() => {
-      try {
-        // @ts-ignore
-        return !!(window as any)?.Capacitor?.isNativePlatform?.();
-      } catch {
-        return false;
-      }
-    })();
-
-    if (!isNativeApp) {
-      const a = document.createElement('a');
-      a.href = book.file_url;
-      a.download = `${book.title}.${book.file_type || 'pdf'}`;
-      a.target = '_blank';
-      a.rel = 'noopener';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      toast({
-        title: t('loading'),
-        description: 'جاري تحميل الكتاب في المتصفح...',
-      });
+    // Check if file is already downloaded in local registry
+    if (isBookOffline(book.id) || isBookDownloadedOnDevice(book.id)) {
+      setShowDuplicateDialog(true);
       return;
     }
 
-    setIsDownloading(true);
-    setDownloadProgress(0);
-    
-    try {
-      const success = await saveBookOffline(
-        {
-          id: book.id,
-          title: book.title,
-          author: book.author,
-          coverUrl: book.cover_url || '/placeholder.svg',
-          fileUrl: book.file_url,
-          fileType: book.file_type || 'pdf',
-        },
-        (progress) => setDownloadProgress(progress)
-      );
+    await executeDownload();
+  };
 
-      if (success) {
-        setIsOffline(true);
-        toast({
-          title: t('success') + ' ✓',
-          description: 'تم حفظ الكتاب على جهازك للقراءة بدون إنترنت',
-        });
-      } else {
-        toast({
-          title: t('error'),
-          description: 'مساحة التخزين غير كافية أو حدث خطأ',
-          variant: 'destructive',
-        });
-      }
-    } catch {
-      toast({
-        title: t('error'),
-        description: 'تعذر تحميل الكتاب',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsDownloading(false);
-      setDownloadProgress(0);
-    }
+  const handleDeleteOffline = async () => {
+    if (!book) return;
+    await removeOfflineBook(book.id);
+    setIsOffline(false);
+    toast({
+      title: t('success'),
+      description: t('deletedFromList').replace('{title}', book.title),
+    });
   };
 
   const handleShare = async () => {
@@ -353,6 +376,18 @@ const BookDetail = () => {
                   )}
                   {isOffline ? t('savedOnDevice') : t('saveOffline')}
                 </Button>
+                {isOffline && (
+                  <Button
+                    variant="outline"
+                    size="xl"
+                    className="gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
+                    onClick={handleDeleteOffline}
+                    title={t('deleteFromDevice')}
+                  >
+                    <Trash2 className="h-5 w-5" />
+                    <span>{t('deleteFromDevice')}</span>
+                  </Button>
+                )}
                 <LikeButton bookId={book.id} size="lg" />
                 <Button
                   variant="ghost"
@@ -448,6 +483,40 @@ const BookDetail = () => {
               {t('login')}
             </Button>
             <Button variant="outline" onClick={() => setShowAuthDialog(false)}>
+              {t('cancel')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Duplicate Download Confirmation Dialog */}
+      <Dialog open={showDuplicateDialog} onOpenChange={setShowDuplicateDialog}>
+        <DialogContent className="sm:max-w-md text-right font-tajawal">
+          <DialogHeader className="text-right sm:text-right">
+            <DialogTitle className="text-lg font-bold flex items-center gap-2">
+              <Download className="h-5 w-5 text-primary" />
+              تنزيل نسخة أخرى؟
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground pt-2">
+              هذا الكتاب محمل مسبقاً على جهازك. هل تريد تحميل نسخة أخرى؟
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-2 text-sm text-foreground/90 leading-relaxed">
+            الكتاب موجود بالفعل ومتاح للقراءة في قسم التحميلات بدون إنترنت.
+          </div>
+          <DialogFooter className="flex flex-row-reverse sm:justify-start gap-2 pt-2">
+            <Button
+              variant="gold"
+              onClick={() => {
+                setShowDuplicateDialog(false);
+                executeDownload();
+              }}
+              className="gap-2"
+            >
+              <Download className="h-4 w-4" />
+              تحميل نسخة أخرى
+            </Button>
+            <Button variant="outline" onClick={() => setShowDuplicateDialog(false)}>
               {t('cancel')}
             </Button>
           </DialogFooter>

@@ -6,6 +6,7 @@ import { HeroSection } from '@/components/home/HeroSection';
 import { CategoriesSection } from '@/components/home/CategoriesSection';
 import { PromoBlocks } from '@/components/home/PromoBlocks';
 import { RecentlyViewedBooks } from '@/components/home/RecentlyViewedBooks';
+import { ContinueReadingSection } from '@/components/home/ContinueReadingSection';
 import { BookCarousel } from '@/components/home/BookCarousel';
 import { FeaturedBooks } from '@/components/home/FeaturedBooks';
 import { RecentBooks } from '@/components/home/RecentBooks';
@@ -16,9 +17,11 @@ import { useFeaturedBookIds } from '@/hooks/useFeaturedBooks';
 import { useBookStats } from '@/hooks/useBookStats';
 import { allCategories } from '@/hooks/useCategories';
 import { useHomeLayoutMode } from '@/hooks/useHomeLayoutMode';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 
 const Index = () => {
+  const { t } = useLanguage();
   const { data: books = [] } = useBooks();
   const { data: featuredIds } = useFeaturedBookIds();
   const { data: statsMap } = useBookStats();
@@ -72,6 +75,7 @@ const Index = () => {
       <Layout>
         <HeroSection />
         <HeroCarousel />
+        <ContinueReadingSection />
         <RecentlyViewedBooks />
         <FeaturedBooks />
         <PromoBlocks slot={1} />
@@ -91,10 +95,10 @@ const Index = () => {
     <Layout>
       <HeroSection />
       <HeroCarousel />
-
+      <ContinueReadingSection />
       <RecentlyViewedBooks />
       <BookCarousel
-        title="الكتب المختارة"
+        title={t('featuredPicks')}
         icon={<Sparkles className="h-5 w-5" />}
         books={featured}
         viewAllHref="/categories"
@@ -104,34 +108,38 @@ const Index = () => {
       <CategoriesSection />
       <PromoBlocks slot={2} />
       <BookCarousel
-        title="الأكثر رواجاً"
+        title={t('trendingSection')}
         icon={<Flame className="h-5 w-5" />}
         books={trending.length ? trending : featured}
         pattern="wide-first"
       />
       <BookCarousel
-        title="الأعلى تقييماً"
+        title={t('topRatedSection')}
         icon={<Star className="h-5 w-5" />}
         books={topRated.length ? topRated : featured.slice().reverse()}
         pattern="tall-first"
       />
       <BookCarousel
-        title="أُضيف حديثاً"
+        title={t('recentlyAddedSection')}
         icon={<Clock className="h-5 w-5" />}
         books={recent}
         pattern="mixed"
       />
       <PromoBlocks slot={3} />
-      {categoryRows.map((row, i) => (
-        <BookCarousel
-          key={row.name}
-          title={row.nameAr}
-          icon={<BookOpen className="h-5 w-5" />}
-          books={row.books}
-          viewAllHref={`/category/${encodeURIComponent(row.name)}`}
-          pattern={(['mixed', 'wide-first', 'tall-first', 'mixed'] as const)[i % 4]}
-        />
-      ))}
+      {categoryRows.map((row, i) => {
+        const catKey = `category_${row.name}`;
+        const catTitle = t(catKey) !== catKey ? t(catKey) : row.nameAr;
+        return (
+          <BookCarousel
+            key={row.name}
+            title={catTitle}
+            icon={<BookOpen className="h-5 w-5" />}
+            books={row.books}
+            viewAllHref={`/category/${encodeURIComponent(row.name)}`}
+            pattern={(['mixed', 'wide-first', 'tall-first', 'mixed'] as const)[i % 4]}
+          />
+        );
+      })}
       <PromoBlocks slot={4} />
     </Layout>
   );

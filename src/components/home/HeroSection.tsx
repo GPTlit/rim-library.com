@@ -51,7 +51,7 @@ export const HeroSection = () => {
           horizonColor="#1c0b5e"
           waveColor="#353335"
           crestColor="#FFFFFF"
-          speed={0.4}
+          speed={0.2}
           amplitude={2.5}
           waveScale={0.6}
           waveRatio={0.9}

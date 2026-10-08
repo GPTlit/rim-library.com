@@ -21,6 +21,7 @@ export const useBookSessionTimer = ({
 }: UseBookSessionTimerOptions) => {
   const [sessionSeconds, setSessionSeconds] = useState(0);
   const [totalBookSeconds, setTotalBookSeconds] = useState(() => (bookId ? getBookReadingTime(bookId) : 0));
+  const [unlockedMedal, setUnlockedMedal] = useState<Medal | null>(null);
   const { data: userProfile } = useUserProfile();
   
   // Track previously unlocked medal IDs to detect newly unlocked medals during session
@@ -48,12 +49,14 @@ export const useBookSessionTimer = ({
     for (const medal of currentProgress.unlockedMedals) {
       if (!previousUnlockedRef.current.has(medal.id)) {
         previousUnlockedRef.current.add(medal.id);
-        toast.success(`🎉 وسام جديد! حصلت على «${medal.title}» (${medal.tierName})`, {
-          description: medal.description,
-          duration: 6000,
-        });
+        // Trigger the notch notification at the top of the screen
+        setUnlockedMedal(medal);
       }
     }
+  }, []);
+
+  const dismissUnlockedMedal = useCallback(() => {
+    setUnlockedMedal(null);
   }, []);
 
   // Update totalBookSeconds when bookId changes
@@ -105,5 +108,7 @@ export const useBookSessionTimer = ({
     formattedTotalBook: formatReadingDurationArabic(totalBookSeconds),
     medalsProgress,
     overallSeconds,
+    unlockedMedal,
+    dismissUnlockedMedal,
   };
 };

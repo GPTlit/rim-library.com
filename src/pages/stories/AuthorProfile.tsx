@@ -6,10 +6,12 @@ import { usePublishedStories } from '@/hooks/useStories';
 import { useFollowers } from '@/hooks/useFollow';
 import { FollowButton } from '@/components/stories/FollowButton';
 import { StoryCard } from '@/components/stories/StoryCard';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { User } from 'lucide-react';
 
 export default function AuthorProfile() {
   const { username } = useParams();
+  const { t } = useLanguage();
   const { data: profile, isLoading } = useQuery({
     queryKey: ['profile-by-username', username],
     queryFn: async () => {
@@ -23,8 +25,8 @@ export default function AuthorProfile() {
   const { data: stories = [] } = usePublishedStories({ authorIds: authorId ? [authorId] : [], limit: 60 });
   const { data: followers } = useFollowers(authorId);
 
-  if (isLoading) return <Layout><div className="container-library py-12">جاري التحميل...</div></Layout>;
-  if (!profile) return <Layout><div className="container-library py-12 text-center text-muted-foreground">المستخدم غير موجود</div></Layout>;
+  if (isLoading) return <Layout><div className="container-library py-12 text-center text-muted-foreground">{t('loading')}</div></Layout>;
+  if (!profile) return <Layout><div className="container-library py-12 text-center text-muted-foreground">{t('noUsers')}</div></Layout>;
 
   return (
     <Layout>
@@ -36,15 +38,15 @@ export default function AuthorProfile() {
           <div className="flex-1">
             <h1 className="text-2xl font-bold">{profile.display_name || profile.username}</h1>
             <p className="text-sm text-muted-foreground">@{profile.username}</p>
-            <p className="text-sm mt-1">{followers?.count ?? 0} في FYP · {stories.length} قصة</p>
+            <p className="text-sm mt-1">{followers?.count ?? 0} {t('followersCount')} · {stories.length} {t('storiesCount')}</p>
           </div>
           {authorId && <FollowButton authorId={authorId} />}
         </div>
         {profile.bio && <p className="mt-4 text-muted-foreground">{profile.bio}</p>}
 
-        <h2 className="text-lg font-semibold mt-8 mb-3">القصص</h2>
+        <h2 className="text-lg font-semibold mt-8 mb-3">{t('allStories')}</h2>
         {stories.length === 0 ? (
-          <p className="text-muted-foreground text-sm">لم يُنشر أي قصة بعد.</p>
+          <p className="text-muted-foreground text-sm">{t('noStoriesFound')}</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {stories.map(s => <StoryCard key={s.id} story={s} />)}

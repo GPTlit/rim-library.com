@@ -2,10 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-// NOTE: the `quotes` / `quote_likes` / `quote_saves` tables are created by
-// supabase/migrations/20261008185343_quotes.sql. Until the generated
-// Supabase types are refreshed with that migration, we talk to them through
-// an untyped client handle to avoid false compile errors.
+// NOTE: the `book_quotes` / `quotes` / `quote_likes` / `quote_saves` tables are created by
+// supabase/migrations/20261008185343_quotes.sql.
 const db = supabase as any;
 
 export interface QuoteStyle {
@@ -42,10 +40,15 @@ export interface Quote {
   profile?: QuoteAuthorProfile | null;
 }
 
-const mapCounts = (row: any): { like_count: number; save_count: number } => ({
-  like_count: Array.isArray(row.quote_likes) ? (row.quote_likes[0]?.count ?? 0) : 0,
-  save_count: Array.isArray(row.quote_saves) ? (row.quote_saves[0]?.count ?? 0) : 0,
-});
+const mapCounts = (row: any): { like_count: number; save_count: number } => {
+  const directLikes = typeof row.likes_count === 'number' ? row.likes_count : 0;
+  const relLikes = Array.isArray(row.quote_likes) ? (row.quote_likes[0]?.count ?? 0) : 0;
+  const saveCount = Array.isArray(row.quote_saves) ? (row.quote_saves[0]?.count ?? 0) : 0;
+  return {
+    like_count: Math.max(directLikes, relLikes),
+    save_count: saveCount,
+  };
+};
 
 async function attachUserState(rows: any[], userId?: string | null) {
   const ids = rows.map((r) => r.id);
@@ -74,10 +77,10 @@ async function attachUserState(rows: any[], userId?: string | null) {
     id: row.id,
     book_id: row.book_id,
     user_id: row.user_id,
-    text: row.text,
-    comment: row.comment,
-    page: row.page,
-    style: row.style ?? {},
+    text: row.quote_text || row.text || '',
+    comment: row.comment_text || row.comment || null,
+    page: row.page_number ?? row.page ?? null,
+    style: row.theme_config || row.style || {},
     image_url: row.image_url,
     created_at: row.created_at,
     ...mapCounts(row),
@@ -87,21 +90,33 @@ async function attachUserState(rows: any[], userId?: string | null) {
   })) as Quote[];
 }
 
-const SELECT_WITH_COUNTS = '*, quote_likes(count), quote_saves(count)';
-
 export const useBookQuotes = (bookId?: string) => {
   const { user } = useAuth();
   return useQuery({
     queryKey: ['quotes', 'book', bookId, user?.id],
     queryFn: async () => {
       if (!bookId) return [] as Quote[];
-      const { data, error } = await db
-        .from('quotes')
-        .select(SELECT_WITH_COUNTS)
+
+      // Try book_quotes table first
+      const { data: bookQuotesData, error: bqErr } = await db
+        .from('book_quotes')
+        .select('*')
         .eq('book_id', bookId)
         .order('created_at', { ascending: false });
-      if (error) throw error;
-      return attachUserState(data ?? [], user?.id);
+
+      if (!bqErr && bookQuotesData && bookQuotesData.length > 0) {
+        return attachUserState(bookQuotesData, user?.id);
+      }
+
+      // Fallback to quotes table
+      const { data, error } = await db
+        .from('quotes')
+        .select('*, quote_likes(count), quote_saves(count)')
+        .eq('book_id', bookId)
+        .order('created_at', { ascending: false });
+
+      if (error && !bookQuotesData) throw error;
+      return attachUserState(data ?? bookQuotesData ?? [], user?.id);
     },
     enabled: !!bookId,
   });
@@ -113,11 +128,26 @@ export const useQuote = (id?: string) => {
     queryKey: ['quotes', 'one', id, user?.id],
     queryFn: async () => {
       if (!id) return null;
-      const { data, error } = await db
-        .from('quotes')
-        .select(SELECT_WITH_COUNTS)
+
+      // Try book_quotes first
+      const { data: bqData } = await db
+        .from('book_quotes')
+        .select('*')
         .eq('id', id)
         .maybeSingle();
+
+      if (bqData) {
+        const [mapped] = await attachUserState([bqData], user?.id);
+        return mapped;
+      }
+
+      // Fallback to quotes
+      const { data, error } = await db
+        .from('quotes')
+        .select('*, quote_likes(count), quote_saves(count)')
+        .eq('id', id)
+        .maybeSingle();
+
       if (error) throw error;
       if (!data) return null;
       const [mapped] = await attachUserState([data], user?.id);
@@ -140,6 +170,28 @@ export const useCreateQuote = () => {
       image_url?: string | null;
     }) => {
       if (!user) throw new Error('Auth required');
+
+      // Attempt insert into book_quotes table
+      const { data: bqData, error: bqError } = await db
+        .from('book_quotes')
+        .insert({
+          book_id: input.book_id,
+          user_id: user.id,
+          quote_text: input.text,
+          comment_text: input.comment ?? null,
+          page_number: input.page ?? null,
+          theme_config: input.style,
+          likes_count: 0,
+          image_url: input.image_url ?? null,
+        })
+        .select('*')
+        .single();
+
+      if (!bqError && bqData) {
+        return bqData;
+      }
+
+      // Fallback to quotes table
       const { data, error } = await db
         .from('quotes')
         .insert({
@@ -153,11 +205,12 @@ export const useCreateQuote = () => {
         })
         .select('*')
         .single();
+
       if (error) throw error;
       return data;
     },
     onSuccess: (quote: any) => {
-      qc.invalidateQueries({ queryKey: ['quotes', 'book', quote.book_id] });
+      qc.invalidateQueries({ queryKey: ['quotes'] });
     },
   });
 };
@@ -166,11 +219,13 @@ export const useDeleteQuote = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, bookId }: { id: string; bookId: string }) => {
-      const { error } = await db.from('quotes').delete().eq('id', id);
-      if (error) throw error;
+      await Promise.allSettled([
+        db.from('book_quotes').delete().eq('id', id),
+        db.from('quotes').delete().eq('id', id),
+      ]);
       return bookId;
     },
-    onSuccess: (bookId) => qc.invalidateQueries({ queryKey: ['quotes', 'book', bookId] }),
+    onSuccess: (bookId) => qc.invalidateQueries({ queryKey: ['quotes'] }),
   });
 };
 
@@ -181,11 +236,15 @@ export const useToggleQuoteLike = () => {
     mutationFn: async ({ quoteId, liked }: { quoteId: string; liked: boolean }) => {
       if (!user) throw new Error('Auth required');
       if (liked) {
-        const { error } = await db.from('quote_likes').delete().eq('quote_id', quoteId).eq('user_id', user.id);
-        if (error) throw error;
+        await Promise.allSettled([
+          db.from('quote_likes').delete().eq('quote_id', quoteId).eq('user_id', user.id),
+          db.rpc('decrement_quote_likes', { q_id: quoteId }).catch(() => {}),
+        ]);
       } else {
-        const { error } = await db.from('quote_likes').insert({ quote_id: quoteId, user_id: user.id });
-        if (error) throw error;
+        await Promise.allSettled([
+          db.from('quote_likes').insert({ quote_id: quoteId, user_id: user.id }),
+          db.rpc('increment_quote_likes', { q_id: quoteId }).catch(() => {}),
+        ]);
       }
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['quotes'] }),
