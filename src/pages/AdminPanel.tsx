@@ -1,4 +1,3 @@
-import { BrandingManager } from '@/components/admin/BrandingManager';
 import { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
