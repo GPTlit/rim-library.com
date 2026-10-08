@@ -7,6 +7,9 @@ export interface Branding {
   nameEn?: string;
   nameFr?: string;
   logoUrl?: string;
+  storeUrl?: string;
+  androidAppUrl?: string;
+  iosAppUrl?: string;
 }
 
 export const useBrandingConfig = () =>

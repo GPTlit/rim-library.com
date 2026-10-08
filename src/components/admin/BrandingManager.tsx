@@ -1,10 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useBranding, BrandingSettings } from '@/contexts/BrandingContext';
+import { useBrandingConfig, useSaveBranding, Branding } from '@/hooks/useBranding';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Sparkles,
@@ -20,6 +21,9 @@ import {
   Menu,
   Bell,
   X,
+  Link as LinkIcon,
+  Smartphone,
+  Apple,
 } from 'lucide-react';
 
 export const BrandingManager: React.FC = () => {
@@ -33,6 +37,45 @@ export const BrandingManager: React.FC = () => {
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [isUploadingFavicon, setIsUploadingFavicon] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Store / App links (saved to app_config 'branding' JSON via useBranding.ts)
+  const { data: brandingConfig } = useBrandingConfig();
+  const saveBranding = useSaveBranding();
+  const [linksForm, setLinksForm] = useState<Branding>({});
+  const [isSavingLinks, setIsSavingLinks] = useState(false);
+
+  useEffect(() => {
+    if (brandingConfig) {
+      setLinksForm({
+        storeUrl: brandingConfig.storeUrl || '',
+        androidAppUrl: brandingConfig.androidAppUrl || '',
+        iosAppUrl: brandingConfig.iosAppUrl || '',
+      });
+    }
+  }, [brandingConfig]);
+
+  const handleLinkChange = (field: keyof Branding, value: string) => {
+    setLinksForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveLinks = async () => {
+    setIsSavingLinks(true);
+    try {
+      await saveBranding({ ...(brandingConfig || {}), ...linksForm });
+      toast({
+        title: 'تم حفظ روابط المتجر والتطبيق',
+        description: 'سيظهر إشعار تحميل التطبيق للزوار تلقائياً عند توفر الروابط.',
+      });
+    } catch (e: any) {
+      toast({
+        title: 'خطأ',
+        description: e.message || 'فشل حفظ الروابط',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSavingLinks(false);
+    }
+  };
 
   const logoFileRef = useRef<HTMLInputElement>(null);
   const faviconFileRef = useRef<HTMLInputElement>(null);
@@ -373,6 +416,70 @@ export const BrandingManager: React.FC = () => {
                   dir="ltr"
                 />
               </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Store & App Links Section */}
+      <Card className="border-border">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <CardTitle className="text-xl flex items-center gap-2">
+                <LinkIcon className="h-5 w-5 text-primary" />
+                روابط المتجر والتطبيق (Store &amp; App Links)
+              </CardTitle>
+              <CardDescription>
+                حدد روابط متجر Google Play وApp Store ورابط المتجر العام. تُستخدم لعرض بانر "حمّل على هاتفك" لزوار الموقع من الهاتف.
+              </CardDescription>
+            </div>
+            <Button variant="gold" size="sm" onClick={handleSaveLinks} disabled={isSavingLinks} className="gap-1.5 text-xs">
+              {isSavingLinks ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+              حفظ الروابط
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="storeUrl" className="text-xs font-semibold flex items-center gap-1.5">
+              <LinkIcon className="h-3.5 w-3.5 text-primary" />
+              رابط المتجر (Store URL)
+            </Label>
+            <Input
+              id="storeUrl"
+              value={linksForm.storeUrl || ''}
+              onChange={(e) => handleLinkChange('storeUrl', e.target.value)}
+              placeholder="https://example.com/store"
+              dir="ltr"
+            />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="androidAppUrl" className="text-xs font-semibold flex items-center gap-1.5">
+                <Smartphone className="h-3.5 w-3.5 text-primary" />
+                رابط تطبيق أندرويد (Play Store)
+              </Label>
+              <Input
+                id="androidAppUrl"
+                value={linksForm.androidAppUrl || ''}
+                onChange={(e) => handleLinkChange('androidAppUrl', e.target.value)}
+                placeholder="https://play.google.com/store/apps/details?id=..."
+                dir="ltr"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="iosAppUrl" className="text-xs font-semibold flex items-center gap-1.5">
+                <Apple className="h-3.5 w-3.5 text-primary" />
+                رابط تطبيق آيفون (App Store)
+              </Label>
+              <Input
+                id="iosAppUrl"
+                value={linksForm.iosAppUrl || ''}
+                onChange={(e) => handleLinkChange('iosAppUrl', e.target.value)}
+                placeholder="https://apps.apple.com/app/id..."
+                dir="ltr"
+              />
             </div>
           </div>
         </CardContent>

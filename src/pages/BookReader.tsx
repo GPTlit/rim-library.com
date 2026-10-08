@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Download, ZoomIn, ZoomOut, Loader2, WifiOff, BookmarkPlus, Bookmark as BookmarkIcon, List, Moon, Sun, RotateCw, RotateCcw, Smartphone, Check, Menu } from 'lucide-react';
+import { ArrowRight, Download, ZoomIn, ZoomOut, Loader2, WifiOff, BookmarkPlus, Bookmark as BookmarkIcon, List, Moon, Sun, RotateCw, RotateCcw, Smartphone, Check, Menu, Quote as QuoteIcon, ScanLine, TextCursorInput } from 'lucide-react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
@@ -20,6 +20,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Sparkles } from 'lucide-react';
 import { useBookSessionTimer } from '@/hooks/useBookSessionTimer';
 import { ReaderSessionTimer } from '@/components/books/ReaderSessionTimer';
+import { QuoteEditorDialog } from '@/components/quotes/QuoteEditorDialog';
+import { QuoteOcrCapture } from '@/components/quotes/QuoteOcrCapture';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -78,6 +81,11 @@ const BookReader = () => {
   const pageElementsRef = useRef<Map<number, HTMLDivElement>>(new Map());
   const shouldRestoreRef = useRef(true);
   const pinchRef = useRef<{ startDist: number; startScale: number } | null>(null);
+  const { t } = useLanguage();
+  const [quoteEditorOpen, setQuoteEditorOpen] = useState(false);
+  const [quoteInitialText, setQuoteInitialText] = useState('');
+  const [ocrOpen, setOcrOpen] = useState(false);
+  const ocrTargetRef = useRef<HTMLDivElement | null>(null);
 
   // Track visual reading scroll progress
   useEffect(() => {
@@ -424,6 +432,47 @@ const BookReader = () => {
                 )}
               </Button>
 
+              {/* Quote (إقتباس) toolbar button */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 sm:h-9 sm:w-9 shrink-0 text-foreground hover:bg-secondary"
+                    title={t('createQuote')}
+                    aria-label={t('createQuote')}
+                  >
+                    <QuoteIcon className="h-4.5 w-4.5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-60 p-2 text-right font-tajawal space-y-1">
+                  <DropdownMenuItem
+                    onClick={() => {
+                      if (selection) {
+                        setQuoteInitialText(selection);
+                        setQuoteEditorOpen(true);
+                      } else {
+                        toast.info(t('selectTextHint'));
+                      }
+                    }}
+                    className="flex items-center gap-2.5 cursor-pointer py-2"
+                  >
+                    <TextCursorInput className="h-4 w-4 text-primary" />
+                    {t('selectTextHint')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      ocrTargetRef.current = pageElementsRef.current.get(currentPage) || null;
+                      setOcrOpen(true);
+                    }}
+                    className="flex items-center gap-2.5 cursor-pointer py-2"
+                  >
+                    <ScanLine className="h-4 w-4 text-primary" />
+                    {t('ocrMode')}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               {/* Three-Lines Menu Button (☰ يحتوي فقط على: الوضع الفاتح/الداكن، التدوير، والتحميل) */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -573,7 +622,7 @@ const BookReader = () => {
                         scale={scale}
                         rotate={pageRotation}
                         className={`shadow-xl rounded-lg overflow-hidden ${invertPages && pageNum > 1 ? 'reader-page-inverted' : ''}`}
-                        renderTextLayer={false}
+                        renderTextLayer={true}
                         renderAnnotationLayer={false}
                       />
                     ) : (
@@ -597,6 +646,18 @@ const BookReader = () => {
         <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 bg-card border border-border rounded-full shadow-2xl px-2 py-1 flex items-center gap-1 animate-fade-in">
           <Button size="sm" variant="ghost" onClick={saveHighlight}>تمييز</Button>
           <div className="h-5 w-px bg-border" />
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1"
+            onClick={() => {
+              setQuoteInitialText(selection);
+              setQuoteEditorOpen(true);
+            }}
+          >
+            <QuoteIcon className="h-3 w-3" /> {t('createQuote')}
+          </Button>
+          <div className="h-5 w-px bg-border" />
           <Button size="sm" variant="gold" className="gap-1" onClick={() => setAskOpen(true)}>
             <Sparkles className="h-3 w-3" /> اسأل الكتاب
           </Button>
@@ -611,6 +672,34 @@ const BookReader = () => {
           author={book.author}
           passage={selection}
           onClose={() => setAskOpen(false)}
+        />
+      )}
+
+      {book && (
+        <QuoteEditorDialog
+          open={quoteEditorOpen}
+          onOpenChange={(v) => {
+            setQuoteEditorOpen(v);
+            if (!v) setQuoteInitialText('');
+          }}
+          bookId={book.id}
+          bookTitle={book.title}
+          bookAuthor={book.author}
+          initialText={quoteInitialText}
+          initialPage={currentPage}
+        />
+      )}
+
+      {ocrOpen && (
+        <QuoteOcrCapture
+          targetRef={ocrTargetRef}
+          onClose={() => setOcrOpen(false)}
+          onExtracted={(extracted) => {
+            setOcrOpen(false);
+            setQuoteInitialText(extracted);
+            setQuoteEditorOpen(true);
+            toast.success(t('ocrDone'));
+          }}
         />
       )}
     </div>

@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
+import { QahwaNative, isQahwaNativeAvailable } from '@/lib/qahwaNative';
+import { buildQahwaDownloadFileName } from '@/lib/capacitorFeatures';
 
 const OFFLINE_BOOKS_KEY = 'maktaba-mauritania-offline-books';
 const OFFLINE_INDEX_KEY = 'maktaba-mauritania-offline-index';
 const OFFLINE_DIR = 'MauritaniaLibrary';
+const DEVICE_DOWNLOADS_KEY = 'qahwa-device-downloads';
 
 // Detect Capacitor native runtime
 const isNative = (): boolean => {
@@ -50,6 +53,83 @@ interface NativeIndexEntry {
   mimeType: string;
 }
 
+export interface DeviceDownloadEntry {
+  bookId: string;
+  title: string;
+  author: string;
+  coverUrl: string;
+  fileName: string;
+  uri: string;
+  size: number;
+  type: string; // mime type, e.g. 'application/pdf'
+  downloadedAt: string;
+  platform: string;
+}
+
+export const loadDeviceDownloads = (): DeviceDownloadEntry[] => {
+  try {
+    const raw = localStorage.getItem(DEVICE_DOWNLOADS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveDeviceDownloads = (entries: DeviceDownloadEntry[]) => {
+  localStorage.setItem(DEVICE_DOWNLOADS_KEY, JSON.stringify(entries));
+};
+
+const base64ToBlobUrl = (base64: string, mimeType: string): string => {
+  const byteString = atob(base64);
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+  return URL.createObjectURL(new Blob([ab], { type: mimeType }));
+};
+
+/**
+ * Returns a usable blob: URL to read a book offline, preferring (in order):
+ * 1) a real on-device Qahwa download (native Android, via QahwaNative.readFile)
+ * 2) the app's internal offline cache (native Capacitor Filesystem)
+ * 3) the web localStorage offline cache (base64 data URL)
+ * Usable outside React components (e.g. from BookReader).
+ */
+export const getOfflinePdfSource = async (bookId: string): Promise<string | null> => {
+  // 1) Real device download tracked by Qahwa
+  if (isQahwaNativeAvailable()) {
+    const entry = loadDeviceDownloads().find((e) => e.bookId === bookId);
+    if (entry) {
+      try {
+        const { base64 } = await QahwaNative.readFile({ uri: entry.uri });
+        if (base64) return base64ToBlobUrl(base64, entry.type || 'application/pdf');
+      } catch (e) {
+        console.warn('getOfflinePdfSource: readFile failed for device download', e);
+      }
+    }
+  }
+
+  // 2) Native in-app offline cache
+  if (isNative()) {
+    const idx = loadNativeIndex().find((e) => e.id === bookId);
+    if (idx) {
+      const url = await nativeFileToBlobUrl(idx.filename, idx.mimeType);
+      if (url) return url;
+    }
+  }
+
+  // 3) Web offline cache (base64 data URL)
+  try {
+    const raw = localStorage.getItem(OFFLINE_BOOKS_KEY);
+    const books: OfflineBook[] = raw ? JSON.parse(raw) : [];
+    const b = books.find((x) => x.id === bookId);
+    if (b?.fileData) return b.fileData;
+  } catch {
+    /* noop */
+  }
+
+  return null;
+};
+
 const loadNativeIndex = (): NativeIndexEntry[] => {
   try {
     const raw = localStorage.getItem(OFFLINE_INDEX_KEY);
@@ -90,6 +170,8 @@ export const useOfflineBooks = () => {
   const [isLoading, setIsLoading] = useState(true);
   // For native: id -> blob URL (created from Filesystem read)
   const [nativeUrls, setNativeUrls] = useState<Record<string, string>>({});
+  // Real on-device downloads (Qahwa native Android, saved via QahwaNative.savePdfToDownloads)
+  const [deviceDownloads, setDeviceDownloads] = useState<DeviceDownloadEntry[]>(() => loadDeviceDownloads());
 
   const loadOfflineBooks = useCallback(async () => {
     try {
@@ -402,6 +484,120 @@ export const useOfflineBooks = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  // --- Real device downloads (Qahwa Android) ---------------------------
+
+  const findDeviceDownload = (bookId: string): DeviceDownloadEntry | null =>
+    deviceDownloads.find((e) => e.bookId === bookId) || null;
+
+  /** Checks via the native plugin whether a saved device download still exists on disk. */
+  const checkDeviceDownloadExists = async (entry: DeviceDownloadEntry): Promise<boolean> => {
+    if (!isQahwaNativeAvailable()) return false;
+    try {
+      const res = await QahwaNative.fileExists({ uri: entry.uri });
+      return !!res?.exists;
+    } catch {
+      return false;
+    }
+  };
+
+  /**
+   * Downloads the book's PDF and saves it to the device's public Downloads
+   * folder via the native QahwaNative plugin. Only works on native Android.
+   */
+  const downloadBookToDevice = async (
+    book: { id: string; title: string; author: string; coverUrl: string; fileUrl: string },
+    onProgress?: (progress: number) => void
+  ): Promise<{ ok: boolean; entry?: DeviceDownloadEntry; error?: string }> => {
+    if (!isQahwaNativeAvailable()) {
+      return { ok: false, error: 'native-unavailable' };
+    }
+    try {
+      onProgress?.(10);
+      const response = await fetch(book.fileUrl);
+      if (!response.ok) throw new Error('Failed to fetch file');
+      onProgress?.(35);
+      const blob = await response.blob();
+      const mimeType = blob.type || 'application/pdf';
+
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const r = new FileReader();
+        r.onloadend = () => {
+          const result = r.result as string;
+          const idx = result.indexOf(',');
+          resolve(idx >= 0 ? result.slice(idx + 1) : result);
+        };
+        r.onerror = () => reject(r.error);
+        r.readAsDataURL(blob);
+      });
+      onProgress?.(65);
+
+      const fileName = buildQahwaDownloadFileName(book.title, book.id);
+      const result = await QahwaNative.savePdfToDownloads({ base64, fileName });
+      onProgress?.(90);
+
+      const entry: DeviceDownloadEntry = {
+        bookId: book.id,
+        title: book.title,
+        author: book.author,
+        coverUrl: book.coverUrl,
+        fileName: result.fileName || fileName,
+        uri: result.uri,
+        size: result.size ?? blob.size,
+        type: mimeType,
+        downloadedAt: new Date().toISOString(),
+        platform: 'android',
+      };
+
+      const next = [entry, ...loadDeviceDownloads().filter((e) => e.bookId !== book.id)];
+      saveDeviceDownloads(next);
+      setDeviceDownloads(next);
+      onProgress?.(100);
+      return { ok: true, entry };
+    } catch (e: any) {
+      return { ok: false, error: e?.message || 'download-failed' };
+    }
+  };
+
+  /** Removes a device-download entry from the tracked list, optionally deleting the real file too. */
+  const removeDeviceDownload = async (bookId: string, alsoDeleteFile: boolean): Promise<void> => {
+    const entry = findDeviceDownload(bookId);
+    if (alsoDeleteFile && entry && isQahwaNativeAvailable()) {
+      try {
+        await QahwaNative.deleteFile({ uri: entry.uri });
+      } catch (e) {
+        console.warn('removeDeviceDownload: deleteFile failed', e);
+      }
+    }
+    const next = loadDeviceDownloads().filter((e) => e.bookId !== bookId);
+    saveDeviceDownloads(next);
+    setDeviceDownloads(next);
+  };
+
+  /**
+   * Validates every tracked device download against the real filesystem and
+   * drops entries whose file no longer exists. Returns the removed entries
+   * so the caller can show a toast.
+   */
+  const refreshDeviceDownloads = async (): Promise<DeviceDownloadEntry[]> => {
+    const current = loadDeviceDownloads();
+    if (!isQahwaNativeAvailable() || current.length === 0) {
+      setDeviceDownloads(current);
+      return [];
+    }
+    const removed: DeviceDownloadEntry[] = [];
+    const kept: DeviceDownloadEntry[] = [];
+    await Promise.all(
+      current.map(async (entry) => {
+        const exists = await checkDeviceDownloadExists(entry);
+        if (exists) kept.push(entry);
+        else removed.push(entry);
+      })
+    );
+    saveDeviceDownloads(kept);
+    setDeviceDownloads(kept);
+    return removed;
+  };
+
   return {
     offlineBooks,
     isLoading,
@@ -413,5 +609,12 @@ export const useOfflineBooks = () => {
     getTotalStorageUsed,
     formatFileSize,
     refresh: loadOfflineBooks,
+    // Real device downloads (Qahwa Android)
+    deviceDownloads,
+    findDeviceDownload,
+    checkDeviceDownloadExists,
+    downloadBookToDevice,
+    removeDeviceDownload,
+    refreshDeviceDownloads,
   };
 };

@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;800&family=Lateef&family=Reem+Kufi:wght@400;700&display=swap');
 
 @layer base {
   :root {
@@ -530,6 +531,14 @@ input, textarea, [contenteditable="true"], .allow-select {
   -webkit-user-select: text;
   user-select: text;
 }
+
+/* Allow selecting text inside the reader's PDF text layer so readers can create quotes */
+.react-pdf__Page__textContent,
+.react-pdf__Page__textContent span {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 
 .reader-page-inverted canvas {
   filter: invert(1) hue-rotate(180deg);

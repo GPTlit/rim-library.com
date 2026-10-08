@@ -30,6 +30,7 @@ import { BookLayers } from '@/components/books/BookLayers';
 import { ReadingJourney } from '@/components/books/ReadingJourney';
 import { getPdfPageCount } from '@/lib/pdfExtract';
 import { supabase } from '@/integrations/supabase/client';
+import { QuoteFeed } from '@/components/quotes/QuoteFeed';
 
 const BookDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -413,6 +414,12 @@ const BookDetail = () => {
                 {/* Reading journey guestbook */}
                 <div className="mt-12 pt-8 border-t border-border">
                   <ReadingJourney bookId={book.id} />
+                </div>
+
+                {/* Quote cards shared by readers */}
+                <div className="mt-12 pt-8 border-t border-border">
+                  <h2 className="text-xl font-bold text-foreground mb-4">{t('bookQuotes')}</h2>
+                  <QuoteFeed bookId={book.id} bookTitle={book.title} />
                 </div>
               </div>
             </div>
