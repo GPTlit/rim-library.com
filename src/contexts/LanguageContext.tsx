@@ -420,7 +420,6 @@ const translations: Translations = {
   selectTextHint: { ar: 'حدد نصاً من الصفحة لإنشاء اقتباس', en: 'Select text on the page to create a quote', fr: 'Sélectionnez du texte sur la page pour créer une citation' },
   enterQuoteTextFirst: { ar: 'أدخل نص الاقتباس أولاً', en: 'Enter the quote text first', fr: 'Entrez d\'abord le texte de la citation' },
   shareQuote: { ar: 'مشاركة الاقتباس', en: 'Share quote', fr: 'Partager la citation' },
-  linkCopied: { ar: 'تم نسخ الرابط', en: 'Link copied', fr: 'Lien copié' },
 };
 
 interface LanguageContextType {

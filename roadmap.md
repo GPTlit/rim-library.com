@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Store links in Name & Logo + mobile "Download to your phone" prompt
-- [ ] Real device PDF downloads (MediaStore), Qahwa downloads list, offline reading, delete choices
-- [ ] Android project + native home-screen widgets (6 types) + deep links
-- [ ] Quote cards (selection + on-device OCR, editor, share/save, story, per-book feed); apply migration; add /quotes/:id route
+- [x] Store links in Name & Logo + mobile "Download to your phone" prompt
+- [ ] Device PDF downloads: list/delete/offline helpers done; BookDetail download button + BookReader offline source still to wire
+- [ ] Android widgets: project, plugin, layouts done; widget classes, manifest, deep links, widget sync in progress
+- [ ] Quote cards: database file, feed, cards done; editor, OCR, reader buttons, quote page in progress; database change not applied yet
