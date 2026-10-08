@@ -19,6 +19,7 @@
     "@capacitor/filesystem": "^8.1.2",
     "@capacitor/local-notifications": "^8.1.0",
     "@capacitor/push-notifications": "^8.0.4",
+    "@capacitor/share": "^8.0.3",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
@@ -59,6 +60,7 @@
     "cmdk": "^1.1.1",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.6.0",
+    "html-to-image": "^1.11.13",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.462.0",
     "motion": "^13.5.0",
@@ -79,6 +81,7 @@
     "streamdown": "^2.7.0",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "tesseract.js": "^7.0.0",
     "use-stick-to-bottom": "^1.1.6",
     "vaul": "^0.9.9",
     "zod": "^3.25.76"

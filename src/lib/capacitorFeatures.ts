@@ -140,3 +140,43 @@ export function createAudioRecorder(): AudioRecorderHandle {
     },
   };
 }
+/* ---------------------------------------------------------------------- */
+/* Qahwa device-download helpers (shared by useOfflineBooks / BookDetail) */
+/* ---------------------------------------------------------------------- */
+
+/** Removes characters unsafe for filenames and trims length. */
+export function sanitizeForFilename(input: string, maxLen = 80): string {
+  return (input || '')
+    .replace(/[\\/:*?"<>|]+/g, '_')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, maxLen) || 'book';
+}
+
+/** Builds the standard filename used for real on-device PDF downloads. */
+export function buildQahwaDownloadFileName(title: string, bookId: string): string {
+  const safeTitle = sanitizeForFilename(title);
+  const shortId = (bookId || '').slice(0, 8);
+  return `Qahwa - ${safeTitle} - ${shortId}.pdf`;
+}
+
+export type MobileOS = 'android' | 'ios' | 'other';
+
+/** Detects the device OS from the browser user agent (not Capacitor-aware). */
+export function detectMobileOS(): MobileOS {
+  if (typeof navigator === 'undefined') return 'other';
+  const ua = navigator.userAgent || (navigator as any).vendor || '';
+  if (/android/i.test(ua)) return 'android';
+  if (/iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream) return 'ios';
+  return 'other';
+}
+
+/** True only when running inside the installed Capacitor native app. */
+export function isRunningNative(): boolean {
+  try {
+    // @ts-ignore
+    return !!(window as any)?.Capacitor?.isNativePlatform?.();
+  } catch {
+    return false;
+  }
+}

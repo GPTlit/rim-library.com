@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="qahwa_espresso">#1A0F0A</color>
+    <color name="qahwa_mocha">#523823</color>
+    <color name="qahwa_latte">#8F7355</color>
+    <color name="qahwa_cream">#E7D9C3</color>
+    <color name="qahwa_text_on_dark">#F5EBDD</color>
+    <color name="qahwa_text_on_light">#F5EBDD</color>
+</resources>
