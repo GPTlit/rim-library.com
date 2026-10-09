@@ -543,3 +543,40 @@ input, textarea, [contenteditable="true"], .allow-select {
 .reader-page-inverted canvas {
   filter: invert(1) hue-rotate(180deg);
 }
+
+/* Native Mobile & Android WebView Performance Optimizations */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior-y: contain;
+}
+
+/* Smooth momentum scrolling for all scroll containers */
+.overflow-y-auto,
+.overflow-x-auto,
+.overflow-auto,
+[data-radix-scroll-area-viewport] {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* GPU hardware acceleration for smooth 60/120fps transitions */
+.gpu-layer {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Safe area inset utilities for notched phones and navigation bars */
+.safe-pt {
+  padding-top: max(env(safe-area-inset-top, 0px), 12px);
+}
+.safe-pb {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
+}
+

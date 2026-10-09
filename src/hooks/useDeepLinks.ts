@@ -40,20 +40,32 @@ export function useDeepLinks() {
       }
     };
 
-    let listenerHandle: { remove: () => void } | undefined;
+    let urlSub: { remove: () => void } | undefined;
+    let backSub: { remove: () => void } | undefined;
 
     (async () => {
       try {
         const { App } = await import('@capacitor/app');
         const launchUrl = await App.getLaunchUrl();
         handleUrl(launchUrl?.url);
-        const sub = await App.addListener('appUrlOpen', (data: { url: string }) => handleUrl(data.url));
-        listenerHandle = sub;
+        urlSub = await App.addListener('appUrlOpen', (data: { url: string }) => handleUrl(data.url));
+
+        // Handle native Android hardware back button
+        backSub = await App.addListener('backButton', ({ canGoBack }) => {
+          if (window.location.pathname !== '/' && window.location.pathname !== '/home') {
+            navigate(-1);
+          } else {
+            App.exitApp();
+          }
+        });
       } catch {
         // @capacitor/app not available — ignore
       }
     })();
 
-    return () => listenerHandle?.remove();
+    return () => {
+      urlSub?.remove();
+      backSub?.remove();
+    };
   }, [navigate]);
 }
