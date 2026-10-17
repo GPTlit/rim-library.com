@@ -24,10 +24,14 @@ export const DevicePermissionPrompt = () => {
 
   useEffect(() => {
     if (!user) return;
-    const seen = localStorage.getItem(PROMPT_KEY);
-    if (!seen) {
-      const timer = window.setTimeout(() => setOpen(true), 700);
-      return () => window.clearTimeout(timer);
+    try {
+      const seen = localStorage.getItem(PROMPT_KEY);
+      if (!seen) {
+        const timer = window.setTimeout(() => setOpen(true), 700);
+        return () => window.clearTimeout(timer);
+      }
+    } catch {
+      // ignore
     }
   }, [user]);
 

@@ -120,9 +120,8 @@ export const BookCard = ({ book, index = 0 }: BookCardProps) => {
           <img
             src={coverImage}
             alt={book.title}
-            loading="eager"
+            loading={index < 4 ? "eager" : "lazy"}
             decoding="async"
-            fetchPriority="high"
             className="w-full h-full object-cover"
           />
           

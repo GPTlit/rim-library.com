@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { BrandingProvider } from "@/contexts/BrandingContext";
+import { RootErrorBoundary } from "@/components/RootErrorBoundary";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ConsentDialog } from "@/components/ConsentDialog";
 import { DevicePermissionPrompt } from "@/components/DevicePermissionPrompt";
@@ -62,60 +63,62 @@ const queryClient = new QueryClient({
 });
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <LanguageProvider>
-        <ThemeProvider>
-          <BrandingProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <AppNativeBridge />
-                <ConsentDialog />
-                <DevicePermissionPrompt />
-                <Routes>
-                <Route path="/auth" element={<Auth />} />
-                {/* Public routes - viewable without login */}
-                <Route path="/" element={<Index />} />
-                <Route path="/categories" element={<Categories />} />
-                <Route path="/category/:name" element={<Category />} />
-                <Route path="/book/:id" element={<BookDetail />} />
-                <Route path="/search" element={<Search />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/copyright" element={<Copyright />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="/quotes/:id" element={<QuotePage />} />
-                <Route path="/quote/:id" element={<QuotePage />} />
-                {/* Stories — public browsing */}
-                <Route path="/explore" element={<Explore />} />
-                <Route path="/story/:id" element={<StoryPage />} />
-                <Route path="/u/:username" element={<AuthorProfile />} />
-                {/* Protected routes - require authentication */}
-                <Route path="/book/:id/read" element={<ProtectedRoute><BookReader /></ProtectedRoute>} />
-                <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
-                <Route path="/write" element={<ProtectedRoute><Write /></ProtectedRoute>} />
-                <Route path="/write/:id" element={<ProtectedRoute><WriteStory /></ProtectedRoute>} />
-                <Route path="/write/:id/parts/:partId" element={<ProtectedRoute><WritePart /></ProtectedRoute>} />
-                <Route path="/story/:id/read/:partId" element={<ProtectedRoute><ReadPart /></ProtectedRoute>} />
-                <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
-                <Route path="/downloads" element={<ProtectedRoute><Downloads /></ProtectedRoute>} />
-                <Route path="/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />
-                <Route path="/admin-upload-mrt" element={<Navigate to="/admin-panel" replace />} />
-                <Route path="/admin-panel" element={<ProtectedRoute requireAdmin><AdminPanel /></ProtectedRoute>} />
-                <Route path="/author-chat" element={<ProtectedRoute><AuthorChat /></ProtectedRoute>} />
-                <Route path="/eterke" element={<ProtectedRoute><Eterke /></ProtectedRoute>} />
-                <Route path="/store" element={<ProtectedRoute><Store /></ProtectedRoute>} />
-                <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </BrandingProvider>
-      </ThemeProvider>
-    </LanguageProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+  <RootErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <LanguageProvider>
+          <ThemeProvider>
+            <BrandingProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <AppNativeBridge />
+                  <ConsentDialog />
+                  <DevicePermissionPrompt />
+                  <Routes>
+                  <Route path="/auth" element={<Auth />} />
+                  {/* Public routes - viewable without login */}
+                  <Route path="/" element={<Index />} />
+                  <Route path="/categories" element={<Categories />} />
+                  <Route path="/category/:name" element={<Category />} />
+                  <Route path="/book/:id" element={<BookDetail />} />
+                  <Route path="/search" element={<Search />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/copyright" element={<Copyright />} />
+                  <Route path="/privacy" element={<Privacy />} />
+                  <Route path="/quotes/:id" element={<QuotePage />} />
+                  <Route path="/quote/:id" element={<QuotePage />} />
+                  {/* Stories — public browsing */}
+                  <Route path="/explore" element={<Explore />} />
+                  <Route path="/story/:id" element={<StoryPage />} />
+                  <Route path="/u/:username" element={<AuthorProfile />} />
+                  {/* Protected routes - require authentication */}
+                  <Route path="/book/:id/read" element={<ProtectedRoute><BookReader /></ProtectedRoute>} />
+                  <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
+                  <Route path="/write" element={<ProtectedRoute><Write /></ProtectedRoute>} />
+                  <Route path="/write/:id" element={<ProtectedRoute><WriteStory /></ProtectedRoute>} />
+                  <Route path="/write/:id/parts/:partId" element={<ProtectedRoute><WritePart /></ProtectedRoute>} />
+                  <Route path="/story/:id/read/:partId" element={<ProtectedRoute><ReadPart /></ProtectedRoute>} />
+                  <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+                  <Route path="/downloads" element={<ProtectedRoute><Downloads /></ProtectedRoute>} />
+                  <Route path="/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />
+                  <Route path="/admin-upload-mrt" element={<Navigate to="/admin-panel" replace />} />
+                  <Route path="/admin-panel" element={<ProtectedRoute requireAdmin><AdminPanel /></ProtectedRoute>} />
+                  <Route path="/author-chat" element={<ProtectedRoute><AuthorChat /></ProtectedRoute>} />
+                  <Route path="/eterke" element={<ProtectedRoute><Eterke /></ProtectedRoute>} />
+                  <Route path="/store" element={<ProtectedRoute><Store /></ProtectedRoute>} />
+                  <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </TooltipProvider>
+          </BrandingProvider>
+        </ThemeProvider>
+      </LanguageProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  </RootErrorBoundary>
 );
 
 export default App;

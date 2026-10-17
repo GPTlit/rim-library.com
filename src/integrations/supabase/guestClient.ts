@@ -3,8 +3,12 @@ import type { Database } from './types';
 import realLibraryCatalog from '@/lib/realLibraryCatalog.json';
 import type { Book } from '@/hooks/useBooks';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.placeholder';
+const FALLBACK_SUPABASE_URL = 'https://lpgcuygtusqtctduwofb.supabase.co';
+const FALLBACK_SUPABASE_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxwZ2N1eWd0dXNxdGN0ZHV3b2ZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2NDk1NTEsImV4cCI6MjA4MTIyNTU1MX0.S_RUgR5sq1MgLc-klffDHg7dpoXl7tvom_jlZqyJeWM';
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || FALLBACK_SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || FALLBACK_SUPABASE_KEY;
 
 const GUEST_EMAIL = 'library_guest_reader@qahwalibrary.app';
 const GUEST_PASS = 'QahwaReader2026!Public';

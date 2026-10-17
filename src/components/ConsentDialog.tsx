@@ -114,9 +114,13 @@ export const ConsentDialog = () => {
   const [showPrivacy, setShowPrivacy] = useState(false);
 
   useEffect(() => {
-    const consented = localStorage.getItem('app-consent-given');
-    if (consented !== 'true') {
-      setShow(true);
+    try {
+      const consented = localStorage.getItem('app-consent-given');
+      if (consented !== 'true') {
+        setShow(true);
+      }
+    } catch {
+      // Storage restricted, proceed without blocking
     }
   }, []);
 
@@ -125,9 +129,13 @@ export const ConsentDialog = () => {
   const c = content[language];
 
   const handleAgree = () => {
-    localStorage.setItem('app-consent-given', 'true');
-    localStorage.setItem('privacy-agreed', 'true');
-    localStorage.setItem('copyright-agreed', 'true');
+    try {
+      localStorage.setItem('app-consent-given', 'true');
+      localStorage.setItem('privacy-agreed', 'true');
+      localStorage.setItem('copyright-agreed', 'true');
+    } catch {
+      // ignore
+    }
     setShow(false);
   };
 
