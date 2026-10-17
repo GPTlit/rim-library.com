@@ -3,8 +3,8 @@ import type { Database } from './types';
 import realLibraryCatalog from '@/lib/realLibraryCatalog.json';
 import type { Book } from '@/hooks/useBooks';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.placeholder';
 
 const GUEST_EMAIL = 'library_guest_reader@qahwalibrary.app';
 const GUEST_PASS = 'QahwaReader2026!Public';

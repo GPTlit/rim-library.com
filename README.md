@@ -72,6 +72,17 @@ To connect a domain, navigate to Project > Settings > Domains and click Connect 
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
 
+## Hosting on Vercel
+
+- **Vercel Configuration**: `vercel.json` is included in the project root to configure Vite SPA rewrites (`/(.*)` -> `/index.html`), preventing 404 errors on search and page refreshes.
+- **Framework Preset**: `Vite`
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **Environment Variables**: In your Vercel Project Dashboard (**Settings -> Environment Variables**), add:
+  - `VITE_SUPABASE_URL`
+  - `VITE_SUPABASE_PUBLISHABLE_KEY`
+  - `VITE_SUPABASE_PROJECT_ID`
+
 ## Hosting on GitHub + Netlify
 
 - Build command: `npm run build`, publish directory: `dist` (already set in `netlify.toml`).
@@ -80,4 +91,4 @@ Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/c
   - `VITE_SUPABASE_URL`
   - `VITE_SUPABASE_PUBLISHABLE_KEY`
   - `VITE_SUPABASE_PROJECT_ID`
-- The AI features run as backend functions (not on Netlify) and are called from the browser, with CORS open, so they keep working on any domain once the variables above are set.
+- The AI features run as backend functions and are called from the browser, with CORS open, so they keep working on any domain once the variables above are set.
