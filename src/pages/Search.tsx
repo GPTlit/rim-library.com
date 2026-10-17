@@ -1,7 +1,8 @@
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import { Search as SearchIcon, ArrowRight, Loader2, BookOpen, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Search as SearchIcon, ArrowRight, Loader2, BookOpen, Lightbulb, CheckCircle2 } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { BookCard } from '@/components/books/BookCard';
+import { BookGridSkeleton } from '@/components/books/BookCardSkeleton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useSearchBooks } from '@/hooks/useBooks';
@@ -66,7 +67,7 @@ const Search = () => {
           {query && suggestion && (
             <div className="max-w-2xl mx-auto mb-8 p-3 px-4 rounded-xl bg-primary/10 border border-primary/20 flex flex-wrap items-center justify-between gap-3 shadow-xs animate-in fade-in">
               <div className="flex items-center gap-2 text-sm">
-                <Sparkles className="h-4 w-4 text-primary shrink-0" />
+                <Lightbulb className="h-4 w-4 text-primary shrink-0" />
                 <span className="text-muted-foreground font-medium">
                   {language === 'ar' ? 'هل تقصد:' : language === 'fr' ? 'Vouliez-vous dire :' : 'Did you mean:'}
                 </span>
@@ -110,8 +111,8 @@ const Search = () => {
 
           {/* Loading State */}
           {isLoading && (
-            <div className="flex justify-center py-16">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="py-4">
+              <BookGridSkeleton count={10} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6" />
             </div>
           )}
 

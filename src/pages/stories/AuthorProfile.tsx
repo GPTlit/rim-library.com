@@ -8,6 +8,7 @@ import { FollowButton } from '@/components/stories/FollowButton';
 import { StoryCard } from '@/components/stories/StoryCard';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { User } from 'lucide-react';
+import { VerifiedBadge } from '@/components/VerifiedBadge';
 
 export default function AuthorProfile() {
   const { username } = useParams();
@@ -15,7 +16,7 @@ export default function AuthorProfile() {
   const { data: profile, isLoading } = useQuery({
     queryKey: ['profile-by-username', username],
     queryFn: async () => {
-      const { data, error } = await supabase.from('user_profiles').select('user_id, username, display_name, avatar_url, bio').eq('username', username!).maybeSingle();
+      const { data, error } = await supabase.from('user_profiles').select('user_id, username, display_name, avatar_url, bio, verified').eq('username', username!).maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -36,7 +37,10 @@ export default function AuthorProfile() {
             {profile.avatar_url ? <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" /> : <User className="h-8 w-8 text-muted-foreground" />}
           </div>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold">{profile.display_name || profile.username}</h1>
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              <span>{profile.display_name || profile.username}</span>
+              {profile.verified && <VerifiedBadge className="h-5 w-5" />}
+            </h1>
             <p className="text-sm text-muted-foreground">@{profile.username}</p>
             <p className="text-sm mt-1">{followers?.count ?? 0} {t('followersCount')} · {stories.length} {t('storiesCount')}</p>
           </div>

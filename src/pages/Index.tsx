@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Sparkles, Star, Clock, BookOpen, Flame } from 'lucide-react';
+import { Award, Star, Clock, BookOpen, Flame } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { HeroCarousel } from '@/components/home/HeroCarousel';
 import { HeroSection } from '@/components/home/HeroSection';
@@ -22,7 +22,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 const Index = () => {
   const { t } = useLanguage();
-  const { data: books = [] } = useBooks();
+  const { data: books = [], isLoading: isBooksLoading } = useBooks();
   const { data: featuredIds } = useFeaturedBookIds();
   const { data: statsMap } = useBookStats();
   const { data: layoutMode = 'classic' } = useHomeLayoutMode();
@@ -99,10 +99,11 @@ const Index = () => {
       <RecentlyViewedBooks />
       <BookCarousel
         title={t('featuredPicks')}
-        icon={<Sparkles className="h-5 w-5" />}
+        icon={<Award className="h-5 w-5" />}
         books={featured}
         viewAllHref="/categories"
         pattern="mixed"
+        isLoading={isBooksLoading && !books.length}
       />
       <PromoBlocks slot={1} />
       <CategoriesSection />
@@ -112,18 +113,21 @@ const Index = () => {
         icon={<Flame className="h-5 w-5" />}
         books={trending.length ? trending : featured}
         pattern="wide-first"
+        isLoading={isBooksLoading && !books.length}
       />
       <BookCarousel
         title={t('topRatedSection')}
         icon={<Star className="h-5 w-5" />}
         books={topRated.length ? topRated : featured.slice().reverse()}
         pattern="tall-first"
+        isLoading={isBooksLoading && !books.length}
       />
       <BookCarousel
         title={t('recentlyAddedSection')}
         icon={<Clock className="h-5 w-5" />}
         books={recent}
         pattern="mixed"
+        isLoading={isBooksLoading && !books.length}
       />
       <PromoBlocks slot={3} />
       {categoryRows.map((row, i) => {

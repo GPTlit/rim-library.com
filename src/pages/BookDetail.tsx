@@ -3,6 +3,7 @@ import { ArrowRight, BookOpen, Download, Share2, WifiOff, Check, Loader2, FileTe
 import { CategoryIcon } from '@/components/CategoryIcon';
 
 import { Layout } from '@/components/layout/Layout';
+import { BookDetailSkeleton } from '@/components/books/BookDetailSkeleton';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { categories } from '@/lib/mockData';
@@ -88,11 +89,7 @@ const BookDetail = () => {
   if (isLoading) {
     return (
       <Layout>
-        <div className="section-padding">
-          <div className="container-library flex justify-center py-20">
-            <Loader2 className="h-10 w-10 animate-spin text-primary" />
-          </div>
-        </div>
+        <BookDetailSkeleton />
       </Layout>
     );
   }

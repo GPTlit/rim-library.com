@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Search, BookOpen, Sparkles, ChevronLeft, ArrowRight } from 'lucide-react';
+import { Search, BookOpen, Layers, Lightbulb, ChevronLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -119,7 +119,7 @@ export const HeroSection = () => {
                 {liveResults.suggestion && (
                   <div className="px-3 py-2 mb-2 bg-primary/15 hover:bg-primary/20 backdrop-blur-md border border-primary/25 rounded-xl flex items-center justify-between gap-2 text-xs transition-colors">
                     <div className="flex items-center gap-1.5 text-foreground min-w-0">
-                      <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
+                      <Lightbulb className="h-3.5 w-3.5 text-primary shrink-0" />
                       <span className="text-muted-foreground shrink-0">{language === 'ar' ? 'هل تقصد:' : 'Did you mean:'}</span>
                       <span className="font-bold text-primary truncate">«{liveResults.suggestion}»</span>
                     </div>
@@ -190,7 +190,7 @@ export const HeroSection = () => {
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="flex h-10 sm:h-12 w-10 sm:w-12 items-center justify-center rounded-xl bg-secondary/80 backdrop-blur-xs">
-                <Sparkles className="h-5 sm:h-6 w-5 sm:w-6 text-amber-500" />
+                <Layers className="h-5 sm:h-6 w-5 sm:w-6 text-amber-500" />
               </div>
               <div className="text-right">
                 <div className="text-xl sm:text-2xl font-bold text-foreground">+{allCategories.length}</div>

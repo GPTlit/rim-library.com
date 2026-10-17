@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Loader2, Music, Volume2, VolumeX, X, Upload, CloudRain, Waves, Wind, Flame, Coffee, Mountain, Sparkles, Piano, Brain } from 'lucide-react';
+import { Loader2, Music, Volume2, VolumeX, X, Upload, CloudRain, Waves, Wind, Flame, Coffee, Mountain, Telescope, Piano, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 
@@ -10,7 +10,7 @@ const SOUNDS: { key: string; label: string; Icon: typeof CloudRain; url: string 
   { key: 'fire',   label: 'موقد',    Icon: Flame,     url: '/audio/ambient/fire.mp3' },
   { key: 'cafe',   label: 'مقهى',    Icon: Coffee,    url: '/audio/ambient/cafe.mp3' },
   { key: 'desert', label: 'صحراء',   Icon: Mountain,  url: '/audio/ambient/desert.mp3' },
-  { key: 'space',  label: 'فضاء',    Icon: Sparkles,  url: '/audio/ambient/space.mp3' },
+  { key: 'space',  label: 'فضاء',    Icon: Telescope, url: '/audio/ambient/space.mp3' },
   { key: 'piano',  label: 'بيانو',   Icon: Piano,     url: '/audio/ambient/piano.mp3' },
   { key: 'pad',    label: 'تأمل',    Icon: Brain,     url: '/audio/ambient/pad.mp3' },
 ];

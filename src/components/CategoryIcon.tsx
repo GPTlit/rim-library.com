@@ -1,6 +1,6 @@
 import {
   BookOpen, Landmark, FlaskConical, ScrollText, Brain, MessageSquareQuote,
-  Baby, GraduationCap, Sparkles, Sprout, Wand2, Rocket, Ghost, Skull,
+  Baby, GraduationCap, Feather, Sprout, Wand2, Rocket, Ghost, Skull,
   Search as SearchIcon, Heart, Swords, Map, Zap, Drama, Smile, Bot,
   Mountain, MoonStar, Spade, Stars, Eye, Home as HomeIcon, Tv, Biohazard,
   Tent, User as UserIcon, Footprints, Building2, Radiation, Cog, Cpu,
@@ -17,7 +17,7 @@ const MAP: Record<string, LucideIcon> = {
   philosophy: MessageSquareQuote,
   kids: Baby,
   school: GraduationCap,
-  poetry: Sparkles,
+  poetry: Feather,
   'self-help': Sprout,
   fantasy: Wand2,
   'sci-fi': Rocket,

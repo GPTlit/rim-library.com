@@ -1,7 +1,7 @@
 import { Layout } from '@/components/layout/Layout';
 import { CategoryCard } from '@/components/home/CategoryCard';
 import { useCategories } from '@/hooks/useCategories';
-import { Skeleton } from '@/components/ui/skeleton';
+import { CategoryCardSkeleton } from '@/components/home/CategoryCardSkeleton';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const Categories = () => {
@@ -25,8 +25,8 @@ const Categories = () => {
           {/* Categories Grid */}
           <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
             {isLoading ? (
-              Array.from({ length: 20 }).map((_, i) => (
-                <Skeleton key={i} className="h-32 rounded-2xl" />
+              Array.from({ length: 24 }).map((_, i) => (
+                <CategoryCardSkeleton key={i} delayIndex={i} />
               ))
             ) : (
               categories?.map((category, index) => (

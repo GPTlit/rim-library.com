@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Sparkles, Loader2 } from 'lucide-react';
+import { ArrowLeft, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BookCard } from '@/components/books/BookCard';
+import { BookGridSkeleton } from '@/components/books/BookCardSkeleton';
 import { useBooks } from '@/hooks/useBooks';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useFeaturedBookIds } from '@/hooks/useFeaturedBooks';
@@ -10,6 +11,31 @@ export const FeaturedBooks = () => {
   const { data: books, isLoading } = useBooks();
   const { data: featuredIds } = useFeaturedBookIds();
   const { t } = useLanguage();
+
+  if (isLoading) {
+    return (
+      <section className="section-padding bg-secondary/30">
+        <div className="container-library">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl gold-gradient">
+                <Award className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <div>
+                <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                  {t('featuredBooks')}
+                </h2>
+                <p className="text-muted-foreground text-sm">
+                  {t('libraryName')}
+                </p>
+              </div>
+            </div>
+          </div>
+          <BookGridSkeleton count={5} className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" />
+        </div>
+      </section>
+    );
+  }
 
   // Admin-curated list (preserves order). Falls back to first 5 if none set.
   const featuredBooks = (() => {
@@ -20,16 +46,6 @@ export const FeaturedBooks = () => {
     }
     return books.slice(0, 5);
   })();
-
-  if (isLoading) {
-    return (
-      <section className="section-padding bg-secondary/30">
-        <div className="container-library flex justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </section>
-    );
-  }
 
   if (featuredBooks.length === 0) {
     return null;
@@ -42,7 +58,7 @@ export const FeaturedBooks = () => {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl gold-gradient">
-              <Sparkles className="h-5 w-5 text-primary-foreground" />
+              <Award className="h-5 w-5 text-primary-foreground" />
             </div>
             <div>
               <h2 className="text-2xl md:text-3xl font-bold text-foreground">

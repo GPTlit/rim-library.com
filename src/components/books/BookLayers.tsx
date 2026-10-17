@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Lock, Unlock, Sparkles, Loader2, Quote, BookOpen, Brain, KeyRound } from 'lucide-react';
+import { Lock, Unlock, Layers, Loader2, Quote, BookOpen, Brain, KeyRound } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -72,7 +72,7 @@ export const BookLayers = ({ bookId, bookTitle, author }: Props) => {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <Sparkles className="h-5 w-5 text-primary" />
+        <Layers className="h-5 w-5 text-primary" />
         <h3 className="font-bold text-lg">طبقات الكتاب الخفية</h3>
       </div>
       <p className="text-sm text-muted-foreground">افتح طبقات أعمق من المعرفة حول هذا الكتاب</p>

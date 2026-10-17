@@ -1,5 +1,6 @@
-import { Star, Loader2 } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { BookCard } from '@/components/books/BookCard';
+import { BookGridSkeleton } from '@/components/books/BookCardSkeleton';
 import { useBooks } from '@/hooks/useBooks';
 import { useBookStats } from '@/hooks/useBookStats';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -12,8 +13,14 @@ export const TopRatedBooks = () => {
   if (isLoading) {
     return (
       <section className="section-padding bg-secondary/20">
-        <div className="container-library flex justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="container-library">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl gold-gradient">
+              <Star className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground">{t('topRatedBooks')}</h2>
+          </div>
+          <BookGridSkeleton count={5} className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4" />
         </div>
       </section>
     );

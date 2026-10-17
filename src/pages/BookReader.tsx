@@ -17,7 +17,7 @@ import { useReadingPresence } from '@/hooks/useReadingPresence';
 import { useReadingTime } from '@/hooks/useReadingTime';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Sparkles } from 'lucide-react';
+import { BookOpenCheck } from 'lucide-react';
 import { useBookSessionTimer } from '@/hooks/useBookSessionTimer';
 import { ReaderSessionTimer } from '@/components/books/ReaderSessionTimer';
 import { ReadingGoalNotch } from '@/components/medals/ReadingGoalNotch';
@@ -695,7 +695,7 @@ const BookReader = () => {
           </Button>
           <div className="h-5 w-px bg-border" />
           <Button size="sm" variant="gold" className="gap-1" onClick={() => setAskOpen(true)}>
-            <Sparkles className="h-3 w-3" /> اسأل الكتاب
+            <BookOpenCheck className="h-3 w-3" /> اسأل الكتاب
           </Button>
         </div>
       )}

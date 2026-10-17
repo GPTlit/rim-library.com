@@ -13,6 +13,7 @@ interface BookCarouselProps {
   viewAllHref?: string;
   /** varied sizing pattern: repeats across the row */
   pattern?: 'mixed' | 'wide-first' | 'tall-first' | 'uniform';
+  isLoading?: boolean;
 }
 
 type Shape = 'wide' | 'tall' | 'standard';
@@ -41,8 +42,46 @@ const coverFor = (book: DbBook, shape: Shape) => {
   return book.cover_url || '/placeholder.svg';
 };
 
+export const BookCarousel = ({ title, icon, books, viewAllHref, pattern = 'mixed', isLoading = false }: BookCarouselProps) => {
+  if (isLoading) {
+    return (
+      <section className="py-6 sm:py-8">
+        <div className="container-library">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2.5">
+              {icon && (
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-primary">
+                  {icon}
+                </div>
+              )}
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground">{title}</h2>
+            </div>
+          </div>
+        </div>
+        <div
+          className="flex gap-3 sm:gap-4 overflow-x-hidden pb-3 px-4 sm:px-6"
+          style={{ scrollbarWidth: 'none' }}
+        >
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className={cn(
+                'relative shrink-0 rounded-xl overflow-hidden bg-muted/60 border border-border/40 book-shadow animate-pulse select-none',
+                sizeClass(i, pattern)
+              )}
+            >
+              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-3 space-y-1.5">
+                <div className="h-3.5 w-3/4 rounded bg-muted/90" />
+                <div className="h-2.5 w-1/2 rounded bg-muted/70" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
 
-export const BookCarousel = ({ title, icon, books, viewAllHref, pattern = 'mixed' }: BookCarouselProps) => {
   if (!books || books.length === 0) return null;
 
   return (

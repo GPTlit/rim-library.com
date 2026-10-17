@@ -1,7 +1,8 @@
 import { useParams, Link } from 'react-router-dom';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { BookCard } from '@/components/books/BookCard';
+import { BookGridSkeleton } from '@/components/books/BookCardSkeleton';
 import { Button } from '@/components/ui/button';
 import { allCategories } from '@/hooks/useCategories';
 import { useBooksByCategory } from '@/hooks/useBooks';
@@ -75,9 +76,7 @@ const Category = () => {
 
           {/* Books Grid */}
           {isLoading ? (
-            <div className="flex justify-center py-16">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
+            <BookGridSkeleton count={10} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6" />
           ) : books && books.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
               {books.map((book, index) => (

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles, Loader2, X } from 'lucide-react';
+import { BookOpenCheck, Loader2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,7 +38,7 @@ export const AskTheBook = ({ bookTitle, author, passage, onClose }: Props) => {
       <div className="bg-card border border-border rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
+            <BookOpenCheck className="h-5 w-5 text-primary" />
             <h3 className="font-bold">اسأل الكتاب</h3>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}><X className="h-4 w-4" /></Button>
@@ -58,7 +58,7 @@ export const AskTheBook = ({ bookTitle, author, passage, onClose }: Props) => {
           </div>
           <Textarea value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="اكتب سؤالك..." rows={2} />
           <Button onClick={() => ask(question)} disabled={loading || !question.trim()} variant="gold" className="w-full gap-2">
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpenCheck className="h-4 w-4" />}
             اسأل
           </Button>
           {answer && (

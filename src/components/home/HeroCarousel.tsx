@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles } from 'lucide-react';
+import { Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useHeroBanners, type HeroBanner } from '@/hooks/useHeroBanners';
@@ -115,7 +115,7 @@ export const HeroCarousel = () => {
               <div className="container-library w-full pb-8 sm:pb-12">
                 <div className="max-w-2xl">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-card/80 backdrop-blur border border-border/50 mb-3">
-                    <Sparkles className="h-3.5 w-3.5 text-gold" />
+                    <Award className="h-3.5 w-3.5 text-gold" />
                     <span className="text-xs font-medium text-foreground">مميز</span>
                   </div>
                   <h2 className="text-2xl sm:text-3xl md:text-5xl font-extrabold text-foreground mb-2 line-clamp-2">

@@ -3,7 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CategoryCard } from './CategoryCard';
 import { useCategories } from '@/hooks/useCategories';
-import { Skeleton } from '@/components/ui/skeleton';
+import { CategoryCardSkeleton } from './CategoryCardSkeleton';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export const CategoriesSection = () => {
@@ -38,7 +38,7 @@ export const CategoriesSection = () => {
         <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
           {isLoading ? (
             Array.from({ length: 8 }).map((_, i) => (
-              <Skeleton key={i} className="h-32 rounded-2xl" />
+              <CategoryCardSkeleton key={i} delayIndex={i} />
             ))
           ) : (
             displayCategories.map((category, index) => (
