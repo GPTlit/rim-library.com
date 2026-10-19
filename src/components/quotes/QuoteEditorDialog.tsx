@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState } from 'react';
-import { Loader2, Download, Share2, Send, BookPlus, ScanLine, Type as TypeIcon } from 'lucide-react';
+import { useMemo, useRef, useState, useEffect } from 'react';
+import { Loader2, Download, Share2, Send, BookPlus, ScanLine, Type as TypeIcon, ClipboardPaste } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -53,6 +53,38 @@ export const QuoteEditorDialog = ({
   const [text, setText] = useState(initialText);
   const [comment, setComment] = useState('');
   const [showComment, setShowComment] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    if (initialText && initialText.trim()) {
+      setText(initialText.trim());
+      return;
+    }
+    // Fallback 1: check last copied or extracted text in reader
+    try {
+      const stored = localStorage.getItem('reader-last-quote-text');
+      if (stored && stored.trim()) {
+        setText(stored.trim());
+        return;
+      }
+    } catch {}
+
+    // Fallback 2: check active selection
+    const sel = window.getSelection?.()?.toString().trim();
+    if (sel) {
+      setText(sel);
+      return;
+    }
+
+    // Fallback 3: check clipboard
+    if (navigator.clipboard?.readText) {
+      navigator.clipboard.readText().then((clip) => {
+        if (clip && clip.trim()) {
+          setText(clip.trim());
+        }
+      }).catch(() => {});
+    }
+  }, [open, initialText]);
   const [backgroundId, setBackgroundId] = useState(backgroundPresets[0].id);
   const [fontId, setFontId] = useState(fontOptions[0].id);
   const [fontSize, setFontSize] = useState(28);
@@ -299,7 +331,29 @@ export const QuoteEditorDialog = ({
           {/* Controls */}
           <div className="space-y-4">
             <div>
-              <Label className="text-xs">{t('quoteText')}</Label>
+              <div className="flex items-center justify-between mb-1">
+                <Label className="text-xs">{t('quoteText')}</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-[11px] gap-1 text-primary hover:text-primary/80"
+                  onClick={async () => {
+                    try {
+                      const clip = await navigator.clipboard?.readText();
+                      if (clip?.trim()) {
+                        setText(clip.trim());
+                        toast({ title: 'تم لصق النص من الحافظة' });
+                      }
+                    } catch {
+                      // ignore
+                    }
+                  }}
+                >
+                  <ClipboardPaste className="h-3 w-3" />
+                  <span>لصق المنسوخ</span>
+                </Button>
+              </div>
               <Textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}

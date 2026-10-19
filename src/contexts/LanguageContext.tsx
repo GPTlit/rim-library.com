@@ -80,6 +80,10 @@ const translations: Translations = {
   recentlyAddedSection: { ar: 'أُضيف حديثاً', en: 'Recently Added', fr: 'Récemment ajoutés' },
   readingTimeProgress: { ar: 'تقدم القراءة', en: 'Reading Progress', fr: 'Progression' },
   deleteFromDevice: { ar: 'حذف من الجهاز', en: 'Delete from device', fr: 'Supprimer de l\'appareil' },
+  recommendedForYou: { ar: 'موصى به لك', en: 'Recommended for You', fr: 'Recommandé pour vous' },
+  recommendedSubtitlePersonalized: { ar: 'ترشيحات مختارة بناءً على اهتمامك بتصنيفات قراءتك الأخيرة', en: 'Picks tailored to your recent reading topics and favorite categories', fr: 'Suggestions personnalisées selon vos lectures récentes' },
+  recommendedSubtitleGeneral: { ar: 'مختارات مميزة مقترحة لبدء رحلتك في القراءة', en: 'Curated picks to inspire your reading journey', fr: 'Sélection coup de cœur pour débuter vos lectures' },
+  basedOnYourReading: { ar: 'بناءً على قراءتك في', en: 'Based on your interest in', fr: 'Basé sur vos lectures en' },
 
   // Navigation
   home: { ar: 'الرئيسية', en: 'Home', fr: 'Accueil' },

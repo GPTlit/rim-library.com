@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Medal, getLocalizedMedal } from '@/lib/medals';
 import { MedalIcon } from './MedalBadge';
-import { X, Sparkles } from 'lucide-react';
+import { X, Trophy } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 
@@ -76,7 +76,7 @@ export const ReadingGoalNotch: React.FC<ReadingGoalNotchProps> = ({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 leading-none">
             <span className="text-[10px] sm:text-[11px] font-bold text-primary flex items-center gap-1 uppercase tracking-wider">
-              <Sparkles className="h-3 w-3 inline" />
+              <Trophy className="h-3 w-3 inline" />
               {headline}
             </span>
             <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-primary/10 text-primary font-medium">

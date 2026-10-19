@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Download, ZoomIn, ZoomOut, Loader2, WifiOff, BookmarkPlus, Bookmark as BookmarkIcon, List, Moon, Sun, RotateCw, RotateCcw, Smartphone, Check, Menu, Quote as QuoteIcon, ScanLine, TextCursorInput } from 'lucide-react';
+import { ArrowRight, Download, ZoomIn, ZoomOut, Loader2, WifiOff, BookmarkPlus, Bookmark as BookmarkIcon, List, Moon, Sun, RotateCw, RotateCcw, Smartphone, Check, Menu, Quote as QuoteIcon, ScanLine, TextCursorInput, Copy, MessageSquare } from 'lucide-react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
@@ -23,6 +23,8 @@ import { ReaderSessionTimer } from '@/components/books/ReaderSessionTimer';
 import { ReadingGoalNotch } from '@/components/medals/ReadingGoalNotch';
 import { QuoteEditorDialog } from '@/components/quotes/QuoteEditorDialog';
 import { QuoteOcrCapture } from '@/components/quotes/QuoteOcrCapture';
+import { PageCommentsDrawer } from '@/components/books/PageCommentsDrawer';
+import { usePageComments } from '@/hooks/usePageComments';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   DropdownMenu,
@@ -87,6 +89,10 @@ const BookReader = () => {
   const [quoteInitialText, setQuoteInitialText] = useState('');
   const [ocrOpen, setOcrOpen] = useState(false);
   const ocrTargetRef = useRef<HTMLDivElement | null>(null);
+  const [pageCommentsOpen, setPageCommentsOpen] = useState(false);
+  const [pageCommentsTargetPage, setPageCommentsTargetPage] = useState<number>(1);
+  const { pageCommentsCountMap } = usePageComments(id || '', pageCommentsTargetPage || currentPage);
+  const currentPageCommentsCount = pageCommentsCountMap.get(currentPage) || 0;
 
   // Track visual reading scroll progress
   useEffect(() => {
@@ -303,17 +309,52 @@ const BookReader = () => {
 
   useEffect(() => () => screen.orientation?.unlock?.(), []);
 
-  // Track text selection for "Ask the book" + highlight save
+  // Smooth, lag-free text selection tracking for "Ask the book", Quotes, and Highlight
   useEffect(() => {
-    const onUp = () => {
-      const sel = window.getSelection?.()?.toString().trim() || '';
-      setSelection(sel);
+    let timer: any;
+    const updateSelection = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        const raw = window.getSelection?.()?.toString() || '';
+        const trimmed = raw.trim();
+        if (trimmed) {
+          setSelection(trimmed);
+          setQuoteInitialText(trimmed);
+          try {
+            localStorage.setItem('reader-last-quote-text', trimmed);
+          } catch {}
+        } else {
+          setSelection('');
+        }
+      }, 80);
     };
-    document.addEventListener('mouseup', onUp);
-    document.addEventListener('touchend', onUp);
+
+    const handleCopy = () => {
+      setTimeout(() => {
+        const sel = window.getSelection?.()?.toString().trim() || '';
+        if (sel) {
+          setSelection(sel);
+          setQuoteInitialText(sel);
+          try {
+            localStorage.setItem('reader-last-quote-text', sel);
+          } catch {}
+          toast.success('تم نسخ النص وتجهيزه للاقتباس تلقائياً');
+        }
+      }, 10);
+    };
+
+    // Notice: Do NOT listen to 'selectionchange' continuously during active dragging.
+    // That was causing 60fps re-renders of the whole reader while the user was dragging.
+    // Instead, listen only when the user finishes selecting (mouseup, touchend) or copies (copy).
+    document.addEventListener('mouseup', updateSelection);
+    document.addEventListener('touchend', updateSelection);
+    document.addEventListener('copy', handleCopy);
+
     return () => {
-      document.removeEventListener('mouseup', onUp);
-      document.removeEventListener('touchend', onUp);
+      clearTimeout(timer);
+      document.removeEventListener('mouseup', updateSelection);
+      document.removeEventListener('touchend', updateSelection);
+      document.removeEventListener('copy', handleCopy);
     };
   }, []);
 
@@ -372,14 +413,14 @@ const BookReader = () => {
         </div>
 
         <div className="container-library">
-          <div className="flex items-center justify-between h-14 gap-2 overflow-hidden">
+          <div className="flex items-center justify-between h-14 gap-1.5 sm:gap-2 overflow-hidden">
             {/* Left section: Back button + Title & Author + Session Timer */}
-            <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 shrink">
+            <div className="flex items-center gap-1 sm:gap-2.5 min-w-0 shrink">
               <Link to={id ? `/book/${id}` : '/'} className="shrink-0">
-                <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0"><ArrowRight className="h-5 w-5" /></Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9 shrink-0"><ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" /></Button>
               </Link>
               <div className="min-w-0 shrink">
-                <h1 className="font-bold text-foreground text-sm sm:text-base truncate max-w-[110px] sm:max-w-[200px] md:max-w-xs">{displayTitle}</h1>
+                <h1 className="font-bold text-foreground text-xs sm:text-base truncate max-w-[75px] xs:max-w-[110px] sm:max-w-[180px] md:max-w-xs">{displayTitle}</h1>
                 <p className="text-[11px] text-muted-foreground truncate hidden sm:block">{displayAuthor}</p>
               </div>
               {isOfflineMode && (
@@ -400,17 +441,17 @@ const BookReader = () => {
             </div>
 
             {/* Center section: Page counter & progress */}
-            <div className="flex items-center gap-1.5 shrink-0 px-2.5 py-1 rounded-full bg-secondary/50 border border-border/60">
-              <span className="text-xs font-mono font-medium text-foreground whitespace-nowrap">{currentPage}/{numPages}</span>
-              <span className="text-[10px] font-bold text-primary px-1.5 py-0.2 rounded bg-primary/10 hidden sm:inline-block">
+            <div className="flex items-center gap-1 shrink-0 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-secondary/50 border border-border/60">
+              <span className="text-[11px] sm:text-xs font-mono font-medium text-foreground whitespace-nowrap">{currentPage}/{numPages}</span>
+              <span className="text-[10px] font-bold text-primary px-1.5 py-0.2 rounded bg-primary/10 hidden md:inline-block">
                 {Math.round(scrollProgress)}%
               </span>
             </div>
 
-            {/* Right section: Scaling buttons (visible on page) + Quick Bookmark + Three-Lines Menu Button (☰) */}
+            {/* Right section: Responsive buttons + Three-Lines Menu Button (☰) */}
             <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-              {/* Scaling / Zoom Controls directly visible on the page */}
-              <div className="flex items-center gap-0.5 sm:gap-1 bg-secondary/60 rounded-full px-1 sm:px-1.5 py-0.5 border border-border/60">
+              {/* Scaling / Zoom Controls visible on md+ screens; touch pinch-to-zoom handles mobile */}
+              <div className="hidden md:flex items-center gap-0.5 sm:gap-1 bg-secondary/60 rounded-full px-1 sm:px-1.5 py-0.5 border border-border/60">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -441,7 +482,7 @@ const BookReader = () => {
                 </Button>
               </div>
 
-              {/* Bookmark Button */}
+              {/* Bookmark Toggle Button */}
               <Button
                 variant={currentPageBookmarked ? 'default' : 'ghost'}
                 size="icon"
@@ -452,11 +493,11 @@ const BookReader = () => {
                 {currentPageBookmarked ? <BookmarkIcon className="h-4 w-4 text-primary" /> : <BookmarkPlus className="h-4 w-4" />}
               </Button>
 
-              {/* Bookmarks List Panel Button */}
+              {/* Bookmarks List Panel Button (Desktop/Tablet) */}
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 sm:h-9 sm:w-9 shrink-0 relative"
+                className="hidden sm:flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 relative"
                 onClick={() => setPanelOpen(!panelOpen)}
                 title="العلامات المرجعية"
               >
@@ -468,48 +509,27 @@ const BookReader = () => {
                 )}
               </Button>
 
-              {/* Quote (إقتباس) toolbar button */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 sm:h-9 sm:w-9 shrink-0 text-foreground hover:bg-secondary"
-                    title={t('createQuote')}
-                    aria-label={t('createQuote')}
-                  >
-                    <QuoteIcon className="h-4.5 w-4.5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-60 p-2 text-right font-tajawal space-y-1">
-                  <DropdownMenuItem
-                    onClick={() => {
-                      if (selection) {
-                        setQuoteInitialText(selection);
-                        setQuoteEditorOpen(true);
-                      } else {
-                        toast.info(t('selectTextHint'));
-                      }
-                    }}
-                    className="flex items-center gap-2.5 cursor-pointer py-2"
-                  >
-                    <TextCursorInput className="h-4 w-4 text-primary" />
-                    {t('selectTextHint')}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => {
-                      ocrTargetRef.current = pageElementsRef.current.get(currentPage) || null;
-                      setOcrOpen(true);
-                    }}
-                    className="flex items-center gap-2.5 cursor-pointer py-2"
-                  >
-                    <ScanLine className="h-4 w-4 text-primary" />
-                    {t('ocrMode')}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {/* Wattpad-style Page Comments button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 sm:h-9 sm:w-9 shrink-0 relative text-foreground hover:bg-secondary"
+                onClick={() => {
+                  setPageCommentsTargetPage(currentPage);
+                  setPageCommentsOpen(true);
+                }}
+                title={`مناقشات القراء على صفحة ${currentPage}`}
+                aria-label="مناقشات القراء"
+              >
+                <MessageSquare className="h-4 w-4" />
+                {currentPageCommentsCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[9px] rounded-full min-w-4 h-4 px-1 flex items-center justify-center font-bold">
+                    {currentPageCommentsCount}
+                  </span>
+                )}
+              </Button>
 
-              {/* Three-Lines Menu Button (☰ يحتوي فقط على: الوضع الفاتح/الداكن، التدوير، والتحميل) */}
+              {/* Three-Lines Menu Button (☰ يحتوي على: الاقتباسات وOCR، التعليقات، العلامات، العرض والتحميل) */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -522,8 +542,110 @@ const BookReader = () => {
                     <Menu className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 p-2 text-right font-tajawal space-y-1">
-                  {/* 1. Light Mode / Dark Mode button */}
+                <DropdownMenuContent align="end" className="w-64 p-2 text-right font-tajawal space-y-1">
+                  <DropdownMenuLabel className="text-xs text-muted-foreground font-semibold px-2 py-1">
+                    أدوات الاقتباس والملاحظات
+                  </DropdownMenuLabel>
+
+                  {/* 1. Quotes inside the 3 lines menu */}
+                  <DropdownMenuItem
+                    onClick={() => {
+                      if (selection) {
+                        setQuoteInitialText(selection);
+                        try {
+                          localStorage.setItem('reader-last-quote-text', selection);
+                        } catch {}
+                        setQuoteEditorOpen(true);
+                      } else {
+                        // Check if text was previously copied
+                        const stored = localStorage.getItem('reader-last-quote-text') || '';
+                        setQuoteInitialText(stored);
+                        setQuoteEditorOpen(true);
+                        if (!stored) {
+                          toast.info('حدد نصاً أو انسخه لإنشاء اقتباس جميل');
+                        }
+                      }
+                    }}
+                    className="flex items-center justify-between cursor-pointer py-2"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <QuoteIcon className="h-4 w-4 text-primary" />
+                      {t('createQuote')}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground font-mono">
+                      {selection ? 'نص محدد' : 'جاهز'}
+                    </span>
+                  </DropdownMenuItem>
+
+                  {/* 2. OCR text extraction */}
+                  <DropdownMenuItem
+                    onClick={() => {
+                      ocrTargetRef.current = pageElementsRef.current.get(currentPage) || null;
+                      setOcrOpen(true);
+                    }}
+                    className="flex items-center justify-between cursor-pointer py-2"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <ScanLine className="h-4 w-4 text-primary" />
+                      {t('ocrMode')}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">مسح ضوئي</span>
+                  </DropdownMenuItem>
+
+                  {/* 3. Wattpad Page discussions */}
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setPageCommentsTargetPage(currentPage);
+                      setPageCommentsOpen(true);
+                    }}
+                    className="flex items-center justify-between cursor-pointer py-2"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <MessageSquare className="h-4 w-4 text-primary" />
+                      مناقشات صفحة {currentPage}
+                    </span>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-primary/10 text-primary font-bold">
+                      {currentPageCommentsCount} تعليق
+                    </span>
+                  </DropdownMenuItem>
+
+                  {/* 4. Bookmarks list */}
+                  <DropdownMenuItem
+                    onClick={() => setPanelOpen(true)}
+                    className="flex items-center justify-between cursor-pointer py-2"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <List className="h-4 w-4 text-primary" />
+                      قائمة العلامات المرجعية
+                    </span>
+                    <span className="text-xs text-muted-foreground font-mono">{bookmarks.length}</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  {/* Mobile zoom controls inside the menu */}
+                  <div className="flex md:hidden items-center justify-between px-2 py-1.5 text-xs">
+                    <span className="text-muted-foreground">حجم الصفحة</span>
+                    <div className="flex items-center gap-1 bg-secondary/80 rounded-full px-1 py-0.5">
+                      <Button size="icon" variant="ghost" className="h-6 w-6 rounded-full" onClick={handleZoomOut}>
+                        <ZoomOut className="h-3 w-3" />
+                      </Button>
+                      <button
+                        type="button"
+                        onClick={() => setScale(1.0)}
+                        className="font-mono text-xs font-semibold px-1"
+                      >
+                        {Math.round(scale * 100)}%
+                      </button>
+                      <Button size="icon" variant="ghost" className="h-6 w-6 rounded-full" onClick={handleZoomIn}>
+                        <ZoomIn className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <DropdownMenuSeparator className="md:hidden" />
+
+                  {/* 5. Light Mode / Dark Mode button */}
                   <DropdownMenuItem onClick={togglePageTheme} className="flex items-center justify-between cursor-pointer py-2">
                     <span className="flex items-center gap-2.5">
                       {invertPages ? <Sun className="h-4 w-4 text-amber-500" /> : <Moon className="h-4 w-4 text-primary" />}
@@ -532,9 +654,7 @@ const BookReader = () => {
                     <span className="text-[11px] text-muted-foreground">{invertPages ? 'مفعل' : 'عادي'}</span>
                   </DropdownMenuItem>
 
-                  <DropdownMenuSeparator />
-
-                  {/* 2. Rotation buttons */}
+                  {/* 6. Rotation buttons */}
                   <DropdownMenuItem onClick={rotatePage} className="flex items-center justify-between cursor-pointer py-2">
                     <span className="flex items-center gap-2.5">
                       <RotateCw className="h-4 w-4 text-primary" />
@@ -571,7 +691,7 @@ const BookReader = () => {
 
                   <DropdownMenuSeparator />
 
-                  {/* 3. Download button */}
+                  {/* 7. Download button */}
                   <DropdownMenuItem asChild className="cursor-pointer py-2">
                     <a href={book?.file_url || fileUrl || '#'} download target="_blank" rel="noopener noreferrer" className="flex items-center justify-between w-full">
                       <span className="flex items-center gap-2.5">
@@ -631,13 +751,35 @@ const BookReader = () => {
                 const pageNum = index + 1;
                 const isLoaded = loadedPages.has(pageNum);
                 const pageBookmarks = bookmarks.filter((b) => b.page === pageNum);
+                const pageCommentsCount = pageCommentsCountMap.get(pageNum) || 0;
                 return (
                   <div
                     key={`page_wrapper_${pageNum}`}
                     data-page={pageNum}
                     ref={(node) => pageRef(node, pageNum)}
-                    className="relative"
+                    className="relative group/page"
                   >
+                    {/* Wattpad-style On-Page Public Comments Trigger */}
+                    <div className="absolute top-3 left-3 z-20">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPageCommentsTargetPage(pageNum);
+                          setPageCommentsOpen(true);
+                        }}
+                        className={cn(
+                          "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold shadow-md transition-all duration-200 backdrop-blur-md cursor-pointer select-none",
+                          pageCommentsCount > 0
+                            ? "bg-primary text-primary-foreground hover:scale-105 hover:shadow-lg ring-2 ring-primary/30 opacity-100"
+                            : "bg-background/90 hover:bg-background text-foreground/80 hover:text-foreground border border-border/80 hover:border-primary/50 opacity-70 group-hover/page:opacity-100 hover:opacity-100 hover:scale-105"
+                        )}
+                        title={`مناقشات القراء على صفحة ${pageNum} (${pageCommentsCount} تعليق)`}
+                      >
+                        <MessageSquare className="h-3.5 w-3.5" />
+                        <span>{pageCommentsCount > 0 ? pageCommentsCount : '+ تعليق'}</span>
+                      </button>
+                    </div>
+
                     {/* Bookmark indicators on the page */}
                     {pageBookmarks.length > 0 && (
                       <div className="absolute top-0 right-1 z-10 flex flex-col gap-0.5">
@@ -679,22 +821,37 @@ const BookReader = () => {
 
       {/* Selection action bar */}
       {selection && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 bg-card border border-border rounded-full shadow-2xl px-2 py-1 flex items-center gap-1 animate-fade-in">
-          <Button size="sm" variant="ghost" onClick={saveHighlight}>تمييز</Button>
-          <div className="h-5 w-px bg-border" />
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 bg-card border border-border rounded-full shadow-2xl px-2.5 py-1.5 flex items-center gap-1.5 animate-fade-in backdrop-blur-md">
+          <Button size="sm" variant="ghost" className="h-7 text-xs px-2" onClick={saveHighlight}>تمييز</Button>
+          <div className="h-4 w-px bg-border" />
           <Button
             size="sm"
             variant="outline"
-            className="gap-1"
+            className="gap-1 h-7 text-xs px-2"
             onClick={() => {
               setQuoteInitialText(selection);
+              try {
+                localStorage.setItem('reader-last-quote-text', selection);
+              } catch {}
               setQuoteEditorOpen(true);
             }}
           >
             <QuoteIcon className="h-3 w-3" /> {t('createQuote')}
           </Button>
-          <div className="h-5 w-px bg-border" />
-          <Button size="sm" variant="gold" className="gap-1" onClick={() => setAskOpen(true)}>
+          <div className="h-4 w-px bg-border" />
+          <Button
+            size="sm"
+            variant="ghost"
+            className="gap-1 h-7 text-xs px-2"
+            onClick={() => {
+              setPageCommentsTargetPage(currentPage);
+              setPageCommentsOpen(true);
+            }}
+          >
+            <MessageSquare className="h-3 w-3" /> تعليق
+          </Button>
+          <div className="h-4 w-px bg-border" />
+          <Button size="sm" variant="gold" className="gap-1 h-7 text-xs px-2" onClick={() => setAskOpen(true)}>
             <BookOpenCheck className="h-3 w-3" /> اسأل الكتاب
           </Button>
         </div>
@@ -726,6 +883,17 @@ const BookReader = () => {
         />
       )}
 
+      {book && (
+        <PageCommentsDrawer
+          open={pageCommentsOpen}
+          onOpenChange={setPageCommentsOpen}
+          bookId={book.id}
+          bookTitle={book.title}
+          currentPage={pageCommentsTargetPage || currentPage}
+          totalPages={numPages}
+        />
+      )}
+
       {ocrOpen && (
         <QuoteOcrCapture
           targetRef={ocrTargetRef}
@@ -733,6 +901,9 @@ const BookReader = () => {
           onExtracted={(extracted) => {
             setOcrOpen(false);
             setQuoteInitialText(extracted);
+            try {
+              localStorage.setItem('reader-last-quote-text', extracted);
+            } catch {}
             setQuoteEditorOpen(true);
             toast.success(t('ocrDone'));
           }}

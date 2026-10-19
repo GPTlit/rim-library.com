@@ -29,7 +29,7 @@ import { AIBulkUpload } from '@/components/admin/AIBulkUpload';
 import { ThemePresetPicker } from '@/components/admin/ThemePresetPicker';
 import { BrandingManager } from '@/components/admin/BrandingManager';
 import { useFeaturedBookIds, useSetFeaturedBookIds } from '@/hooks/useFeaturedBooks';
-import { Bot, Send, Loader2, Settings, Palette, ToggleLeft, Sparkles, Upload, FileText, Image, Image as ImageIcon, Save, Trash2, Pencil, X, ShoppingBag, Bell, Star, Plus, ArrowUp, ArrowDown } from 'lucide-react';
+import { Bot, Send, Loader2, Settings, Palette, ToggleLeft, Layers, Upload, FileText, Image, Image as ImageIcon, Save, Trash2, Pencil, X, ShoppingBag, Bell, Star, Plus, ArrowUp, ArrowDown } from 'lucide-react';
 
 // Truncate a title to the first 4 words followed by … when longer
 const truncateTitle = (title: string, maxWords = 4) => {
@@ -529,7 +529,7 @@ const AdminPanel = () => {
               اللافتات
             </TabsTrigger>
             <TabsTrigger value="branding" className="flex items-center gap-2 px-4 py-2">
-              <Sparkles className="h-4 w-4" />
+              <Layers className="h-4 w-4" />
               الاسم والشعار
             </TabsTrigger>
           </TabsList>
@@ -988,7 +988,7 @@ const AdminPanel = () => {
             <Card className="h-[600px] flex flex-col">
               <CardHeader className="border-b">
                 <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-primary" />
+                  <Bot className="h-5 w-5 text-primary" />
                   مساعد الإدارة الذكي
                 </CardTitle>
               </CardHeader>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles, Upload, FileText, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { Brain, Upload, FileText, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -163,7 +163,7 @@ export const AIBulkUpload = ({ onDone }: { onDone?: () => void }) => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-primary" />
+          <Brain className="h-5 w-5 text-primary" />
           الرفع الذكي بالـ AI
         </CardTitle>
         <p className="text-sm text-muted-foreground">
@@ -240,7 +240,7 @@ export const AIBulkUpload = ({ onDone }: { onDone?: () => void }) => {
             </>
           ) : (
             <>
-              <Sparkles className="h-4 w-4" />
+              <Brain className="h-4 w-4" />
               ابدأ المعالجة التلقائية ({jobs.length})
             </>
           )}

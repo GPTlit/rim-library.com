@@ -1,6 +1,6 @@
 import React from 'react';
 import { Medal, formatReadingDuration, getLocalizedMedal } from '@/lib/medals';
-import { Sparkles, BookOpen, Compass, Shield, Scroll, Sun, Lock, CheckCircle2, Crown, Gem, Star, Award } from 'lucide-react';
+import { Flame, BookOpen, Compass, Shield, Scroll, Sun, Lock, CheckCircle2, Crown, Gem, Star, Award } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import {
@@ -26,7 +26,7 @@ export const MedalIcon: React.FC<{ iconName: Medal['iconName']; className?: stri
 }) => {
   switch (iconName) {
     case 'spark':
-      return <Sparkles className={className} />;
+      return <Flame className={className} />;
     case 'book':
       return <BookOpen className={className} />;
     case 'compass':

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { User, Heart, Lock, Mail, LogOut, BookOpen, StickyNote, Plus, Pencil, Trash2, MoreVertical, Camera, Save, X, Loader2, BookText, Award, Clock, History as HistoryIcon, Sparkles } from 'lucide-react';
+import { User, Heart, Lock, Mail, LogOut, BookOpen, StickyNote, Plus, Pencil, Trash2, MoreVertical, Camera, Save, X, Loader2, BookText, Award, Clock, History as HistoryIcon } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

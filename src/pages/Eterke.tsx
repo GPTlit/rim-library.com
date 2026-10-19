@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Plus, Send, Mic, Image, FileUp, Book, Users, 
-  Loader2, Sparkles, Trash2, Square, Camera, UserPlus, X, MessageCircle, User
+  Loader2, Bot, Trash2, Square, Camera, UserPlus, X, MessageCircle, User
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -1330,7 +1330,7 @@ const Eterke = () => {
                         <Avatar className="h-8 w-8 shrink-0">
                           {isAI ? (
                             <AvatarFallback className="gold-gradient">
-                              <Sparkles className="h-4 w-4 text-primary-foreground" />
+                              <Bot className="h-4 w-4 text-primary-foreground" />
                             </AvatarFallback>
                           ) : (
                             <>

@@ -532,11 +532,26 @@ input, textarea, [contenteditable="true"], .allow-select {
   user-select: text;
 }
 
-/* Allow selecting text inside the reader's PDF text layer so readers can create quotes */
+/* Allow selecting text inside the reader's PDF text layer so readers can create quotes smoothly */
+.react-pdf__Page,
+.react-pdf__Page__canvas,
 .react-pdf__Page__textContent,
-.react-pdf__Page__textContent span {
-  -webkit-user-select: text;
-  user-select: text;
+.react-pdf__Page__textContent span,
+.textLayer,
+.textLayer span,
+.textLayer :is(span, br) {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  -webkit-touch-callout: default !important;
+}
+
+.textLayer {
+  opacity: 1 !important;
+  mix-blend-mode: multiply;
+}
+
+.dark .textLayer {
+  mix-blend-mode: screen;
 }
 
 

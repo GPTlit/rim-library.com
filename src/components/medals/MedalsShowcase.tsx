@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { MEDALS, calculateMedalsProgress, formatReadingDuration, getLocalizedMedal } from '@/lib/medals';
 import { MedalBadge, MedalIcon } from './MedalBadge';
-import { Award, Sparkles, Trophy } from 'lucide-react';
+import { Award, Target, Trophy } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
@@ -61,7 +61,7 @@ export const MedalsShowcase: React.FC<MedalsShowcaseProps> = ({
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold text-primary flex items-center gap-1">
-                    <Sparkles className="h-3.5 w-3.5" /> {nextTargetLabel}
+                    <Target className="h-3.5 w-3.5" /> {nextTargetLabel}
                   </span>
                   <span
                     className={cn(

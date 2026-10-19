@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Check, Sparkles } from 'lucide-react';
+import { Check, Palette } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const PRESETS = [
@@ -57,7 +57,7 @@ export const ThemePresetPicker = () => {
   return (
     <div>
       <div className="flex items-center gap-2 mb-4">
-        <Sparkles className="h-5 w-5 text-primary" />
+        <Palette className="h-5 w-5 text-primary" />
         <h4 className="font-semibold">مظاهر خاصة (مرئية للجميع)</h4>
       </div>
       <p className="text-sm text-muted-foreground mb-4">

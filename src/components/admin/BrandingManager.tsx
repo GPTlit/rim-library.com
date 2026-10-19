@@ -8,7 +8,8 @@ import { useBranding, BrandingSettings } from '@/contexts/BrandingContext';
 import { useBrandingConfig, useSaveBranding, Branding } from '@/hooks/useBranding';
 import { supabase } from '@/integrations/supabase/client';
 import {
-  Sparkles,
+  Layers,
+  Eye,
   Upload,
   Image as ImageIcon,
   Save,
@@ -210,7 +211,7 @@ export const BrandingManager: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <CardTitle className="text-xl flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-primary" />
+                <Layers className="h-5 w-5 text-primary" />
                 إدارة الاسم والشعار والأيقونة المفضلة (Favicon)
               </CardTitle>
               <CardDescription>
@@ -489,7 +490,7 @@ export const BrandingManager: React.FC = () => {
       <Card className="border-border">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-amber-500" />
+            <Eye className="h-5 w-5 text-amber-500" />
             معاينة مباشرة في الوقت الفعلي (Live Branding Preview)
           </CardTitle>
           <CardDescription>

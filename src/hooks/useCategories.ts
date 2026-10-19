@@ -14,7 +14,7 @@ export const allCategories: Category[] = [
   { id: '6', name: 'philosophy', nameAr: 'فلسفة', icon: '💭', bookCount: 0 },
   { id: '7', name: 'kids', nameAr: 'كتب أطفال', icon: '🧒', bookCount: 0 },
   { id: '8', name: 'school', nameAr: 'كتب مدرسية', icon: '🎓', bookCount: 0 },
-  { id: '9', name: 'poetry', nameAr: 'شعر', icon: '✨', bookCount: 0 },
+  { id: '9', name: 'poetry', nameAr: 'شعر', icon: '🪶', bookCount: 0 },
   { id: '10', name: 'self-help', nameAr: 'تطوير الذات', icon: '🌱', bookCount: 0 },
   
   // New fiction genres
@@ -26,7 +26,7 @@ export const allCategories: Category[] = [
   { id: '16', name: 'romance', nameAr: 'رومانسي', icon: '💕', bookCount: 0 },
   { id: '17', name: 'historical-fiction', nameAr: 'تاريخي خيالي', icon: '⚔️', bookCount: 0 },
   { id: '18', name: 'adventure', nameAr: 'مغامرات', icon: '🗺️', bookCount: 0 },
-  { id: '19', name: 'action', nameAr: 'أكشن', icon: '💥', bookCount: 0 },
+  { id: '19', name: 'action', nameAr: 'أكشن', icon: '🎯', bookCount: 0 },
   { id: '20', name: 'drama', nameAr: 'دراما', icon: '🎭', bookCount: 0 },
   { id: '21', name: 'comedy', nameAr: 'كوميديا', icon: '😂', bookCount: 0 },
   

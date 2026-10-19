@@ -6,6 +6,7 @@ import { HeroSection } from '@/components/home/HeroSection';
 import { CategoriesSection } from '@/components/home/CategoriesSection';
 import { PromoBlocks } from '@/components/home/PromoBlocks';
 import { RecentlyViewedBooks } from '@/components/home/RecentlyViewedBooks';
+import { RecommendedBooks } from '@/components/home/RecommendedBooks';
 import { ContinueReadingSection } from '@/components/home/ContinueReadingSection';
 import { BookCarousel } from '@/components/home/BookCarousel';
 import { FeaturedBooks } from '@/components/home/FeaturedBooks';
@@ -77,6 +78,7 @@ const Index = () => {
         <HeroCarousel />
         <ContinueReadingSection />
         <RecentlyViewedBooks />
+        <RecommendedBooks />
         <FeaturedBooks />
         <PromoBlocks slot={1} />
         <CategoriesSection />
@@ -97,6 +99,7 @@ const Index = () => {
       <HeroCarousel />
       <ContinueReadingSection />
       <RecentlyViewedBooks />
+      <RecommendedBooks />
       <BookCarousel
         title={t('featuredPicks')}
         icon={<Award className="h-5 w-5" />}
