@@ -48,7 +48,6 @@ export default defineConfig(({ mode }) => ({
     // No manualChunks: splitting React away from libraries that use it caused a
     // load-order bug ("reading 'forwardRef'") that left published sites blank.
   },
-  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
