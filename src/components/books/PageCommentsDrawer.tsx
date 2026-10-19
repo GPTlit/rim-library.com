@@ -19,6 +19,10 @@ interface PageCommentsDrawerProps {
   bookTitle?: string;
   currentPage: number;
   totalPages?: number;
+  /** Position (percent of page) where a new comment will be pinned */
+  anchor?: { x: number; y: number } | null;
+  /** Only show these comment ids (a tapped marker) */
+  focusIds?: string[] | null;
 }
 
 export const PageCommentsDrawer = ({
@@ -28,14 +32,18 @@ export const PageCommentsDrawer = ({
   bookTitle,
   currentPage,
   totalPages,
+  anchor = null,
+  focusIds = null,
 }: PageCommentsDrawerProps) => {
   const { user } = useAuth();
   const { language } = useLanguage();
   const { toast } = useToast();
   const [commentText, setCommentText] = useState('');
 
-  const { pageComments, isLoading, addPageComment, isAdding, deletePageComment, toggleLike } =
+  const { pageComments: allPageComments, isLoading, addPageComment, isAdding, deletePageComment, toggleLike } =
     usePageComments(bookId, currentPage);
+
+  const pageComments = focusIds ? allPageComments.filter((c) => focusIds.includes(c.id)) : allPageComments;
 
   const getLocale = () => {
     switch (language) {
@@ -53,7 +61,8 @@ export const PageCommentsDrawer = ({
     }
 
     try {
-      await addPageComment({ page: currentPage, text: commentText.trim() });
+      await addPageComment({ page: currentPage, text: commentText.trim(), x: anchor?.x ?? null, y: anchor?.y ?? null });
+      onOpenChange(false);
       setCommentText('');
       toast({ title: 'تم نشر تعليقك ليراه جميع القراء على هذه الصفحة' });
     } catch (err: any) {
