@@ -91,7 +91,50 @@ const BookReader = () => {
   const ocrTargetRef = useRef<HTMLDivElement | null>(null);
   const [pageCommentsOpen, setPageCommentsOpen] = useState(false);
   const [pageCommentsTargetPage, setPageCommentsTargetPage] = useState<number>(1);
-  const { pageCommentsCountMap } = usePageComments(id || '', pageCommentsTargetPage || currentPage);
+  const { pageCommentsCountMap, allComments: allPageComments } = usePageComments(id || '', pageCommentsTargetPage || currentPage);
+  const [commentAnchor, setCommentAnchor] = useState<{ x: number; y: number } | null>(null);
+  const [commentFocusIds, setCommentFocusIds] = useState<string[] | null>(null);
+  const holdRef = useRef<{ timer: number; sx: number; sy: number } | null>(null);
+  const [holdPoint, setHoldPoint] = useState<{ page: number; x: number; y: number } | null>(null);
+  const cancelHold = () => {
+    if (holdRef.current) window.clearTimeout(holdRef.current.timer);
+    holdRef.current = null;
+    setHoldPoint(null);
+  };
+  const startHold = (e: React.PointerEvent<HTMLDivElement>, pageNum: number) => {
+    if ((e.target as HTMLElement).closest('button')) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    cancelHold();
+    setHoldPoint({ page: pageNum, x, y });
+    const timer = window.setTimeout(() => {
+      holdRef.current = null;
+      setHoldPoint(null);
+      try { window.getSelection()?.removeAllRanges(); } catch { /* ignore */ }
+      if (!user) {
+        toast.error('سجّل الدخول أولاً لتضيف تعليقك على الصفحة');
+        return;
+      }
+      if (navigator.vibrate) navigator.vibrate(30);
+      setCommentFocusIds(null);
+      setCommentAnchor({ x, y });
+      setPageCommentsTargetPage(pageNum);
+      setPageCommentsOpen(true);
+    }, 1500);
+    holdRef.current = { timer, sx: e.clientX, sy: e.clientY };
+  };
+  const moveHold = (e: React.PointerEvent) => {
+    const h = holdRef.current;
+    if (h && Math.hypot(e.clientX - h.sx, e.clientY - h.sy) > 10) cancelHold();
+  };
+  const openMarker = (pageNum: number, ids: string[]) => {
+    setCommentAnchor(null);
+    setCommentFocusIds(ids);
+    setPageCommentsTargetPage(pageNum);
+    setPageCommentsOpen(true);
+  };
   const currentPageCommentsCount = pageCommentsCountMap.get(currentPage) || 0;
 
   // Track visual reading scroll progress
@@ -758,27 +801,46 @@ const BookReader = () => {
                     data-page={pageNum}
                     ref={(node) => pageRef(node, pageNum)}
                     className="relative group/page"
+                    onPointerDown={(e) => startHold(e, pageNum)}
+                    onPointerMove={moveHold}
+                    onPointerUp={cancelHold}
+                    onPointerCancel={cancelHold}
+                    onPointerLeave={cancelHold}
+                    onContextMenu={(e) => e.preventDefault()}
                   >
-                    {/* Wattpad-style On-Page Public Comments Trigger */}
-                    <div className="absolute top-3 left-3 z-20">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPageCommentsTargetPage(pageNum);
-                          setPageCommentsOpen(true);
-                        }}
-                        className={cn(
-                          "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold shadow-md transition-all duration-200 backdrop-blur-md cursor-pointer select-none",
-                          pageCommentsCount > 0
-                            ? "bg-primary text-primary-foreground hover:scale-105 hover:shadow-lg ring-2 ring-primary/30 opacity-100"
-                            : "bg-background/90 hover:bg-background text-foreground/80 hover:text-foreground border border-border/80 hover:border-primary/50 opacity-70 group-hover/page:opacity-100 hover:opacity-100 hover:scale-105"
-                        )}
-                        title={`مناقشات القراء على صفحة ${pageNum} (${pageCommentsCount} تعليق)`}
-                      >
-                        <MessageSquare className="h-3.5 w-3.5" />
-                        <span>{pageCommentsCount > 0 ? pageCommentsCount : '+ تعليق'}</span>
-                      </button>
-                    </div>
+                    {/* Wattpad-style pinned comment markers (hold 1.5s on the page to add one) */}
+                    {(() => {
+                      const pinned = allPageComments.filter((c) => c.page === pageNum);
+                      if (pinned.length === 0) return null;
+                      const groups: { x: number; y: number; ids: string[] }[] = [];
+                      pinned.forEach((c) => {
+                        const cx = c.x ?? 4;
+                        const cy = c.y ?? 3;
+                        const g = groups.find((gg) => Math.abs(gg.x - cx) < 6 && Math.abs(gg.y - cy) < 3);
+                        if (g) g.ids.push(c.id);
+                        else groups.push({ x: cx, y: cy, ids: [c.id] });
+                      });
+                      return groups.map((g) => (
+                        <button
+                          key={g.ids[0]}
+                          type="button"
+                          onClick={(ev) => { ev.stopPropagation(); openMarker(pageNum, g.ids); }}
+                          onPointerDown={(ev) => ev.stopPropagation()}
+                          className="absolute z-20 -translate-x-1/2 -translate-y-full flex items-center gap-0.5 rounded-full rounded-bl-none bg-primary/85 text-primary-foreground px-1.5 py-0.5 text-[10px] font-bold shadow-md opacity-80 hover:opacity-100 hover:scale-110 transition-all"
+                          style={{ left: `${Math.min(97, Math.max(3, g.x))}%`, top: `${Math.min(99, Math.max(4, g.y))}%` }}
+                          aria-label={`${g.ids.length} تعليق`}
+                        >
+                          <MessageSquare className="h-3 w-3" />
+                          {g.ids.length > 1 && <span>{g.ids.length}</span>}
+                        </button>
+                      ));
+                    })()}
+                    {holdPoint?.page === pageNum && (
+                      <span
+                        className="pointer-events-none absolute z-20 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-primary animate-ping"
+                        style={{ left: `${holdPoint.x}%`, top: `${holdPoint.y}%` }}
+                      />
+                    )}
 
                     {/* Bookmark indicators on the page */}
                     {pageBookmarks.length > 0 && (
@@ -891,6 +953,8 @@ const BookReader = () => {
           bookTitle={book.title}
           currentPage={pageCommentsTargetPage || currentPage}
           totalPages={numPages}
+          anchor={commentAnchor}
+          focusIds={commentFocusIds}
         />
       )}
 

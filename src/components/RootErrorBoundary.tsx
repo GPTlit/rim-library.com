@@ -44,7 +44,7 @@ export class RootErrorBoundary extends Component<Props, State> {
         window.location.href = '/';
       });
     } else {
-      window.location.href = '/';
+      globalThis.location.href = '/';
     }
   };
 
@@ -78,7 +78,7 @@ export class RootErrorBoundary extends Component<Props, State> {
             </button>
           </div>
 
-          {process.env.NODE_ENV !== 'production' && this.state.error && (
+          {import.meta.env.DEV && this.state.error && (
             <pre className="mt-8 p-4 bg-stone-900 border border-stone-800 rounded-lg text-xs text-stone-400 text-left max-w-lg overflow-auto" dir="ltr">
               {this.state.error.message}
             </pre>

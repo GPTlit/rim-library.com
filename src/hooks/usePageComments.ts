@@ -10,6 +10,8 @@ export interface PageComment {
   content: string;
   cleanText: string;
   page: number;
+  x: number | null;
+  y: number | null;
   created_at: string;
   parent_id: string | null;
   likes_count: number;
@@ -23,7 +25,7 @@ export interface PageComment {
 }
 
 // Helper to parse page number from comment content
-export const parseCommentPage = (raw: string): { page: number | null; text: string } => {
+export const parseCommentPage = (raw: string): { page: number | null; text: string; x?: number | null; y?: number | null } => {
   if (!raw) return { page: null, text: '' };
 
   // Try JSON format { page: 3, text: '...' }
@@ -31,7 +33,7 @@ export const parseCommentPage = (raw: string): { page: number | null; text: stri
     try {
       const parsed = JSON.parse(raw);
       if (typeof parsed.page === 'number') {
-        return { page: parsed.page, text: parsed.text || '' };
+        return { page: parsed.page, text: parsed.text || '', x: typeof parsed.x === 'number' ? parsed.x : null, y: typeof parsed.y === 'number' ? parsed.y : null };
       }
     } catch {
       // fallback
@@ -108,6 +110,8 @@ export const usePageComments = (bookId: string, currentPage?: number) => {
             ...comment,
             cleanText: parsed.text || comment.content,
             page: parsed.page ?? 1, // default to page 1 if not tagged
+            x: parsed.x ?? null,
+            y: parsed.y ?? null,
             likes_count: count || 0,
             user_liked: userLiked,
             author: profilesMap.get(comment.user_id) || {
@@ -142,9 +146,12 @@ export const usePageComments = (bookId: string, currentPage?: number) => {
 
   // Mutation to add a public page comment
   const addPageCommentMutation = useMutation({
-    mutationFn: async ({ page, text }: { page: number; text: string }) => {
+    mutationFn: async ({ page, text, x, y }: { page: number; text: string; x?: number | null; y?: number | null }) => {
       if (!user) throw new Error('Must be logged in');
-      const taggedContent = `[p:${page}] ${text.trim()}`;
+      const taggedContent =
+        typeof x === 'number' && typeof y === 'number'
+          ? JSON.stringify({ page, x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10, text: text.trim() })
+          : `[p:${page}] ${text.trim()}`;
 
       const { data, error } = await supabase
         .from('comments')

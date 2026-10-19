@@ -35,14 +35,14 @@ export function useWidgetSync() {
 
         // 1. Featured & daily book
         try {
-          const { data: featuredData } = await supabase
+          const { data: featuredData } = await (supabase as any)
             .from('books')
             .select('id,title,author,cover_url,description')
             .eq('is_featured', true)
             .limit(1)
             .maybeSingle();
 
-          const fallbackBook = featuredData || (await supabase.from('books').select('id,title,author,cover_url,description').limit(1).maybeSingle()).data;
+          const fallbackBook = featuredData || (await (supabase as any).from('books').select('id,title,author,cover_url,description').limit(1).maybeSingle()).data;
           if (fallbackBook) {
             const b = toWidgetBook(fallbackBook);
             payload.dailyBook = { ...b, message: 'اقتراح اليوم من مكتبة القهوة' };
@@ -52,7 +52,7 @@ export function useWidgetSync() {
 
         // 2. Discover books
         try {
-          const { data: discoverData } = await supabase
+          const { data: discoverData } = await (supabase as any)
             .from('books')
             .select('id,title,author,cover_url,description')
             .limit(20);
@@ -65,7 +65,7 @@ export function useWidgetSync() {
         try {
           let foundContinue = false;
           if (signedIn) {
-            const { data: historyData } = await supabase
+            const { data: historyData } = await (supabase as any)
               .from('reading_history')
               .select('book_id,current_page,books(id,title,author,cover_url,total_pages)')
               .eq('user_id', user!.id)
@@ -128,7 +128,7 @@ export function useWidgetSync() {
 
           let quotesList = bqData || [];
           if (!quotesList.length) {
-            const { data: qData } = await supabase
+            const { data: qData } = await (supabase as any)
               .from('quotes')
               .select('id,text,book_id,books(title,author)')
               .order('created_at', { ascending: false })

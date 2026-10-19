@@ -17,7 +17,6 @@ export const VerifiedBadge = ({ className, title = 'حساب موثّق' }: Prop
     className={cn('inline-block h-5 w-5 shrink-0 align-middle select-none', className)}
     role="img"
     aria-label={title}
-    title={title}
   >
     {/* Meta / Instagram 12-point scalloped starburst rosette in official Meta blue */}
     <path
