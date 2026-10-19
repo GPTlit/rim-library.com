@@ -7,11 +7,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 const content = {
   ar: {
-    welcome: 'مرحباً بك في مكتبة القهوة! 📚',
+    welcome: 'مرحباً بك في مكتبة القهوة!',
     message: 'قبل أن تبدأ بالاستكشاف، يرجى مراجعة سياسة الخصوصية الخاصة بنا. بتحديد "أوافق"، فإنك توافق على سياسة الخصوصية وشروط الاستخدام.',
-    agree: '✅ أوافق وأتابع',
-    readPrivacy: '📄 قراءة سياسة الخصوصية',
-    contactMe: '📞 تواصل معي',
+    agree: 'أوافق وأتابع',
+    readPrivacy: 'قراءة سياسة الخصوصية',
+    contactMe: 'تواصل معي',
     checkboxLabel: 'لقد قرأت وأوافق على سياسة الخصوصية',
     closePrivacy: 'إغلاق',
     privacyTitle: 'سياسة الخصوصية',
@@ -35,16 +35,16 @@ const content = {
 نأخذ الأمان على محمل الجد ونستخدم تدابير معيارية في الصناعة لحماية بياناتك.
 
 تواصل معنا:
-📧 البريد الإلكتروني: salemmoustapha15@gmail.com
-📞 الهاتف / واتساب: +222 26749039
+البريد الإلكتروني: salemmoustapha15@gmail.com
+الهاتف / واتساب: +222 26749039
 Snapchat: myself15_10`,
   },
   en: {
-    welcome: 'Welcome to مكتبة القهوة! 📚',
+    welcome: 'Welcome to مكتبة القهوة!',
     message: 'Before you start exploring, please review our Privacy Policy. By checking "I Agree," you consent to our Privacy Policy and Terms of Use.',
-    agree: '✅ I Agree & Continue',
-    readPrivacy: '📄 Read Privacy Policy',
-    contactMe: '📞 Contact Me',
+    agree: 'I Agree & Continue',
+    readPrivacy: 'Read Privacy Policy',
+    contactMe: 'Contact Me',
     checkboxLabel: 'I have read and agree to the Privacy Policy',
     closePrivacy: 'Close',
     privacyTitle: 'Privacy Policy',
@@ -68,16 +68,16 @@ Security:
 We take security seriously and use industry-standard measures to protect your data.
 
 Contact Us:
-📧 Email: salemmoustapha15@gmail.com
-📞 Phone / WhatsApp: +222 26749039
+Email: salemmoustapha15@gmail.com
+Phone / WhatsApp: +222 26749039
 Snapchat: myself15_10`,
   },
   fr: {
-    welcome: 'Bienvenue dans مكتبة القهوة ! 📚',
+    welcome: 'Bienvenue dans مكتبة القهوة !',
     message: 'Avant de commencer à explorer, veuillez consulter notre Politique de Confidentialité. En cochant "J\'accepte", vous consentez à notre Politique de Confidentialité et Conditions d\'Utilisation.',
-    agree: '✅ J\'accepte et je continue',
-    readPrivacy: '📄 Lire la Politique de Confidentialité',
-    contactMe: '📞 Contactez-moi',
+    agree: 'J\'accepte et je continue',
+    readPrivacy: 'Lire la Politique de Confidentialité',
+    contactMe: 'Contactez-moi',
     checkboxLabel: 'J\'ai lu et j\'accepte la Politique de Confidentialité',
     closePrivacy: 'Fermer',
     privacyTitle: 'Politique de Confidentialité',
@@ -101,8 +101,8 @@ Sécurité :
 Nous prenons la sécurité au sérieux et utilisons des mesures standard pour protéger vos données.
 
 Nous Contacter :
-📧 Email : salemmoustapha15@gmail.com
-📞 Téléphone / WhatsApp : +222 26749039
+Email : salemmoustapha15@gmail.com
+Téléphone / WhatsApp : +222 26749039
 Snapchat : myself15_10`,
   },
 };
