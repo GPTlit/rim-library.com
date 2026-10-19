@@ -44,25 +44,9 @@ export default defineConfig(({ mode }) => ({
     target: "es2020",
     cssCodeSplit: true,
     sourcemap: false,
-    chunkSizeWarningLimit: 1500,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes("node_modules/react/") || id.includes("node_modules/react-dom/") || id.includes("node_modules/react-router-dom/")) {
-            return "vendor-react";
-          }
-          if (id.includes("node_modules/@radix-ui/")) {
-            return "vendor-radix";
-          }
-          if (id.includes("node_modules/lucide-react/")) {
-            return "vendor-icons";
-          }
-          if (id.includes("node_modules/@tanstack/react-query/")) {
-            return "vendor-query";
-          }
-        },
-      },
-    },
+    chunkSizeWarningLimit: 3000,
+    // No manualChunks: splitting React away from libraries that use it caused a
+    // load-order bug ("reading 'forwardRef'") that left published sites blank.
   },
   resolve: {
     alias: {

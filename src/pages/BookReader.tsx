@@ -493,8 +493,8 @@ const BookReader = () => {
 
             {/* Right section: Responsive buttons + Three-Lines Menu Button (☰) */}
             <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-              {/* Scaling / Zoom Controls visible on md+ screens; touch pinch-to-zoom handles mobile */}
-              <div className="hidden md:flex items-center gap-0.5 sm:gap-1 bg-secondary/60 rounded-full px-1 sm:px-1.5 py-0.5 border border-border/60">
+              {/* Zoom controls visible on every screen size, alongside pinch-to-zoom */}
+              <div className="flex items-center gap-0.5 sm:gap-1 bg-secondary/60 rounded-full px-0.5 sm:px-1.5 py-0.5 border border-border/60">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -508,7 +508,7 @@ const BookReader = () => {
                 <button
                   type="button"
                   onClick={() => setScale(1.0)}
-                  className="text-[11px] font-mono font-semibold px-1 min-w-[2.2rem] text-center select-none hover:text-primary transition-colors"
+                  className="hidden sm:inline text-[11px] font-mono font-semibold px-1 min-w-[2.2rem] text-center select-none hover:text-primary transition-colors"
                   title="إعادة تعيين الحجم 100%"
                 >
                   {Math.round(scale * 100)}%
