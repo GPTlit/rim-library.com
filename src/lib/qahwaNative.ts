@@ -29,6 +29,20 @@ export interface WidgetPayload {
   featured?: WidgetBook;
   quote?: { id: string; text: string; bookId: string; bookTitle: string; author?: string };
   updatedAt: string;
+  language?: string;
+  lastReadAt?: string;
+  progress?: number;
+  readingSeconds?: number;
+  mascot?: string;
+}
+
+export interface LocalPdf {
+  id: string;
+  title: string;
+  fileName: string;
+  uri: string;
+  size: number;
+  modifiedAt: string;
 }
 
 export interface QahwaNativePlugin {
@@ -42,12 +56,15 @@ export interface QahwaNativePlugin {
   readFile(opts: { uri: string }): Promise<{ base64: string }>;
   /** Stores widget data as JSON and asks all Qahwa widgets to refresh. */
   updateWidgets(opts: { json: string }): Promise<void>;
+  getPendingPdf(): Promise<{ pdf?: LocalPdf }>;
+  listDevicePdfs(): Promise<{ files: LocalPdf[]; limited: boolean }>;
+  getReadablePdf(opts: { uri: string }): Promise<{ uri: string }>;
 }
 
 export const QahwaNative = registerPlugin<QahwaNativePlugin>('QahwaNative');
 
 export const isQahwaNativeAvailable = () =>
-  Capacitor.getPlatform() === 'android' && Capacitor.isPluginAvailable('QahwaNative');
+  Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('QahwaNative');
 
 /** Deep link scheme used by widgets: qahwa://book/<id>?page=<n>, qahwa://quote/<id>, qahwa://downloads */
 export const QAHWA_SCHEME = 'qahwa';
