@@ -7,6 +7,7 @@ android {
     compileSdk = rootProject.ext.compileSdkVersion
     buildFeatures { compose true }
     compileOptions {
+        coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_21
         targetCompatibility JavaVersion.VERSION_21
     }
@@ -39,6 +40,7 @@ repositories {
 }
 
 dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
     implementation 'androidx.glance:glance-appwidget:1.1.1'
     implementation 'androidx.work:work-runtime-ktx:2.10.0'
     implementation 'androidx.compose.runtime:runtime:1.7.8'

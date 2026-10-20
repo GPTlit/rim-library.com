@@ -6,3 +6,4 @@
 - The reader uses a bundled PDF worker, bounded adjacent-page rendering, and a memoized page component to work offline and avoid growing canvas memory.
 - Native document access uses granted content URIs and app-private copies; automatic discovery must never bypass scoped-storage permissions.
 - Widget payloads share the reader's persisted page position and refresh on reading events; native OS scheduling is best-effort, not continuous animation.
+- Android Glance providers use distinct widget classes so updates cannot mix widget types; iOS WidgetKit integration source stays under native/ios until an Xcode target and App Group are configured.
