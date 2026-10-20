@@ -55,6 +55,34 @@
         </provider>
 
         <!-- Qahwa home-screen widgets -->
+        <receiver android:name=".widgets.ResumeGlanceReceiver" android:exported="true" android:label="@string/widget_continue_reading_label">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/glance_resume_info" />
+        </receiver>
+        <receiver android:name=".widgets.DailyGlanceReceiver" android:exported="true" android:label="@string/widget_daily_book_label">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/glance_daily_info" />
+        </receiver>
+        <receiver android:name=".widgets.DiscoverGlanceReceiver" android:exported="true" android:label="@string/widget_discover_label">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/glance_discover_info" />
+        </receiver>
+        <receiver android:name=".widgets.CollectionGlanceReceiver" android:exported="true" android:label="@string/widget_collection_label">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/glance_collection_info" />
+        </receiver>
+        <receiver android:name=".widgets.QuoteGlanceReceiver" android:exported="true" android:label="@string/widget_quote_label">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/glance_quote_info" />
+        </receiver>
+        <receiver android:name=".widgets.StreakGlanceReceiver" android:exported="true" android:label="@string/widget_streak_label">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/glance_streak_info" />
+        </receiver>
+        <receiver android:name=".widgets.MinimalGlanceReceiver" android:exported="true" android:label="@string/widget_minimal_label">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/glance_minimal_info" />
+        </receiver>
         <receiver
             android:name=".widgets.DailyBookWidgetProvider"
             android:exported="true"

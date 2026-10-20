@@ -17,4 +17,6 @@
     <string name="widget_minimal_description">واجهة مصغّرة لفتح آخر كتاب بسرعة.</string>
     <string name="widget_quote_label">اقتباس - قهوة</string>
     <string name="widget_quote_description">اقتباس مُلهم من كتبك مع رابط لمصدره.</string>
+    <string name="widget_streak_label">وقت القراءة - قهوة</string>
+    <string name="widget_streak_description">وقت القراءة والعودة لكتابك خلال اليوم.</string>
 </resources>

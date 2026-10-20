@@ -34,7 +34,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 /** Seven real Glance widgets; providers read cached shared state without network calls. */
-class QahwaGlanceWidget(private val kind: String = "resume") : GlanceAppWidget() {
+open class QahwaGlanceWidget(private val kind: String = "resume") : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Exact
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val data = WidgetDataHelper.getPayload(context) ?: JSONObject()
@@ -121,21 +121,27 @@ class QahwaGlanceWidget(private val kind: String = "resume") : GlanceAppWidget()
     }
 }
 
-abstract class QahwaGlanceReceiver(private val kind: String) : GlanceAppWidgetReceiver() {
-    override val glanceAppWidget: GlanceAppWidget = QahwaGlanceWidget(kind)
+class ResumeWidget : QahwaGlanceWidget("resume")
+class DailyWidget : QahwaGlanceWidget("daily")
+class DiscoverWidget : QahwaGlanceWidget("discover")
+class CollectionWidget : QahwaGlanceWidget("collection")
+class QuoteWidget : QahwaGlanceWidget("quote")
+class StreakWidget : QahwaGlanceWidget("streak")
+class MinimalWidget : QahwaGlanceWidget("minimal")
+abstract class QahwaGlanceReceiver : GlanceAppWidgetReceiver() {
     override fun onEnabled(context: Context) { super.onEnabled(context); QahwaWidgetRefresh.schedule(context) }
 }
-class ResumeGlanceReceiver : QahwaGlanceReceiver("resume")
-class DailyGlanceReceiver : QahwaGlanceReceiver("daily")
-class DiscoverGlanceReceiver : QahwaGlanceReceiver("discover")
-class CollectionGlanceReceiver : QahwaGlanceReceiver("collection")
-class QuoteGlanceReceiver : QahwaGlanceReceiver("quote")
-class StreakGlanceReceiver : QahwaGlanceReceiver("streak")
-class MinimalGlanceReceiver : QahwaGlanceReceiver("minimal")
+class ResumeGlanceReceiver : QahwaGlanceReceiver() { override val glanceAppWidget = ResumeWidget() }
+class DailyGlanceReceiver : QahwaGlanceReceiver() { override val glanceAppWidget = DailyWidget() }
+class DiscoverGlanceReceiver : QahwaGlanceReceiver() { override val glanceAppWidget = DiscoverWidget() }
+class CollectionGlanceReceiver : QahwaGlanceReceiver() { override val glanceAppWidget = CollectionWidget() }
+class QuoteGlanceReceiver : QahwaGlanceReceiver() { override val glanceAppWidget = QuoteWidget() }
+class StreakGlanceReceiver : QahwaGlanceReceiver() { override val glanceAppWidget = StreakWidget() }
+class MinimalGlanceReceiver : QahwaGlanceReceiver() { override val glanceAppWidget = MinimalWidget() }
 
 class QahwaWidgetRefresh(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
-        for (kind in listOf("resume", "daily", "discover", "collection", "quote", "streak", "minimal")) QahwaGlanceWidget(kind).updateAll(applicationContext)
+        for (widget in listOf(ResumeWidget(), DailyWidget(), DiscoverWidget(), CollectionWidget(), QuoteWidget(), StreakWidget(), MinimalWidget())) widget.updateAll(applicationContext)
         return Result.success()
     }
     companion object {
