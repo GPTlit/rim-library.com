@@ -1,3 +1,4 @@
+/// <reference types="bun" />
 import { describe, expect, test } from 'bun:test';
 import { COMMENT_HOLD_MS, mascotState, pageWindow, readingPercent } from './readerState';
 
