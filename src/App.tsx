@@ -95,6 +95,7 @@ const App = () => (
                   <Route path="/u/:username" element={<AuthorProfile />} />
                   {/* Protected routes - require authentication */}
                   <Route path="/book/:id/read" element={<ProtectedRoute><BookReader /></ProtectedRoute>} />
+                  <Route path="/local/:id/read" element={<ProtectedRoute><BookReader /></ProtectedRoute>} />
                   <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
                   <Route path="/write" element={<ProtectedRoute><Write /></ProtectedRoute>} />
                   <Route path="/write/:id" element={<ProtectedRoute><WriteStory /></ProtectedRoute>} />
