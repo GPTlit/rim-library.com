@@ -10,10 +10,13 @@ import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useOfflineBooks, DeviceDownloadEntry } from '@/hooks/useOfflineBooks';
 import { isQahwaNativeAvailable } from '@/lib/qahwaNative';
+import type { LocalPdf } from '@/lib/qahwaNative';
+import { localPdfs, refreshLocalPdfs } from '@/lib/localPdfs';
 
 const Downloads = () => {
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const [localFiles, setLocalFiles] = useState<LocalPdf[]>(localPdfs);
   const {
     offlineBooks,
     isLoading,
@@ -33,6 +36,7 @@ const Downloads = () => {
     if (!isNative) return;
     (async () => {
       const removed = await refreshDeviceDownloads();
+      try { const result = await refreshLocalPdfs(); setLocalFiles(result.files); } catch { /* retained imports remain */ }
       if (removed.length > 0) {
         toast({
           title: t('staleDownloadsRemoved'),
@@ -48,11 +52,14 @@ const Downloads = () => {
     ? deviceDownloads.reduce((sum, d) => sum + (d.size || 0), 0)
     : getTotalStorageUsed();
 
-  const handleRemove = (bookId: string, title: string, deleteFile: boolean) => {
-    if (isNative) {
-      removeDeviceDownload(bookId, deleteFile);
+  const handleRemove = async (bookId: string, title: string, deleteFile: boolean) => {
+    try {
+      if (isNative) await removeDeviceDownload(bookId, deleteFile);
+      if (deleteFile || !isNative) await removeOfflineBook(bookId);
+    } catch {
+      toast({ title: language === 'ar' ? 'لم يسمح الجهاز بحذف الملف' : language === 'fr' ? 'Suppression refusée par l’appareil' : 'The device did not allow file deletion', variant: 'destructive' });
+      return;
     }
-    removeOfflineBook(bookId);
 
     toast({
       title: t('deleted'),
@@ -225,6 +232,22 @@ const Downloads = () => {
                 <Button variant="gold">{t('browseLibraryAction')}</Button>
               </Link>
             </div>
+          )}
+
+          {isNative && localFiles.length > 0 && (
+            <section className="mt-8 border-t border-border pt-6">
+              <h2 className="text-xl font-bold text-foreground mb-4">{language === 'ar' ? 'ملفات PDF على الجهاز' : language === 'fr' ? 'PDF sur cet appareil' : 'Device PDFs'}</h2>
+              <div className="space-y-3">
+                {localFiles.filter(p => !deviceDownloads.some(d => d.uri === p.uri)).map(pdf => (
+                  <div key={pdf.id} className="flex flex-wrap items-center gap-3 border-b border-border py-3">
+                    <BookOpen className="h-6 w-6 shrink-0 text-primary" />
+                    <div className="min-w-0 flex-1"><h3 className="truncate font-semibold text-foreground">{pdf.title}</h3>
+                      <p className="text-xs text-muted-foreground truncate">{pdf.fileName} · {formatFileSize(pdf.size)}</p></div>
+                    <Button asChild size="sm" variant="outline"><Link to={`/local/${pdf.id}/read`}><BookOpen className="h-4 w-4 mr-2" />{language === 'ar' ? 'قراءة' : language === 'fr' ? 'Lire' : 'Read'}</Link></Button>
+                  </div>
+                ))}
+              </div>
+            </section>
           )}
 
           {/* Help Text */}

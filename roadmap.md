@@ -1,5 +1,11 @@
 # Roadmap
+- [x] Anchor page comments in the margin after a 2.5 second hold; signed-in hold and zoom verified
+- [x] Bundle offline PDF worker, bound adjacent canvases, memoize PDF pages, avoid loading the whole bookshelf
+- [x] Android external PDF opening and permission-aware local bookshelf source implemented
+- [x] Seven Glance widget options, six mascot states, twelve static frames, event-based sync and best-effort updates implemented
+- [ ] Native device verification: Android SDK/Java and a real phone unavailable in this workspace
+- [ ] iOS widgets activation: WidgetKit/Capacitor source and assets ready; Xcode app target, App Group signing and Mac required
 - [x] Store links in Name & Logo + mobile "Download to your phone" prompt
 - [ ] Device PDF downloads: list/delete/offline helpers done; BookDetail download button + BookReader offline source still to wire
-- [ ] Android widgets: project, plugin, layouts done; widget classes, manifest, deep links, widget sync in progress
+- [x] Android widget source, manifest, deep links and sync completed; native verification tracked above
 - [ ] Quote cards: database file, feed, cards done; editor, OCR, reader buttons, quote page in progress; database change not applied yet

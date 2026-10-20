@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowRight, Download, ZoomIn, ZoomOut, Loader2, WifiOff, BookmarkPlus, Bookmark as BookmarkIcon, List, Moon, Sun, RotateCw, RotateCcw, Smartphone, Check, Menu, Quote as QuoteIcon, ScanLine, TextCursorInput, Copy, MessageSquare } from 'lucide-react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
@@ -35,29 +35,35 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import { ReaderPdfPage } from '@/components/books/ReaderPdfPage';
+import { COMMENT_HOLD_MS, pageWindow, readPosition, savePosition } from '@/lib/readerState';
+import { localPdfs, readableLocalPdf } from '@/lib/localPdfs';
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+pdfjs.GlobalWorkerOptions.workerSrc = new URL('../../node_modules/react-pdf/node_modules/pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
+const PDF_OPTIONS = { rangeChunkSize: 131072, disableAutoFetch: true, disableStream: false };
 
 const BookReader = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const localEntry = id ? localPdfs().find(p => p.id === id) : undefined;
   const { data: book, isLoading } = useBook(id || '');
   const { getOfflineBookUrl } = useOfflineBooks();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   // Authentication gating: signed-out visitors cannot open the reader
   useEffect(() => {
-    if (!user) {
+    if (!authLoading && !user) {
       toast.error('تسجيل الدخول مطلوب للقراءة', {
         description: 'يرجى تسجيل الدخول للاستمتاع بقراءة الكتاب وتتبع وقتك وأوسمتك.',
         duration: 5000,
       });
       navigate(id ? `/book/${id}` : '/', { replace: true });
     }
-  }, [user, id, navigate]);
+  }, [user, authLoading, id, navigate]);
 
   useReadingTime(true);
-  useReadingPresence(id);
+  useReadingPresence(localEntry ? undefined : id);
   const sessionTimer = useBookSessionTimer({
     bookId: id || '',
     title: book?.title,
@@ -67,6 +73,7 @@ const BookReader = () => {
   });
   const [numPages, setNumPages] = useState<number>(0);
   const [scale, setScale] = useState(1.0);
+  const [pageWidth, setPageWidth] = useState(600);
   const [isOfflineMode, setIsOfflineMode] = useState(false);
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [loadedPages, setLoadedPages] = useState<Set<number>>(new Set());
@@ -102,7 +109,9 @@ const BookReader = () => {
     setHoldPoint(null);
   };
   const startHold = (e: React.PointerEvent<HTMLDivElement>, pageNum: number) => {
+    if (localEntry) return;
     if ((e.target as HTMLElement).closest('button')) return;
+    if (!e.isPrimary) { cancelHold(); return; }
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -122,7 +131,7 @@ const BookReader = () => {
       setCommentAnchor({ x, y });
       setPageCommentsTargetPage(pageNum);
       setPageCommentsOpen(true);
-    }, 1500);
+    }, COMMENT_HOLD_MS);
     holdRef.current = { timer, sx: e.clientX, sy: e.clientY };
   };
   const moveHold = (e: React.PointerEvent) => {
@@ -136,6 +145,24 @@ const BookReader = () => {
     setPageCommentsOpen(true);
   };
   const currentPageCommentsCount = pageCommentsCountMap.get(currentPage) || 0;
+
+  useEffect(() => {
+    const measure = () => setPageWidth(Math.min(600, Math.max(180, window.innerWidth - 96)));
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, []);
+
+  useEffect(() => {
+    if (!id || !numPages || !user) return;
+    const timer = window.setTimeout(() => {
+      const el = pageElementsRef.current.get(currentPage);
+      savePosition({ id, title: book?.title || localEntry?.title || 'PDF', author: book?.author,
+        coverUrl: book?.cover_url || undefined, page: currentPage, totalPages: numPages,
+        scrollOffset: Math.max(0, -(el?.getBoundingClientRect().top || 0)), updatedAt: new Date().toISOString() });
+    }, 750);
+    return () => window.clearTimeout(timer);
+  }, [id, currentPage, numPages, book, user, localEntry?.title]);
 
   // Track visual reading scroll progress
   useEffect(() => {
@@ -174,9 +201,16 @@ const BookReader = () => {
     let cancelled = false;
 
     const initBook = async () => {
+      if (localEntry) {
+        try {
+          const source = await readableLocalPdf(localEntry.uri);
+          if (!cancelled) { setFileUrl(source); setIsOfflineMode(true); }
+        } catch { toast.error('تعذر فتح الملف المحلي'); }
+        return;
+      }
       // 1. Try offline source first (works 100% offline without network)
       const offlineSrc = await getOfflinePdfSource(id);
-      if (cancelled) return;
+      if (cancelled) { if (offlineSrc?.startsWith('blob:')) URL.revokeObjectURL(offlineSrc); return; }
 
       if (offlineSrc) {
         setFileUrl(offlineSrc);
@@ -209,24 +243,30 @@ const BookReader = () => {
 
     initBook();
     return () => { cancelled = true; };
-  }, [book, id, getOfflineBookUrl]);
+  }, [book, id, localEntry?.uri]);
+
+  useEffect(() => () => { if (fileUrl?.startsWith('blob:')) URL.revokeObjectURL(fileUrl); }, [fileUrl]);
 
   // Restore last bookmark position after pages render
   useEffect(() => {
     if (!shouldRestoreRef.current || numPages === 0 || !id) return;
     const last = getLastBookmark(id);
-    if (last) {
+    const position = readPosition();
+    const requestedPage = Number(searchParams.get('page'));
+    const restore = requestedPage > 0 ? { page: requestedPage, scrollOffset: position?.id === id ? position.scrollOffset : 0 }
+      : position?.id === id ? position : last;
+    if (restore) {
       shouldRestoreRef.current = false;
       // Delay to let pages mount
-      setTimeout(() => navigateToPage(last.page, last.scrollOffset), 500);
+      setTimeout(() => navigateToPage(Math.min(numPages, restore.page), restore.scrollOffset), 100);
     }
   }, [numPages, id]);
 
   const onDocumentLoadSuccess = ({ numPages: n }: { numPages: number }) => {
     setNumPages(n);
-    setLoadedPages(new Set([1, 2, 3]));
+    setLoadedPages(pageWindow(1, n));
     // Cache page count to DB if missing
-    if (book && !(book as any).page_count) {
+    if (book && user && !(book as any).page_count) {
       supabase.from('books').update({ page_count: n }).eq('id', book.id);
     }
   };
@@ -240,6 +280,7 @@ const BookReader = () => {
 
   const onTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 2) {
+      cancelHold();
       pinchRef.current = {
         startDist: getDist(e.touches[0], e.touches[1]),
         startScale: scale,
@@ -261,15 +302,12 @@ const BookReader = () => {
 
   const navigateToPage = (page: number, _scrollOffset: number = 0) => {
     // Ensure page is loaded
-    setLoadedPages((prev) => {
-      const next = new Set(prev);
-      for (let i = Math.max(1, page - 1); i <= Math.min(numPages, page + 2); i++) next.add(i);
-      return next;
-    });
+    setLoadedPages(pageWindow(page, numPages));
     setTimeout(() => {
       const el = pageElementsRef.current.get(page);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (_scrollOffset) window.scrollBy({ top: _scrollOffset, behavior: 'smooth' });
       }
     }, 100);
   };
@@ -294,7 +332,12 @@ const BookReader = () => {
 
   // Track current page via IntersectionObserver
   const pageRef = useCallback((node: HTMLDivElement | null, pageNum: number) => {
-    if (!node) return;
+    if (!node) {
+      const old = pageElementsRef.current.get(pageNum);
+      if (old) observerRef.current?.unobserve(old);
+      pageElementsRef.current.delete(pageNum);
+      return;
+    }
     pageElementsRef.current.set(pageNum, node);
 
     if (!observerRef.current) {
@@ -305,16 +348,15 @@ const BookReader = () => {
               const pg = Number(entry.target.getAttribute('data-page'));
               if (pg) {
                 setCurrentPage(pg);
-                setLoadedPages((prev) => {
-                  const next = new Set(prev);
-                  for (let i = Math.max(1, pg - 1); i <= Math.min(numPages, pg + 2); i++) next.add(i);
-                  return next;
+                setLoadedPages(prev => {
+                  const next = pageWindow(pg, numPages);
+                  return [...next].every(p => prev.has(p)) && next.size === prev.size ? prev : next;
                 });
               }
             }
           });
         },
-        { rootMargin: '600px 0px', threshold: 0.5 }
+        { rootMargin: '0px', threshold: 0.15 }
       );
     }
     observerRef.current.observe(node);
@@ -408,7 +450,7 @@ const BookReader = () => {
   };
 
   const localDownloadedEntry = id ? loadDeviceDownloads().find((d) => d.bookId === id) : null;
-  const displayTitle = book?.title || localDownloadedEntry?.title || 'كتاب';
+  const displayTitle = book?.title || localEntry?.title || localDownloadedEntry?.title || 'كتاب';
   const displayAuthor = book?.author || localDownloadedEntry?.author || '';
 
   if (isLoading && !fileUrl && !localDownloadedEntry) {
@@ -419,7 +461,7 @@ const BookReader = () => {
     );
   }
 
-  if (!book && !fileUrl && !localDownloadedEntry) {
+  if (!book && !fileUrl && !localDownloadedEntry && !localEntry) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -459,7 +501,7 @@ const BookReader = () => {
           <div className="flex items-center justify-between h-14 gap-1.5 sm:gap-2 overflow-hidden">
             {/* Left section: Back button + Title & Author + Session Timer */}
             <div className="flex items-center gap-1 sm:gap-2.5 min-w-0 shrink">
-              <Link to={id ? `/book/${id}` : '/'} className="shrink-0">
+              <Link to={localEntry ? '/downloads' : id ? `/book/${id}` : '/'} className="shrink-0">
                 <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9 shrink-0"><ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" /></Button>
               </Link>
               <div className="min-w-0 shrink">
@@ -491,7 +533,7 @@ const BookReader = () => {
               </span>
             </div>
 
-            {/* Right section: Responsive buttons + Three-Lines Menu Button (☰) */}
+            {/* Reader controls */}
             <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
               {/* Zoom controls visible on every screen size, alongside pinch-to-zoom */}
               <div className="flex items-center gap-0.5 sm:gap-1 bg-secondary/60 rounded-full px-0.5 sm:px-1.5 py-0.5 border border-border/60">
@@ -572,7 +614,7 @@ const BookReader = () => {
                 )}
               </Button>
 
-              {/* Three-Lines Menu Button (☰ يحتوي على: الاقتباسات وOCR، التعليقات، العلامات، العرض والتحميل) */}
+              {/* Reader menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -763,7 +805,7 @@ const BookReader = () => {
 
       {/* PDF Viewer */}
       <div
-        className="flex-1 overflow-auto p-4 touch-pan-y"
+        className="flex-1 overflow-auto px-12 py-4 touch-pan-y"
         ref={containerRef}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
@@ -774,6 +816,7 @@ const BookReader = () => {
           {fileUrl && (
             <Document
               file={fileUrl}
+              options={PDF_OPTIONS}
               onLoadSuccess={onDocumentLoadSuccess}
               loading={
                 <div className="flex items-center justify-center py-20">
@@ -808,7 +851,7 @@ const BookReader = () => {
                     onPointerLeave={cancelHold}
                     onContextMenu={(e) => e.preventDefault()}
                   >
-                    {/* Wattpad-style pinned comment markers (hold 1.5s on the page to add one) */}
+                    {/* Margin markers keep writing unobstructed; coordinates retain the exact anchor. */}
                     {(() => {
                       const pinned = allPageComments.filter((c) => c.page === pageNum);
                       if (pinned.length === 0) return null;
@@ -816,23 +859,26 @@ const BookReader = () => {
                       pinned.forEach((c) => {
                         const cx = c.x ?? 4;
                         const cy = c.y ?? 3;
-                        const g = groups.find((gg) => Math.abs(gg.x - cx) < 6 && Math.abs(gg.y - cy) < 3);
+                        const g = groups.find((gg) => Math.abs(gg.y - cy) < 3);
                         if (g) g.ids.push(c.id);
                         else groups.push({ x: cx, y: cy, ids: [c.id] });
                       });
                       return groups.map((g) => (
-                        <button
+                        <Button
                           key={g.ids[0]}
                           type="button"
+                          variant="secondary"
+                          size="icon"
                           onClick={(ev) => { ev.stopPropagation(); openMarker(pageNum, g.ids); }}
                           onPointerDown={(ev) => ev.stopPropagation()}
-                          className="absolute z-20 -translate-x-1/2 -translate-y-full flex items-center gap-0.5 rounded-full rounded-bl-none bg-primary/85 text-primary-foreground px-1.5 py-0.5 text-[10px] font-bold shadow-md opacity-80 hover:opacity-100 hover:scale-110 transition-all"
-                          style={{ left: `${Math.min(97, Math.max(3, g.x))}%`, top: `${Math.min(99, Math.max(4, g.y))}%` }}
+                          className="absolute z-20 -right-10 -translate-y-1/2 h-8 w-8 border border-border text-[10px] font-bold shadow-sm before:absolute before:right-full before:w-2 before:h-px before:bg-border"
+                          style={{ top: `${Math.min(99, Math.max(1, g.y))}%` }}
                           aria-label={`${g.ids.length} تعليق`}
+                          title={`صفحة ${pageNum} · ${Math.round(g.y)}%`}
                         >
                           <MessageSquare className="h-3 w-3" />
                           {g.ids.length > 1 && <span>{g.ids.length}</span>}
-                        </button>
+                        </Button>
                       ));
                     })()}
                     {holdPoint?.page === pageNum && (
@@ -857,17 +903,10 @@ const BookReader = () => {
                       </div>
                     )}
                     {isLoaded ? (
-                      <Page
-                        pageNumber={pageNum}
-                        scale={scale}
-                        rotate={pageRotation}
-                        className={`shadow-xl rounded-lg overflow-hidden ${invertPages && pageNum > 1 ? 'reader-page-inverted' : ''}`}
-                        renderTextLayer={true}
-                        renderAnnotationLayer={false}
-                      />
+                      <ReaderPdfPage page={pageNum} width={pageWidth} scale={scale} rotation={pageRotation} inverted={invertPages && pageNum > 1} />
                     ) : (
                       <div
-                        style={{ height: `${800 * scale}px`, width: `${600 * scale}px` }}
+                        style={{ height: `${pageWidth * 1.414 * scale}px`, width: `${pageWidth * scale}px` }}
                         className="bg-card rounded-lg flex items-center justify-center"
                       >
                         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />

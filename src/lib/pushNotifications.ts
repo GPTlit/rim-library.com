@@ -99,6 +99,10 @@ export async function registerForPushNotifications(): Promise<PushRegistrationRe
 }
 
 export async function showForegroundNotification(title: string, body: string): Promise<void> {
+  if (document.visibilityState === 'visible') {
+    window.dispatchEvent(new CustomEvent('qahwa-notification', { detail: { title, body } }));
+    return;
+  }
   try {
     const { sendLocalNotification } = await import('@/lib/localNotifications');
     await sendLocalNotification({ title, body });

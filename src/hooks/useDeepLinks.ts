@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
+import { QahwaNative, isQahwaNativeAvailable } from '@/lib/qahwaNative';
+import { rememberLocalPdf } from '@/lib/localPdfs';
 
 /**
  * Listens for qahwa:// deep links fired from home-screen widgets (and cold-start launch
@@ -10,7 +12,14 @@ export function useDeepLinks() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (Capacitor.getPlatform() !== 'android') return;
+    if (!Capacitor.isNativePlatform()) return;
+    const openPending = async () => {
+      if (!isQahwaNativeAvailable()) return;
+      try {
+        const { pdf } = await QahwaNative.getPendingPdf();
+        if (pdf) { rememberLocalPdf(pdf); navigate(`/local/${pdf.id}/read`); }
+      } catch { /* no inbound file */ }
+    };
 
     const handleUrl = (rawUrl?: string | null) => {
       if (!rawUrl || !rawUrl.startsWith('qahwa://')) return;
@@ -22,7 +31,8 @@ export function useDeepLinks() {
 
         if (segments[0] === 'read' && segments[1]) {
           const page = params.get('page');
-          navigate(`/book/${segments[1]}/read${page ? `?page=${page}` : ''}`);
+          const kind = segments[1].startsWith('local-') ? 'local' : 'book';
+          navigate(`/${kind}/${segments[1]}/read${page ? `?page=${page}` : ''}`);
         } else if (segments[0] === 'book' && segments[1]) {
           const page = params.get('page');
           if (page) {
@@ -42,13 +52,18 @@ export function useDeepLinks() {
 
     let urlSub: { remove: () => void } | undefined;
     let backSub: { remove: () => void } | undefined;
+    let resumeSub: { remove: () => void } | undefined;
+    // Imports happen off-thread; poll briefly to cover a cold-start copy completing after hydration.
+    const pendingTimer = window.setInterval(() => { if (document.visibilityState === 'visible') void openPending(); }, 1500);
 
     (async () => {
       try {
         const { App } = await import('@capacitor/app');
+        await openPending();
         const launchUrl = await App.getLaunchUrl();
         handleUrl(launchUrl?.url);
-        urlSub = await App.addListener('appUrlOpen', (data: { url: string }) => handleUrl(data.url));
+        urlSub = await App.addListener('appUrlOpen', (data: { url: string }) => { handleUrl(data.url); void openPending(); });
+        resumeSub = await App.addListener('appStateChange', ({ isActive }) => { if (isActive) void openPending(); });
 
         // Handle native Android hardware back button
         backSub = await App.addListener('backButton', ({ canGoBack }) => {
@@ -66,6 +81,8 @@ export function useDeepLinks() {
     return () => {
       urlSub?.remove();
       backSub?.remove();
+      resumeSub?.remove();
+      window.clearInterval(pendingTimer);
     };
   }, [navigate]);
 }

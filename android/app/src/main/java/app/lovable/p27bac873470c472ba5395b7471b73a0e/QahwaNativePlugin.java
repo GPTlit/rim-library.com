@@ -46,6 +46,74 @@ public class QahwaNativePlugin extends Plugin {
     private static final String TARGET_DIR = "Qahwa Library";
 
     @PluginMethod
+    public void getPendingPdf(PluginCall call) {
+        JSObject result = new JSObject();
+        JSObject pending = LocalPdfStore.pending(getContext());
+        if (pending != null) result.put("pdf", pending);
+        call.resolve(result);
+    }
+
+    @PluginMethod
+    public void getReadablePdf(PluginCall call) {
+        String value = call.getString("uri");
+        if (value == null) { call.reject("uri required"); return; }
+        new Thread(() -> {
+            try {
+                Uri uri = Uri.parse(value);
+                if ("content".equals(uri.getScheme())) {
+                    JSObject imported = LocalPdfStore.importPdf(getContext(), uri);
+                    valueResult(call, imported.getString("uri"));
+                } else if ("file".equals(uri.getScheme()) && uri.getPath() != null) {
+                    File file = new File(uri.getPath());
+                    // Copy large PDFs directly, never shuttle base64 across the bridge.
+                    File dir = new File(getContext().getCacheDir(), "readable-pdfs");
+                    dir.mkdirs();
+                    File copy = new File(dir, LocalPdfStore.stableId(value) + ".pdf");
+                    if (!copy.exists() || copy.length() != file.length() || copy.lastModified() < file.lastModified()) {
+                        try (InputStream input = new FileInputStream(file); OutputStream output = new FileOutputStream(copy)) {
+                            byte[] buffer = new byte[65536]; int n;
+                            while ((n = input.read(buffer)) != -1) output.write(buffer, 0, n);
+                        }
+                    }
+                    valueResult(call, Uri.fromFile(copy).toString());
+                } else call.reject("Unsupported document URI");
+            } catch (Exception e) { call.reject("Cannot open document", e); }
+        }, "qahwa-pdf-source").start();
+    }
+
+    private void valueResult(PluginCall call, String uri) {
+        JSObject result = new JSObject(); result.put("uri", uri); call.resolve(result);
+    }
+
+    @PluginMethod
+    public void listDevicePdfs(PluginCall call) {
+        new Thread(() -> {
+            org.json.JSONArray files = LocalPdfStore.list(getContext());
+            // Scoped storage exposes owned/indexed PDFs, not every other app's documents.
+            Uri collection = MediaStore.Files.getContentUri("external");
+            try (Cursor c = getContext().getContentResolver().query(collection,
+                    new String[] { MediaStore.Files.FileColumns._ID, MediaStore.Files.FileColumns.DISPLAY_NAME,
+                        MediaStore.Files.FileColumns.SIZE, MediaStore.Files.FileColumns.DATE_MODIFIED },
+                    MediaStore.Files.FileColumns.MIME_TYPE + "=?", new String[] { "application/pdf" }, null)) {
+                if (c != null) while (c.moveToNext()) {
+                    Uri uri = ContentUris.withAppendedId(collection, c.getLong(0));
+                    // Only show files whose read permission is actually available.
+                    try (InputStream in = getContext().getContentResolver().openInputStream(uri)) {
+                        if (in == null) continue;
+                        JSObject pdf = new JSObject();
+                        pdf.put("id", LocalPdfStore.stableId(uri.toString()));
+                        pdf.put("title", c.getString(1).replaceFirst("(?i)\\.pdf$", ""));
+                        pdf.put("fileName", c.getString(1)); pdf.put("uri", uri.toString()); pdf.put("size", c.getLong(2));
+                        pdf.put("modifiedAt", java.time.Instant.ofEpochSecond(c.getLong(3)).toString());
+                        files.put(pdf);
+                    } catch (Exception ignored) { }
+                }
+            } catch (Exception ignored) { }
+            JSObject result = new JSObject(); result.put("files", files); result.put("limited", true); call.resolve(result);
+        }, "qahwa-pdf-bookshelf").start();
+    }
+
+    @PluginMethod
     public void savePdfToDownloads(PluginCall call) {
         String base64 = call.getString("base64");
         String fileName = call.getString("fileName");
@@ -287,6 +355,7 @@ public class QahwaNativePlugin extends Plugin {
             CollectionWidgetProvider.requestUpdate(ctx);
             MinimalWidgetProvider.requestUpdate(ctx);
             QuoteWidgetProvider.requestUpdate(ctx);
+            app.lovable.p27bac873470c472ba5395b7471b73a0e.widgets.QahwaWidgetRefresh.enqueue(ctx);
         }).start();
 
         call.resolve();

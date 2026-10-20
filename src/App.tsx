@@ -41,6 +41,7 @@ import AuthorProfile from "./pages/stories/AuthorProfile";
 import QuotePage from "./pages/QuotePage";
 import { useDeepLinks } from "@/hooks/useDeepLinks";
 import { useWidgetSync } from "@/hooks/useWidgetSync";
+import { QahwaNotificationBar } from "@/components/QahwaNotificationBar";
 
 const AppNativeBridge = () => {
   useDeepLinks();
@@ -74,6 +75,7 @@ const App = () => (
                 <Sonner />
                 <BrowserRouter>
                   <AppNativeBridge />
+                  <QahwaNotificationBar />
                   <ConsentDialog />
                   <DevicePermissionPrompt />
                   <Routes>
@@ -95,6 +97,7 @@ const App = () => (
                   <Route path="/u/:username" element={<AuthorProfile />} />
                   {/* Protected routes - require authentication */}
                   <Route path="/book/:id/read" element={<ProtectedRoute><BookReader /></ProtectedRoute>} />
+                  <Route path="/local/:id/read" element={<ProtectedRoute><BookReader /></ProtectedRoute>} />
                   <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
                   <Route path="/write" element={<ProtectedRoute><Write /></ProtectedRoute>} />
                   <Route path="/write/:id" element={<ProtectedRoute><WriteStory /></ProtectedRoute>} />

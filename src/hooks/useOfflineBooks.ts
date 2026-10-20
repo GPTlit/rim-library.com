@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { QahwaNative, isQahwaNativeAvailable } from '@/lib/qahwaNative';
 import { buildQahwaDownloadFileName } from '@/lib/capacitorFeatures';
+import { readableLocalPdf } from '@/lib/localPdfs';
 
 const OFFLINE_BOOKS_KEY = 'maktaba-mauritania-offline-books';
 const OFFLINE_INDEX_KEY = 'maktaba-mauritania-offline-index';
@@ -130,8 +131,7 @@ export const getOfflinePdfSource = async (bookId: string): Promise<string | null
     const entry = loadDeviceDownloads().find((e) => e.bookId === bookId);
     if (entry) {
       try {
-        const { base64 } = await QahwaNative.readFile({ uri: entry.uri });
-        if (base64) return base64ToBlobUrl(base64, entry.type || 'application/pdf');
+        return await readableLocalPdf(entry.uri);
       } catch (e) {
         console.warn('getOfflinePdfSource: readFile failed for device download', e);
       }
@@ -231,15 +231,7 @@ export const useOfflineBooks = () => {
         }));
         setOfflineBooks(list);
 
-        // Resolve blob URLs in background
-        const urlMap: Record<string, string> = {};
-        await Promise.all(
-          index.map(async (e) => {
-            const url = await nativeFileToBlobUrl(e.filename, e.mimeType);
-            if (url) urlMap[e.id] = url;
-          })
-        );
-        setNativeUrls(urlMap);
+        // Resolve only the requested book in getOfflinePdfSource, not the whole bookshelf.
       } else {
         const data = localStorage.getItem(OFFLINE_BOOKS_KEY);
         setOfflineBooks(data ? JSON.parse(data) : []);
@@ -617,9 +609,11 @@ export const useOfflineBooks = () => {
     const entry = findDeviceDownload(bookId);
     if (alsoDeleteFile && entry && isQahwaNativeAvailable()) {
       try {
-        await QahwaNative.deleteFile({ uri: entry.uri });
+        const result = await QahwaNative.deleteFile({ uri: entry.uri });
+        if (!result.deleted) throw new Error('The device did not permit deleting this file');
       } catch (e) {
         console.warn('removeDeviceDownload: deleteFile failed', e);
+        throw e;
       }
     }
     const next = loadDeviceDownloads().filter((e) => e.bookId !== bookId);
