@@ -53,6 +53,8 @@ export function useDeepLinks() {
     let urlSub: { remove: () => void } | undefined;
     let backSub: { remove: () => void } | undefined;
     let resumeSub: { remove: () => void } | undefined;
+    // Imports happen off-thread; poll briefly to cover a cold-start copy completing after hydration.
+    const pendingTimer = window.setInterval(() => void openPending(), 1500);
 
     (async () => {
       try {
@@ -80,6 +82,7 @@ export function useDeepLinks() {
       urlSub?.remove();
       backSub?.remove();
       resumeSub?.remove();
+      window.clearInterval(pendingTimer);
     };
   }, [navigate]);
 }
