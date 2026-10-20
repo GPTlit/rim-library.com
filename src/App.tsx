@@ -41,6 +41,7 @@ import AuthorProfile from "./pages/stories/AuthorProfile";
 import QuotePage from "./pages/QuotePage";
 import { useDeepLinks } from "@/hooks/useDeepLinks";
 import { useWidgetSync } from "@/hooks/useWidgetSync";
+import { QahwaNotificationBar } from "@/components/QahwaNotificationBar";
 
 const AppNativeBridge = () => {
   useDeepLinks();
@@ -74,6 +75,7 @@ const App = () => (
                 <Sonner />
                 <BrowserRouter>
                   <AppNativeBridge />
+                  <QahwaNotificationBar />
                   <ConsentDialog />
                   <DevicePermissionPrompt />
                   <Routes>
