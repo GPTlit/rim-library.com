@@ -111,59 +111,67 @@ const Index = () => {
   // Mode 2 (showcase): cinematic carousels with mixed cover framing.
   return (
     <Layout>
-      <HeroSection />
-      <HeroCarousel />
+      <HeroWithCarousel />
       <ContinueReadingSection />
-      <RecentlyViewedBooks />
-      <RecommendedBooks />
-      <BookCarousel
-        title={t('featuredPicks')}
-        icon={<Award className="h-5 w-5" />}
-        books={featured}
-        viewAllHref="/categories"
-        pattern="mixed"
-        isLoading={isBooksLoading && !books.length}
-      />
-      <PromoBlocks slot={1} />
-      <CategoriesSection />
-      <PromoBlocks slot={2} />
-      <BookCarousel
-        title={t('trendingSection')}
-        icon={<Flame className="h-5 w-5" />}
-        books={trending.length ? trending : featured}
-        pattern="wide-first"
-        isLoading={isBooksLoading && !books.length}
-      />
-      <BookCarousel
-        title={t('topRatedSection')}
-        icon={<Star className="h-5 w-5" />}
-        books={topRated.length ? topRated : featured.slice().reverse()}
-        pattern="tall-first"
-        isLoading={isBooksLoading && !books.length}
-      />
-      <BookCarousel
-        title={t('recentlyAddedSection')}
-        icon={<Clock className="h-5 w-5" />}
-        books={recent}
-        pattern="mixed"
-        isLoading={isBooksLoading && !books.length}
-      />
-      <PromoBlocks slot={3} />
+      <LazySection><RecentlyViewedBooks /></LazySection>
+      <LazySection><RecommendedBooks /></LazySection>
+      <LazySection>
+        <BookCarousel
+          title={t('featuredPicks')}
+          icon={<Award className="h-5 w-5" />}
+          books={featured}
+          viewAllHref="/categories"
+          pattern="mixed"
+          isLoading={isBooksLoading && !books.length}
+        />
+      </LazySection>
+      <LazySection minHeight={180}><PromoBlocks slot={1} /></LazySection>
+      <LazySection><CategoriesSection /></LazySection>
+      <LazySection minHeight={180}><PromoBlocks slot={2} /></LazySection>
+      <LazySection>
+        <BookCarousel
+          title={t('trendingSection')}
+          icon={<Flame className="h-5 w-5" />}
+          books={trending.length ? trending : featured}
+          pattern="wide-first"
+          isLoading={isBooksLoading && !books.length}
+        />
+      </LazySection>
+      <LazySection>
+        <BookCarousel
+          title={t('topRatedSection')}
+          icon={<Star className="h-5 w-5" />}
+          books={topRated.length ? topRated : featured.slice().reverse()}
+          pattern="tall-first"
+          isLoading={isBooksLoading && !books.length}
+        />
+      </LazySection>
+      <LazySection>
+        <BookCarousel
+          title={t('recentlyAddedSection')}
+          icon={<Clock className="h-5 w-5" />}
+          books={recent}
+          pattern="mixed"
+          isLoading={isBooksLoading && !books.length}
+        />
+      </LazySection>
+      <LazySection minHeight={180}><PromoBlocks slot={3} /></LazySection>
       {categoryRows.map((row, i) => {
         const catKey = `category_${row.name}`;
         const catTitle = t(catKey) !== catKey ? t(catKey) : row.nameAr;
         return (
-          <BookCarousel
-            key={row.name}
-            title={catTitle}
-            icon={<BookOpen className="h-5 w-5" />}
-            books={row.books}
-            viewAllHref={`/category/${encodeURIComponent(row.name)}`}
-            pattern={(['mixed', 'wide-first', 'tall-first', 'mixed'] as const)[i % 4]}
-          />
+          <LazySection key={row.name}>
+            <BookCarousel
+              title={catTitle}
+              icon={<BookOpen className="h-5 w-5" />}
+              books={row.books}
+              viewAllHref={`/category/${encodeURIComponent(row.name)}`}
+              pattern={(['mixed', 'wide-first', 'tall-first', 'mixed'] as const)[i % 4]}
+            />
+          </LazySection>
         );
       })}
-      <PromoBlocks slot={4} />
+      <LazySection minHeight={180}><PromoBlocks slot={4} /></LazySection>
     </Layout>
   );
 

@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -39,6 +40,7 @@ import StoryPage from "./pages/stories/StoryPage";
 import ReadPart from "./pages/stories/ReadPart";
 import AuthorProfile from "./pages/stories/AuthorProfile";
 import QuotePage from "./pages/QuotePage";
+const Widgets = lazy(() => import("./pages/Widgets"));
 import { useDeepLinks } from "@/hooks/useDeepLinks";
 import { useWidgetSync } from "@/hooks/useWidgetSync";
 import { QahwaNotificationBar } from "@/components/QahwaNotificationBar";
@@ -91,6 +93,7 @@ const App = () => (
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/quotes/:id" element={<QuotePage />} />
                   <Route path="/quote/:id" element={<QuotePage />} />
+                  <Route path="/widgets" element={<Suspense fallback={null}><Widgets /></Suspense>} />
                   {/* Stories — public browsing */}
                   <Route path="/explore" element={<Explore />} />
                   <Route path="/story/:id" element={<StoryPage />} />

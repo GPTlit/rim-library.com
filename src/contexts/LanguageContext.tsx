@@ -496,6 +496,18 @@ const translations: Translations = {
   selectTextHint: { ar: 'حدد نصاً من الصفحة لإنشاء اقتباس', en: 'Select text on the page to create a quote', fr: 'Sélectionnez du texte sur la page pour créer une citation' },
   enterQuoteTextFirst: { ar: 'أدخل نص الاقتباس أولاً', en: 'Enter the quote text first', fr: 'Entrez d\'abord le texte de la citation' },
   shareQuote: { ar: 'مشاركة الاقتباس', en: 'Share quote', fr: 'Partager la citation' },
+  widgetsBadge: { ar: 'ودجت الشاشة الرئيسية', en: 'Home screen widgets', fr: 'Widgets d\'accueil' },
+  widgetsTitle: { ar: 'ودجت قهوة', en: 'Qahwa Widgets', fr: 'Widgets Qahwa' },
+  widgetsSubtitle: { ar: 'عاين جميع الودجت السبعة وحالات التميمة الست كما تظهر على شاشة هاتفك الرئيسية.', en: 'Preview all seven widgets and the six mascot moods exactly as they appear on your phone home screen.', fr: 'Prévisualisez les sept widgets et les six humeurs de la mascotte comme sur votre écran d\'accueil.' },
+  widgetDay: { ar: 'نهاري', en: 'Day', fr: 'Jour' },
+  widgetNight: { ar: 'ليلي', en: 'Night', fr: 'Nuit' },
+  widgetsHint: { ar: 'على Android: اضغط مطولاً على الشاشة الرئيسية ثم اختر "الودجت" وابحث عن QAHWA لإضافة أي منها.', en: 'On Android: long-press your home screen, choose "Widgets" and search for QAHWA to add any of them.', fr: 'Sur Android : appui long sur l\'écran d\'accueil, "Widgets", puis cherchez QAHWA.' },
+  storyExpires24h: { ar: 'ستظهر على ملفك لمدة 24 ساعة', en: 'It will appear on your profile for 24 hours', fr: 'Elle apparaîtra sur votre profil pendant 24 heures' },
+  storyExpiresIn: { ar: 'تختفي بعد', en: 'Disappears in', fr: 'Disparaît dans' },
+  hoursShort: { ar: 'س', en: 'h', fr: 'h' },
+  storyKept: { ar: 'محفوظة للأبد', en: 'Kept forever', fr: 'Conservée' },
+  keepForever: { ar: 'احتفظ بها', en: 'Keep forever', fr: 'Conserver' },
+  storyDeleted: { ar: 'تم حذف القصة', en: 'Story deleted', fr: 'Histoire supprimée' },
 };
 
 interface LanguageContextType {

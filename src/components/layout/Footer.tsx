@@ -33,6 +33,9 @@ export const Footer = () => {
             <Link to="/about" className="hover:text-primary transition-colors">
               {t('about')}
             </Link>
+            <Link to="/widgets" className="hover:text-primary transition-colors">
+              {t('widgetsTitle')}
+            </Link>
           </nav>
 
         </div>
