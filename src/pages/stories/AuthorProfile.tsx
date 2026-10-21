@@ -9,6 +9,7 @@ import { StoryCard } from '@/components/stories/StoryCard';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { User } from 'lucide-react';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
+import { QuoteStoryCircles } from '@/components/stories/QuoteStoryCircles';
 
 export default function AuthorProfile() {
   const { username } = useParams();
@@ -47,6 +48,13 @@ export default function AuthorProfile() {
           {authorId && <FollowButton authorId={authorId} />}
         </div>
         {profile.bio && <p className="mt-4 text-muted-foreground">{profile.bio}</p>}
+        {authorId && (
+          <QuoteStoryCircles
+            userId={authorId}
+            displayName={profile.display_name || profile.username}
+            avatarUrl={profile.avatar_url}
+          />
+        )}
 
         <h2 className="text-lg font-semibold mt-8 mb-3">{t('allStories')}</h2>
         {stories.length === 0 ? (
