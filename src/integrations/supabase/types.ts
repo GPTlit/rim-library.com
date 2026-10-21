@@ -261,6 +261,53 @@ export type Database = {
           },
         ]
       }
+      book_quotes: {
+        Row: {
+          book_id: string
+          comment_text: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          likes_count: number
+          page_number: number | null
+          quote_text: string
+          theme_config: Json
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          comment_text?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          likes_count?: number
+          page_number?: number | null
+          quote_text: string
+          theme_config?: Json
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          comment_text?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          likes_count?: number
+          page_number?: number | null
+          quote_text?: string
+          theme_config?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_quotes_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       book_ratings: {
         Row: {
           book_id: string
@@ -959,6 +1006,146 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "quiz_attempts_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quote_likes: {
+        Row: {
+          created_at: string
+          quote_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          quote_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          quote_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_likes_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quote_saves: {
+        Row: {
+          created_at: string
+          quote_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          quote_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          quote_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_saves_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quote_stories: {
+        Row: {
+          archived: boolean
+          book_id: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          image_url: string | null
+          style: Json
+          text: string
+          user_id: string
+        }
+        Insert: {
+          archived?: boolean
+          book_id?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          image_url?: string | null
+          style?: Json
+          text: string
+          user_id: string
+        }
+        Update: {
+          archived?: boolean
+          book_id?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          image_url?: string | null
+          style?: Json
+          text?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_stories_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotes: {
+        Row: {
+          book_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          page: number | null
+          style: Json
+          text: string
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          page?: number | null
+          style?: Json
+          text: string
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          page?: number | null
+          style?: Json
+          text?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotes_book_id_fkey"
             columns: ["book_id"]
             isOneToOne: false
             referencedRelation: "books"

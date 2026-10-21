@@ -20,7 +20,7 @@ import { useNavigate } from 'react-router-dom';
 import { backgroundPresets, fontOptions } from './quotePresets';
 import { QuoteStyle, uploadQuoteImage, useCreateQuote } from '@/hooks/useQuotes';
 import { isRunningNative } from '@/lib/capacitorFeatures';
-import { useCreateStory, uploadStoryMedia } from '@/hooks/useStories';
+import { useCreateQuoteStory } from '@/hooks/useQuoteStories';
 
 interface QuoteEditorDialogProps {
   open: boolean;
@@ -48,7 +48,7 @@ export const QuoteEditorDialog = ({
   const { toast } = useToast();
   const navigate = useNavigate();
   const createQuote = useCreateQuote();
-  const createStory = useCreateStory();
+  const createQuoteStory = useCreateQuoteStory();
 
   const [text, setText] = useState(initialText);
   const [comment, setComment] = useState('');
@@ -261,18 +261,16 @@ export const QuoteEditorDialog = ({
     try {
       const blob = await generateBlob();
       if (!blob || !user) throw new Error('render failed');
-      const file = new File([blob], `quote-${Date.now()}.png`, { type: 'image/png' });
-      const coverUrl = await uploadStoryMedia(file, user.id, 'cover');
-      const description = [text.trim(), showComment ? comment.trim() : ''].filter(Boolean).join('\n\n');
-      const story = await createStory.mutateAsync({
-        title: bookTitle ? `${t('createQuote')} — ${bookTitle}` : t('newQuote'),
-        description,
-        cover_url: coverUrl,
+      const imageUrl = await uploadQuoteImage(blob, user.id);
+      await createQuoteStory.mutateAsync({
+        book_id: bookId,
+        text: [text.trim(), showComment ? comment.trim() : ''].filter(Boolean).join('\n\n'),
+        image_url: imageUrl,
+        style,
       });
-      toast({ title: t('quoteStoryPosted') });
+      toast({ title: t('quoteStoryPosted'), description: t('storyExpires24h') });
       resetAfterPost();
       onOpenChange(false);
-      navigate(`/write/${story.id}`);
     } catch {
       toast({ title: t('ocrFailed'), variant: 'destructive' as any });
     } finally {
