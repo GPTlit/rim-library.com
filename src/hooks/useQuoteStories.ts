@@ -29,7 +29,7 @@ export const useActiveQuoteStories = (userId?: string) => {
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return ((data ?? []) as QuoteStory[]).filter(isLive);
+      return ((data ?? []) as unknown as QuoteStory[]).filter(isLive);
     },
     enabled: !!userId,
     // Stories are time-sensitive: re-check after a minute, not cached forever
@@ -60,7 +60,7 @@ export const useCreateQuoteStory = () => {
         .select('*')
         .single();
       if (error) throw error;
-      return data as QuoteStory;
+      return data as unknown as QuoteStory;
     },
     onSuccess: (s) => qc.invalidateQueries({ queryKey: ['quote-stories', 'active', s.user_id] }),
   });
