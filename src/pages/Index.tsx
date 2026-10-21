@@ -19,6 +19,23 @@ import { useBookStats } from '@/hooks/useBookStats';
 import { allCategories } from '@/hooks/useCategories';
 import { useHomeLayoutMode } from '@/hooks/useHomeLayoutMode';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { LazySection } from '@/components/LazySection';
+
+// Soft gradient + shadow that blends the hero search face into the ad carousel below it
+const HeroWithCarousel = () => (
+  <div className="relative">
+    <HeroSection />
+    <div className="relative">
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 z-10 h-24 sm:h-32 bg-gradient-to-b from-background via-background/60 to-transparent"
+        aria-hidden="true"
+      />
+      <div className="shadow-[0_-24px_48px_-32px_hsl(var(--foreground)/0.25)]">
+        <HeroCarousel />
+      </div>
+    </div>
+  </div>
+);
 
 
 const Index = () => {
@@ -74,20 +91,19 @@ const Index = () => {
   if (layoutMode === 'classic') {
     return (
       <Layout>
-        <HeroSection />
-        <HeroCarousel />
+        <HeroWithCarousel />
         <ContinueReadingSection />
-        <RecentlyViewedBooks />
-        <RecommendedBooks />
-        <FeaturedBooks />
-        <PromoBlocks slot={1} />
-        <CategoriesSection />
-        <PromoBlocks slot={2} />
-        <RecentBooks />
-        <PromoBlocks slot={3} />
-        <TrendingBooks />
-        <TopRatedBooks />
-        <PromoBlocks slot={4} />
+        <LazySection><RecentlyViewedBooks /></LazySection>
+        <LazySection><RecommendedBooks /></LazySection>
+        <LazySection><FeaturedBooks /></LazySection>
+        <LazySection minHeight={180}><PromoBlocks slot={1} /></LazySection>
+        <LazySection><CategoriesSection /></LazySection>
+        <LazySection minHeight={180}><PromoBlocks slot={2} /></LazySection>
+        <LazySection><RecentBooks /></LazySection>
+        <LazySection minHeight={180}><PromoBlocks slot={3} /></LazySection>
+        <LazySection><TrendingBooks /></LazySection>
+        <LazySection><TopRatedBooks /></LazySection>
+        <LazySection minHeight={180}><PromoBlocks slot={4} /></LazySection>
       </Layout>
     );
   }
