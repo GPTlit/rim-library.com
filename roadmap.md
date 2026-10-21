@@ -3,9 +3,12 @@
 - [x] Bundle offline PDF worker, bound adjacent canvases, memoize PDF pages, avoid loading the whole bookshelf
 - [x] Android external PDF opening and permission-aware local bookshelf source implemented
 - [x] Seven Glance widget options, six mascot states, twelve static frames, event-based sync and best-effort updates implemented
+- [x] In-app widget showcase page (/widgets) with all 7 widgets, 6 mascot moods, day/night previews
+- [x] 24-hour quote stories: quote_stories table (applied), post-as-story from quote editor, profile story circles + viewer, keep-forever archive
+- [x] Quote cards database (book_quotes/quotes/likes/saves) applied
+- [x] Homepage hero-to-carousel gradient/shadow blend; below-fold home sections lazy-rendered on scroll
 - [ ] Native device verification: Android SDK/Java and a real phone unavailable in this workspace
 - [ ] iOS widgets activation: WidgetKit/Capacitor source and assets ready; Xcode app target, App Group signing and Mac required
 - [x] Store links in Name & Logo + mobile "Download to your phone" prompt
-- [ ] Device PDF downloads: list/delete/offline helpers done; BookDetail download button + BookReader offline source still to wire
+- [x] Device PDF downloads: list/delete/offline helpers, BookDetail download button, BookReader offline source
 - [x] Android widget source, manifest, deep links and sync completed; native verification tracked above
-- [ ] Quote cards: database file, feed, cards done; editor, OCR, reader buttons, quote page in progress; database change not applied yet
