@@ -56,10 +56,9 @@ export const Header = () => {
   const { user, isAdmin, signOut } = useAuth();
   const { t, language, setLanguage } = useLanguage();
   const { theme, setTheme } = useTheme();
-  const { getLibraryName, getLibrarySubtitle } = useBranding();
+  const { getLibraryName } = useBranding();
 
   const libraryName = getLibraryName(language);
-  const librarySubtitle = getLibrarySubtitle(language);
 
   // Grouped Navigation links
   const mainNavGroups = [

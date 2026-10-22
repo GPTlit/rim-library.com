@@ -13,6 +13,7 @@ import { useAllStoreProducts, StoreProduct } from '@/hooks/useStoreProducts';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { allCategories } from '@/hooks/useCategories';
+import { CategoryIcon } from '@/components/CategoryIcon';
 import { Plus, Pencil, Trash2, Image, Loader2, ShoppingBag, Package } from 'lucide-react';
 
 export const StoreManagement = () => {
@@ -245,7 +246,7 @@ export const StoreManagement = () => {
 
   const getCategoryName = (categoryKey: string) => {
     const cat = allCategories.find(c => c.name === categoryKey);
-    return cat ? `${cat.icon} ${cat.nameAr}` : categoryKey;
+    return cat ? cat.nameAr : categoryKey;
   };
 
   const ProductForm = ({ onSubmit }: { onSubmit: () => void }) => (
@@ -293,7 +294,10 @@ export const StoreManagement = () => {
           <SelectContent>
             {allCategories.map((cat) => (
               <SelectItem key={cat.id} value={cat.name}>
-                {cat.icon} {cat.nameAr}
+                <span className="inline-flex items-center gap-1.5">
+                  <CategoryIcon name={cat.name} className="h-3.5 w-3.5" />
+                  {cat.nameAr}
+                </span>
               </SelectItem>
             ))}
           </SelectContent>
@@ -416,7 +420,7 @@ export const StoreManagement = () => {
                       </div>
                       <div className="flex flex-wrap gap-2 mt-2">
                         <Badge variant="outline" className="text-xs">
-                          {getCategoryName(product.category)}
+                          <CategoryIcon name={product.category} className="h-3 w-3" /> {getCategoryName(product.category)}
                         </Badge>
                         <Badge 
                           variant={product.is_available ? 'default' : 'secondary'}
