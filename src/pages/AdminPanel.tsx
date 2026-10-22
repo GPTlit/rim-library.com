@@ -28,6 +28,7 @@ import { VerifiedBadgeManager } from '@/components/admin/VerifiedBadgeManager';
 import { AIBulkUpload } from '@/components/admin/AIBulkUpload';
 import { ThemePresetPicker } from '@/components/admin/ThemePresetPicker';
 import { BrandingManager } from '@/components/admin/BrandingManager';
+import { CategoryIcon } from '@/components/CategoryIcon';
 import { useFeaturedBookIds, useSetFeaturedBookIds } from '@/hooks/useFeaturedBooks';
 import { Bot, Send, Loader2, Settings, Palette, ToggleLeft, Layers, Upload, FileText, Image, Image as ImageIcon, Save, Trash2, Pencil, X, ShoppingBag, Bell, Star, Plus, ArrowUp, ArrowDown } from 'lucide-react';
 
@@ -775,7 +776,7 @@ const AdminPanel = () => {
                                 htmlFor={`cat-${cat.id}`}
                                 className="text-sm cursor-pointer flex items-center gap-1"
                               >
-                                <span>{cat.icon}</span>
+                                <CategoryIcon name={cat.name} className="h-4 w-4 text-primary shrink-0" />
                                 <span>{cat.nameAr}</span>
                               </label>
                             </div>
@@ -788,7 +789,8 @@ const AdminPanel = () => {
                             const cat = allCategories.find(c => c.name === catName);
                             return cat ? (
                               <Badge key={catName} variant="secondary" className="gap-1">
-                                {cat.icon} {cat.nameAr}
+                                <CategoryIcon name={catName} className="h-3 w-3" />
+                                {cat.nameAr}
                                 <button
                                   type="button"
                                   onClick={() => toggleCategory(catName)}
@@ -938,7 +940,8 @@ const AdminPanel = () => {
                                 const category = allCategories.find(c => c.name === cat);
                                 return (
                                   <Badge key={cat} variant="outline" className="text-xs">
-                                    {category?.icon} {category?.nameAr || cat}
+                                    {category && <CategoryIcon name={category.name} className="h-3 w-3" />}
+                                    {category?.nameAr || cat}
                                   </Badge>
                                 );
                               })}
@@ -1222,7 +1225,7 @@ const AdminPanel = () => {
                           htmlFor={`edit-cat-${cat.id}`}
                           className="text-sm cursor-pointer flex items-center gap-1"
                         >
-                          <span>{cat.icon}</span>
+                          <CategoryIcon name={cat.name} className="h-4 w-4 text-primary shrink-0" />
                           <span>{cat.nameAr}</span>
                         </label>
                       </div>

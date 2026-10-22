@@ -4,10 +4,9 @@ import { useBranding } from '@/contexts/BrandingContext';
 
 export const Logo = () => {
   const { language } = useLanguage();
-  const { branding, getLibraryName, getLibrarySubtitle } = useBranding();
+  const { branding, getLibraryName } = useBranding();
   
   const libraryName = getLibraryName(language);
-  const librarySubtitle = getLibrarySubtitle(language);
 
   return (
     <Link to="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0 select-none">
@@ -25,13 +24,10 @@ export const Logo = () => {
         <div className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-accent/80 animate-pulse" />
       </div>
       
-      {/* Brand Name & Subtitle - full size and visible on all screens */}
+      {/* Brand Name only - no subtitle, clean and prominent */}
       <div className="flex flex-col shrink-0 justify-center">
         <span className="text-base sm:text-xl font-extrabold text-foreground tracking-tight leading-tight group-hover:text-primary transition-colors whitespace-nowrap">
           {libraryName}
-        </span>
-        <span className="text-[10px] sm:text-xs text-muted-foreground/80 font-medium tracking-normal whitespace-nowrap">
-          {librarySubtitle}
         </span>
       </div>
     </Link>
